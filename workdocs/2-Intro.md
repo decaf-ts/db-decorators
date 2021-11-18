@@ -1,3 +1,4 @@
-## Typescript Project Workspace Template
+## DB Decorators
 
-With documentation, release mechanism and github workflows to match
+Extension to Decorator Validation with common db functionalities
+

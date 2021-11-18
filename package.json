@@ -1,7 +1,7 @@
 {
-  "name": "ts-workspace",
-  "version": "1.1.0-no-ci",
-  "description": "template for ts projects",
+  "name": "db-decorators",
+  "version": "0.0.1",
+  "description": "DB decorators extension for decorator validation",
   "main": "./build/index.js",
   "scripts": {
     "start:dev": "nodemon",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TiagoVenceslau/ts-workspace.git"
+    "url": "git+https://github.com/TiagoVenceslau/db-decorators.git"
   },
   "engines": {
     "node": ">=14.0.0",
@@ -31,9 +31,9 @@
   "author": "TiagoVenceslau",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/TiagoVenceslau/ts-workspace/issues"
+    "url": "https://github.com/TiagoVenceslau/db-decorators/issues"
   },
-  "homepage": "https://github.com/TiagoVenceslau/ts-workspace#readme",
+  "homepage": "https://github.com/TiagoVenceslau/db-decorators#readme",
   "devDependencies": {
     "@babel/preset-env": "^7.16.4",
     "@types/jest": "^26.0.24",
