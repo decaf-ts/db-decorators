@@ -1,5 +1,5 @@
 /**
- * @module ts-workspace
+ * @module db-decorators
  */
 
-export * from './hello';
+export * from './model';
