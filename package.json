@@ -1,6 +1,6 @@
 {
   "name": "db-decorators",
-  "version": "0.0.1",
+  "version": "0.0.1-no-ci",
   "description": "DB decorators extension for decorator validation",
   "main": "./build/index.js",
   "scripts": {
