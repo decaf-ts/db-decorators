@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Decorator Validation Engine index.ts</title>
+  <title>Decorator Validation Engine operations/index.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -100,7 +100,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>index.ts</h1>
+                    <h1>operations/index.ts</h1>
                 </header>
                 
 
@@ -110,13 +110,15 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @module db-decorators
+ * @namespace operations
+ * @memberOf db-decorators
  */
 
-export * from './model';
-export * from './operations';
-export * from './repository';
-export * from './utils';</code></pre>
+
+export * from './constants';
+export * from './decorators';
+export * from './types';
+</code></pre>
         </article>
     </section>
 

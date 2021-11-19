@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Decorator Validation Engine index.ts</title>
+  <title>Decorator Validation Engine model/constants.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -100,7 +100,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>index.ts</h1>
+                    <h1>model/constants.ts</h1>
                 </header>
                 
 
@@ -110,13 +110,28 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * @module db-decorators
+ * @enum DBKeys
+ * @memberOf model
  */
+export const DBKeys = {
+    REFLECT: 'model.db.',
+    ID: "id",
+    TIMESTAMP: 'timestamp'
+}
 
-export * from './model';
-export * from './operations';
-export * from './repository';
-export * from './utils';</code></pre>
+/**
+ * @enum DEFAULT_ERROR_MESSAGES
+ * @memberOf model
+ */
+export const DEFAULT_ERROR_MESSAGES = {
+    ID: 'This id is invalid',
+    TIMESTAMP: {
+        REQUIRED: 'Timestamp is Mandatory',
+        DATE: "The Timestamp must the a valid date"
+    }
+}
+
+export const DEFAULT_TIMESTAMP_FORMAT = "dd/MM/yyyy hh:mm:ss:S";</code></pre>
         </article>
     </section>
 

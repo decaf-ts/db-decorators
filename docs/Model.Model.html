@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Decorator Validation Engine ts-workspace</title>
+  <title>Decorator Validation Engine Model</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -90,15 +90,15 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-ts-workspace.html">ts-workspace</a></li></ul><h3>Namespaces</h3><ul><li><a href="ts-workspace.Hello.html">Hello</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li></ul></div>
                 
             </nav>
         </div>
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Module</p>
-                    <h1>ts-workspace</h1>
+                    <p>Namespace</p>
+                    <h1>Model</h1>
                 </header>
                 
 
@@ -109,6 +109,7 @@
 
 <header>
     
+        <h2>Model</h2>
         
     
 </header>
@@ -117,11 +118,75 @@
     <div class="container-overview">
     
         
+            <div class="description"><p>Abstract class representing a Validatable Model object</p>
+<p>Model objects must:</p>
+<ul>
+<li>Have all their properties defined as optional via '?' or as 'defined in constructor' via '!';</li>
+<li>Have all their properties initialized (only the '@required()' decorated properties
+<strong>need</strong> to be initialized, but all of them should be as good practice);</li>
+</ul></div>
+        
+
+        
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="model_DBModel.ts.html" class="button">View Source</a>
+            <span>
+                <a href="model_DBModel.ts.html">model/DBModel.ts</a>, <a href="model_DBModel.ts.html#line4">line 4</a>
+            </span>
+        </p>
+    
+</dl>
+
 
         
     
     </div>
     
+    
+        <h3 class="subsection-title">Extends</h3>
+
+        
+
+
+    <ul>
+        <li>Model</li>
+    </ul>
+
+
     
 
     
