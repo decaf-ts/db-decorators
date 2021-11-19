@@ -1,0 +1,64 @@
+import DBModel from "../src/model/DBModel";
+import {AsyncRepositoryImp, Callback, DBErrors, errorCallback, ModelCallback} from "../src";
+// @ts-ignore
+import {TestModelAsync} from "./TestModel";
+import ModelErrorDefinition from "@tvenceslau/decorator-validation/lib/Model/ModelErrorDefinition";
+
+export abstract class AsyncRamRepository<T extends DBModel> extends AsyncRepositoryImp<T> {
+    private ram: {[indexer: string]: T} = {};
+
+    constructor(clazz: {new(): T}) {
+        super(clazz);
+    }
+
+    create(model: T, callback: ModelCallback<T>): void {
+        const self = this;
+        self.read(model.id, (err, oldModel) => {
+            if (!err)
+                return errorCallback(new Error(DBErrors.EXISTS), callback);
+
+            const errors: ModelErrorDefinition | undefined = model.hasErrors();
+            if (errors)
+                return errorCallback(errors.toString(), callback);
+
+            self.ram[model.id] = model;
+            callback(undefined, model);
+        });
+    }
+
+    delete(key: any, callback: Callback): void {
+        const self = this;
+        self.read(key, (err, oldModel) => {
+            if (err)
+                return errorCallback(new Error(DBErrors.MISSING), callback);
+            delete self.ram[key];
+            callback()
+        });
+    }
+
+    read(key: any, callback: ModelCallback<T>): void {
+        if (!(key in this.ram))
+            return errorCallback(new Error(DBErrors.MISSING), callback);
+        callback(undefined, this.ram[key]);
+    }
+
+    update(model: T, callback: ModelCallback<T>): void {
+        const self = this;
+        self.read(model.id, (err, oldModel) => {
+            if (err)
+                return errorCallback(err, callback);
+            const errors: ModelErrorDefinition | undefined = model.hasErrors(oldModel);
+            if (errors)
+                return errorCallback(errors.toString(), callback);
+
+            self.ram[model.id] = model;
+            callback(undefined, model);
+        });
+    }
+}
+
+export class TestRamRepository extends AsyncRamRepository<TestModelAsync>{
+    constructor() {
+        super(TestModelAsync);
+    }
+}

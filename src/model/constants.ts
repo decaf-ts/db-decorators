@@ -3,8 +3,9 @@
  * @memberOf model
  */
 export const DBKeys = {
-    REFLECT: 'model.validation.',
-    ID: "id"
+    REFLECT: 'model.db.',
+    ID: "id",
+    TIMESTAMP: 'timestamp'
 }
 
 /**
@@ -12,5 +13,11 @@ export const DBKeys = {
  * @memberOf model
  */
 export const DEFAULT_ERROR_MESSAGES = {
-    ID: 'This id is invalid'
+    ID: 'This id is invalid',
+    TIMESTAMP: {
+        REQUIRED: 'Timestamp is Mandatory',
+        DATE: "The Timestamp must the a valid date"
+    }
 }
+
+export const DEFAULT_TIMESTAMP_FORMAT = "dd/MM/yyyy hh:mm:ss:S";
