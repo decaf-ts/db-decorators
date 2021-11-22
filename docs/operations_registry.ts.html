@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Decorator Validation Engine repository/repository.ts</title>
+  <title>Decorator Validation Engine operations/registry.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -100,7 +100,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>repository/repository.ts</h1>
+                    <h1>operations/registry.ts</h1>
                 </header>
                 
 
@@ -109,134 +109,54 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import DBModel from "../model/DBModel";
-import {
-    enforceDBDecorators,
-    getDbDecorators,
-    prefixMethod,
-    prefixMethodAsync,
-    errorCallback,
-    LoggedError,
-    enforceDBDecoratorsAsync
-} from "../utils";
-import {OperationKeys} from "../operations";
+            <pre class="prettyprint source linenums"><code>import {OperationHandler} from "./types";
+import {IRegistry} from "../utils";
 
-export type DbKey = string | number;
+class OperationsRegistry implements IRegistry&lt;OperationHandler> {
+    private cache: { [indexer: string]: any } = {};
 
-export interface Repository&lt;T extends DBModel> {
-    create(key?: DbKey, model?: T, ...args: any[]): T;
-    read(key?: DbKey, ...args: any[]): T;
-    update(key?: DbKey, model?: T, ...args: any[]): T;
-    delete(key?: DbKey, ...args: any[]): void;
-}
-
-export interface AsyncRepository&lt;T extends DBModel> {
-    create(key?: DbKey, model?: T, ...args: any[]): void;
-    read(key?: DbKey, ...args: any[]): void;
-    update(key?: DbKey, model?: T, ...args: any[]): void;
-    delete(key?: DbKey, ...args: any[]): void;
-}
-
-export type Err = Error | string | undefined;
-
-export type Callback = (err?: Err, ...args: any[]) => void;
-
-export type ModelCallback&lt;T extends DBModel> = (err?: Err, result?: T) => void;
-
-export abstract class RepositoryImp&lt;T extends DBModel> implements Repository&lt;T>{
-    private readonly clazz: {new(): T};
-
-    constructor(clazz: {new(): T}) {
-        this.clazz = clazz;
-        prefixMethod(this, this.create, this._create, "create");
-    }
-
-    create(key?: DbKey, model?: T, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
-    }
-
-    _create(key?: DbKey, model?: T, ...args: any[]): any[] {
-        if (!model)
-            throw new LoggedError(new Error('Missing Model'));
-        const decorators = getDbDecorators(model, OperationKeys.CREATE);
-        if (!decorators)
-            return [model, ...args];
-        try {
-            model = enforceDBDecorators&lt;T>(this, model, decorators);
-        } catch (e) {
-            throw new LoggedError(e);
+    get&lt;OperationHandler>(targetName: string, propKey: string, operation: string): OperationHandler | undefined {
+        try{
+            return this.cache[targetName][propKey][operation];
+        } catch (e){
+            return undefined;
         }
-
-        return [key, model, ...args];
     }
 
-    delete(key?: DbKey, ...args: any[]): void {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
+    register&lt;OperationHandler>(handler: OperationHandler, operation: string, target: { [indexer: string]: any }, propKey: string | symbol): void {
+        const name = target.constructor.name;
+        if (!this.cache[name])
+            this.cache[name] = {};
+        if (!this.cache[name][propKey])
+            this.cache[name][propKey] = {};
+        if (this.cache[name][propKey][operation])
+            return;
+        this.cache[name][propKey][operation] = handler;
     }
+}
 
-    read(key?: DbKey, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
-    }
+let actingOperationsRegistry: IRegistry&lt;OperationHandler>;
 
-    update(key?: DbKey, model?: T, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
-    }
+/**
+ * Returns the current {@link OperationsRegistry}
+ * @function getOperationsRegistry
+ * @return IRegistry&lt;OperationHandler>, defaults to {@link OperationsRegistry}
+ * @memberOf operations
+ */
+export function getOperationsRegistry(): IRegistry&lt;OperationHandler> {
+    if (!actingOperationsRegistry)
+        actingOperationsRegistry = new OperationsRegistry();
+    return actingOperationsRegistry;
 }
 
 /**
- * @typedef T extends DBModel
+ * Returns the current OperationsRegistry
+ * @function getOperationsRegistry
+ * @prop {IRegistry&lt;OperationHandler>} operationsRegistry the new implementation of Registry
+ * @memberOf operations
  */
-export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncRepository&lt;T>{
-    private readonly clazz: {new(): T};
-
-    constructor(clazz: {new(): T}) {
-        this.clazz = clazz;
-        prefixMethodAsync(this, this.create, this._create, "create");
-    }
-
-    /**
-     *
-     * @param {any} [key]
-     * @param {T} model Model object
-     * @param {any[]} args optional Arguments. The last one must be the callback
-     * implicit @param {@link ModelCallback} callback Popped from args
-     */
-    create(key?: DbKey, model?: T, ...args: any[]): void {
-        const callback: ModelCallback&lt;T> = args.pop();
-        errorCallback(new Error(`Child Classes must implement this!`), callback);
-    }
-
-    private _create(key?: DbKey, model?: T, ...args: any[]): void {
-        const callback: Callback = args.pop();
-        if (!model)
-            return callback(new Error(`Missing Model`));
-        // @ts-ignore
-        model = new (this.clazz)(model);
-        const decorators = getDbDecorators(model, OperationKeys.CREATE);
-        if (!decorators)
-            return callback(undefined, model, ...args);
-
-        enforceDBDecoratorsAsync&lt;T>(this, model, decorators, (err: Err, newModel: T | undefined) => {
-            if (err)
-                return errorCallback(err, callback);
-            callback(undefined, key, newModel, ...args);
-        });
-    }
-
-    delete(key?: DbKey, ...args: any[]): void {
-        const callback: Callback = args.pop();
-        errorCallback(new Error(`Child Classes must implement this!`), callback);
-    }
-
-    read(key?: DbKey, ...args: any[]): void {
-        const callback: ModelCallback&lt;T> = args.pop();
-        errorCallback(new Error(`Child Classes must implement this!`), callback);
-    }
-
-    update(key?: DbKey, model?: T, ...args: any[]): void {
-        const callback: ModelCallback&lt;T> = args.pop();
-        errorCallback(new Error(`Child Classes must implement this!`), callback);
-    }
+export function setOperationsRegistry(operationsRegistry: IRegistry&lt;OperationHandler>){
+   actingOperationsRegistry = operationsRegistry;
 }</code></pre>
         </article>
     </section>

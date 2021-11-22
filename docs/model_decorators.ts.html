@@ -92,7 +92,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li></ul></div>
                 
             </nav>
         </div>
@@ -114,22 +114,79 @@ import {DEFAULT_ERROR_MESSAGES, DBKeys, DEFAULT_TIMESTAMP_FORMAT} from "./consta
 import {DBOperations, on, Generators} from "../operations";
 import {date, required} from "@tvenceslau/decorator-validation/lib";
 import DBModel from "./DBModel";
+import {IGeneratorAsync, IGenerator} from "../repository/generators";
+import {Callback, Err, ModelCallback, Repository} from "../repository";
 
 
 const getDBKey = (str: string) => DBKeys.REFLECT + str;
 
 /**
+ * Marks the property as readonly.
+ *
+ * @param {string} [message] the error message. Defaults to {@link DEFAULT_ERROR_MESSAGES.READONLY.INVALID}
+ * @decorator readonly
+ * @namespace decorators
+ * @memberOf model
+ */
+export function readonly(message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID) {
+    return (target: any, propertyKey: string) => {
+        Reflect.defineMetadata(
+            getDBKey(DBKeys.READONLY),
+            {
+                message: message
+            },
+            target,
+            propertyKey
+        );
+    }
+}
+
+
+
+/**
  * Marks the property as ID.
  * Makes it required
+ * Makes it readonly
  *
  * @param {Generators&lt;T>} generator
- * @param {string} [message] the error message. Defaults to {@link DEFAULT_ERROR_MESSAGES.ID}
+ * @param {string} [message] the error message. Defaults to {@link DEFAULT_ERROR_MESSAGES.ID.INVALID}
  * @decorator id
  * @namespace decorators
  * @memberOf model
  */
-export function id&lt;T extends DBModel>(generator: Generators&lt;T>, message: string = DEFAULT_ERROR_MESSAGES.ID) {
-    return (target: any, propertyKey: string) => {
+export function id&lt;T extends DBModel>(generator: Generators&lt;T>, message: string = DEFAULT_ERROR_MESSAGES.ID.INVALID) {
+    return (target: T, propertyKey: string) => {
+        required(DEFAULT_ERROR_MESSAGES.ID.REQUIRED)(target, propertyKey);
+        readonly()(target, propertyKey);
+        on(DBOperations.CREATE, function(this: Repository&lt;T>, model: T, ...args: any[]){
+            const gen: IGenerator&lt;T> | IGeneratorAsync&lt;T> = new generator();
+
+            const updater = function(target: T, propertyKey: string, value: any){
+                Object.defineProperty(target, propertyKey, {
+                    enumerable: true,
+                    writable: false,
+                    configurable: false,
+                    value: value
+                });
+            }
+
+            const isAsync = typeof args[args.length - 1] === 'function';
+
+            if (!isAsync){
+                const value = gen.generate(model, ...args);
+                updater(model, propertyKey, value);
+                return model;
+            }
+
+            const callback: ModelCallback&lt;T> = args.pop();
+
+            gen.generate(model, ...args, (err: Err, value: any) => {
+                if (err)
+                    return callback(err);
+                updater(model, propertyKey, value)
+                callback(undefined, model);
+            });
+        })(target, propertyKey);
         Reflect.defineMetadata(
             getDBKey(DBKeys.ID),
             {
@@ -174,7 +231,19 @@ export function id&lt;T extends DBModel>(generator: Generators&lt;T>, message: s
 export const timestamp = (operation: string[] = DBOperations.CREATE_UPDATE, format: string = DEFAULT_TIMESTAMP_FORMAT) => (target: any, propertyKey: string) => {
     date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE)(target, propertyKey);
     required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED)(target, propertyKey);
-    on(operation, () => Date.now());
+    on(operation, function(this: Repository&lt;DBModel>, model: DBModel, callback?: Callback){
+        model[propertyKey] = new Date();
+        if (callback)
+            return callback(undefined, model);
+    })(target,propertyKey);
+    Reflect.defineMetadata(
+        getDBKey(DBKeys.TIMESTAMP),
+        {
+            message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE
+        },
+        target,
+        propertyKey
+    );
 }
 
 // export const user = (operation: string[] = DBOperations.CREATE_UPDATE, format: string = "") => (target: any, propertyKey: string) => {

@@ -51,7 +51,7 @@ export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
         if (!decorators)
             return [model, ...args];
         try {
-            model = enforceDBDecorators<T>(model, decorators);
+            model = enforceDBDecorators<T>(this, model, decorators);
         } catch (e) {
             throw new LoggedError(e);
         }

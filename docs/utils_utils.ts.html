@@ -92,7 +92,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li></ul></div>
                 
             </nav>
         </div>
@@ -110,14 +110,18 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>
-import {constructFromObject as constrObj, construct as superConstruct} from "@tvenceslau/decorator-validation/lib";
+import {
+    constructFromObject as constrObj,
+    construct as superConstruct,
+    ModelKeys
+} from "@tvenceslau/decorator-validation/lib";
 export {getPropertyDecorators, getClassDecorators, stringFormat, formatDate} from "@tvenceslau/decorator-validation/lib";
 
 import DBModel from "../model/DBModel";
-import {Callback, Err} from "../repository";
-import {getPropertyDecorators} from "./index";
-import {DBKeys} from "../model";
-import {OperationKeys} from "../operations";
+import {AsyncRepository, Callback, Err, ModelCallback, Repository} from "../repository";
+import {errorCallback, getPropertyDecorators, LoggedError} from "./index";
+import {OperationHandler, OperationKeys} from "../operations";
+import {getOperationsRegistry} from "../operations/registry";
 
 /**
  * Helper Function to override constructors
@@ -138,13 +142,14 @@ export function constructFromObject&lt;T extends DBModel>(self: T, obj?: T | {})
  * @param {any} obj The Base Object
  * @param {Function} after The original method
  * @param {Function} prefix The Prefix method. The output will be used as arguments in the original method
+ * @param {string} [afterName] When the after function anme cannot be extracted, pass it here
  */
-export function prefixMethod(obj: any, after: Function, prefix: Function){
+export function prefixMethod(obj: any, after: Function, prefix: Function, afterName?: string){
     function wrapper(this: any, ...args: any[]){
         const results = prefix.call(this, ...args);
         return after.call(this, ...results);
     }
-    obj[prefix.name] = wrapper.bind(obj);
+    obj[afterName ? afterName : after.name] = wrapper.bind(obj);
 }
 
 /**
@@ -152,8 +157,9 @@ export function prefixMethod(obj: any, after: Function, prefix: Function){
  * @param {any} obj The Base Object
  * @param {Function} after The original method
  * @param {Function} prefix The Prefix method. The output will be used as arguments in the original method
+ * @param {string} [afterName] When the after function anme cannot be extracted, pass it here
  */
-export function prefixMethodAsync(obj: any, after: Function, prefix: Function){
+export function prefixMethodAsync(obj: any, after: Function, prefix: Function, afterName?: string){
     function wrapper(this: any, ...args: any[]){
         const callback: Callback = args.pop();
         return prefix.call(this, ...args, (err: Err, ...results: any[]) => {
@@ -162,45 +168,80 @@ export function prefixMethodAsync(obj: any, after: Function, prefix: Function){
             after.call(this, ...results, callback);
         });
     }
-    obj[prefix.name] = wrapper.bind(obj);
+    obj[afterName ? afterName : after.name] = wrapper.bind(obj);
 }
 
-export const getAllPropertyDecorators = function&lt;T extends DBModel>(model: T , ...prefixes: string[]): {[indexer: string]: {[indexer: string]: any[]}} | undefined {
+export const getAllPropertyDecorators = function&lt;T extends DBModel>(model: T , ...prefixes: string[]): {[indexer: string]: any[]} | undefined {
     if (!prefixes || !prefixes.length)
         return;
 
-    const pushOrCreate = function(accum: {[indexer: string]: {[indexer: string]: any}}, key: string, values: {prop: string | symbol, decorators: any[]}){
+    const pushOrCreate = function(accum: {[indexer: string]: {[indexer: string]: any}}, key: string, decorators: any[]){
         if (!decorators)
             return;
         if (!accum[key])
-            accum[key] = {};
-        if (!accum[key][values.prop.toString()])
-            accum[key][values.prop.toString()] = [];
-        accum[key][values.prop.toString()].push(...values.decorators);
+            accum[key] = [];
+        accum[key].push(...decorators);
     }
 
-    const decorators: {[indexer: string]: {[indexer: string]: any[]}} = Object.keys(model).reduce((accum, propKey) => {
-        prefixes.forEach(p => {
-            const decorators: {prop: string | symbol, decorators: any[]} = getPropertyDecorators(p, model, propKey);
-            pushOrCreate(accum, propKey, decorators);
+    return Object.keys(model).reduce((accum: {} | undefined, propKey) => {
+        prefixes.forEach((p, index) => {
+            const decorators: {prop: string | symbol, decorators: any[]} = getPropertyDecorators(p, model, propKey, index !== 0);
+            if (!accum)
+                accum = {};
+            pushOrCreate(accum, propKey, decorators.decorators);
         });
         return accum;
-    }, {});
-
-    return decorators;
+    }, undefined);
 }
 
 export const getDbDecorators = function&lt;T extends DBModel>(model: T, operation: string): {[indexer: string]: {[indexer: string]: any[]}} | undefined {
-    const decorators = getAllPropertyDecorators(model, DBKeys.REFLECT, OperationKeys.REFLECT);
+    const decorators = getAllPropertyDecorators(model, OperationKeys.REFLECT);
     if (!decorators)
         return;
-    return Object.keys(decorators).reduce((accum, decorator) => {
+    return Object.keys(decorators).reduce((accum: {[indexer: string]: any}, decorator) => {
+        const dec = decorators[decorator].filter(d => d.key === operation);
+        if (dec &amp;&amp; dec.length)
+            accum[decorator] = dec;
         return accum;
     }, {});
 }
 
-export const enforceDBDecorators = function&lt;T extends DBModel>(model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}){
+export const enforceDBDecorators = function&lt;T extends DBModel>(repo: Repository&lt;T>, model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}): T {
+    Object.keys(decorators).forEach(prop => {
+        // @ts-ignore
+        const decs: any[] = decorators[prop];
+        const handler: OperationHandler | undefined = getOperationsRegistry().get(model.constructor.name, prop, decs[0].key);
+        if (!handler)
+            throw new LoggedError(`Could not find registered handler for the operation ${prop}`);
+        handler.call(repo, model, ...decs[0].props.args, ...decs[0].props.props);
+    });
 
+    return model;
+}
+
+export const enforceDBDecoratorsAsync = function&lt;T extends DBModel>(repo: AsyncRepository&lt;T>, model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}, callback: ModelCallback&lt;T>){
+
+    const propIterator = function(props: string[], callback: ModelCallback&lt;T>){
+        const prop = props.shift();
+        if (!prop)
+            return callback(undefined, model);
+        // @ts-ignore
+        const decs: any[] = decorators[prop];
+        const handler: OperationHandler | undefined = getOperationsRegistry().get(model.constructor.name, prop, decs[0].key);
+        if (!handler)
+            return errorCallback(`Could not find registered handler for the operation ${prop}`, callback);
+        handler.call(repo, model, ...decs[0].props.args, ...decs[0].props.props, (err: Err) => {
+            if (err)
+                return callback(err);
+            propIterator(props, callback);
+        });
+    }
+
+    propIterator(Object.keys(decorators), (err: Err, model?: T) => {
+        if (err)
+            return callback(err);
+        callback(undefined, model);
+    });
 }</code></pre>
         </article>
     </section>

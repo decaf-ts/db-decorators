@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Decorator Validation Engine repository/repository.ts</title>
+  <title>Decorator Validation Engine utils/registry/decorators.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -100,7 +100,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>repository/repository.ts</h1>
+                    <h1>utils/registry/decorators.ts</h1>
                 </header>
                 
 
@@ -109,134 +109,77 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import DBModel from "../model/DBModel";
-import {
-    enforceDBDecorators,
-    getDbDecorators,
-    prefixMethod,
-    prefixMethodAsync,
-    errorCallback,
-    LoggedError,
-    enforceDBDecoratorsAsync
-} from "../utils";
-import {OperationKeys} from "../operations";
+            <pre class="prettyprint source linenums"><code>/**
+ * Defines a class as a injectable
+ *
+ * @prop {boolean} [singleton] defaults to true. if the behaviour is meant to be singleton
+ * @decorator injectable
+ * @namespace Decorators
+ * @memberOf Model
+ */
+import {construct} from "../utils";
+import {IRegistry} from "./registry";
 
-export type DbKey = string | number;
+class InjectableRegistryImp implements IRegistry&lt;{new(): any}>{
+    get&lt;T>(key: any, ...args: any[]): T | undefined {
+        return undefined;
+    }
 
-export interface Repository&lt;T extends DBModel> {
-    create(key?: DbKey, model?: T, ...args: any[]): T;
-    read(key?: DbKey, ...args: any[]): T;
-    update(key?: DbKey, model?: T, ...args: any[]): T;
-    delete(key?: DbKey, ...args: any[]): void;
+    register&lt;T>(obj: T, ...args: any[]): void {
+    }
+
 }
 
-export interface AsyncRepository&lt;T extends DBModel> {
-    create(key?: DbKey, model?: T, ...args: any[]): void;
-    read(key?: DbKey, ...args: any[]): void;
-    update(key?: DbKey, model?: T, ...args: any[]): void;
-    delete(key?: DbKey, ...args: any[]): void;
-}
+let actingInjectablesRegistry: IRegistry&lt;{new(): any}>;
 
-export type Err = Error | string | undefined;
-
-export type Callback = (err?: Err, ...args: any[]) => void;
-
-export type ModelCallback&lt;T extends DBModel> = (err?: Err, result?: T) => void;
-
-export abstract class RepositoryImp&lt;T extends DBModel> implements Repository&lt;T>{
-    private readonly clazz: {new(): T};
-
-    constructor(clazz: {new(): T}) {
-        this.clazz = clazz;
-        prefixMethod(this, this.create, this._create, "create");
-    }
-
-    create(key?: DbKey, model?: T, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
-    }
-
-    _create(key?: DbKey, model?: T, ...args: any[]): any[] {
-        if (!model)
-            throw new LoggedError(new Error('Missing Model'));
-        const decorators = getDbDecorators(model, OperationKeys.CREATE);
-        if (!decorators)
-            return [model, ...args];
-        try {
-            model = enforceDBDecorators&lt;T>(this, model, decorators);
-        } catch (e) {
-            throw new LoggedError(e);
-        }
-
-        return [key, model, ...args];
-    }
-
-    delete(key?: DbKey, ...args: any[]): void {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
-    }
-
-    read(key?: DbKey, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
-    }
-
-    update(key?: DbKey, model?: T, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
-    }
+/**
+ * Returns the current {@link InjectableRegistryImp}
+ * @function getInjectablesRegistry
+ * @return IRegistry, defaults to {@link InjectableRegistryImp}
+ * @memberOf operations
+ */
+export function getInjectablesRegistry(): IRegistry&lt;{new(): any}> {
+    if (!actingInjectablesRegistry)
+        actingInjectablesRegistry = new InjectableRegistryImp();
+    return actingInjectablesRegistry;
 }
 
 /**
- * @typedef T extends DBModel
+ * Returns the current OperationsRegistry
+ * @function getOperationsRegistry
+ * @prop {IRegistry} operationsRegistry the new implementation of Registry
+ * @memberOf operations
  */
-export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncRepository&lt;T>{
-    private readonly clazz: {new(): T};
+export function setInjectablesRegistry(operationsRegistry: IRegistry&lt;{new(): any}>){
+    actingInjectablesRegistry = operationsRegistry;
+}
 
-    constructor(clazz: {new(): T}) {
-        this.clazz = clazz;
-        prefixMethodAsync(this, this.create, this._create, "create");
+export const injectable = (singleton: boolean = true) => (original: Function) => {
+
+
+
+
+    // the new constructor behaviour
+    const newConstructor : any = function (...args: any[]) {
+        let instance;
+        if (singleton){
+            instance = getInjectablesRegistry().get(original.name);
+            if (!instance){
+                instance = construct(original, ...args);
+                getInjectablesRegistry().register(original.name, instance);
+            }
+        } else {
+            instance = construct(original, ...args);
+        }
+
+        return instance;
     }
 
-    /**
-     *
-     * @param {any} [key]
-     * @param {T} model Model object
-     * @param {any[]} args optional Arguments. The last one must be the callback
-     * implicit @param {@link ModelCallback} callback Popped from args
-     */
-    create(key?: DbKey, model?: T, ...args: any[]): void {
-        const callback: ModelCallback&lt;T> = args.pop();
-        errorCallback(new Error(`Child Classes must implement this!`), callback);
-    }
+    // copy prototype so instanceof operator still works
+    newConstructor.prototype = original.prototype;
 
-    private _create(key?: DbKey, model?: T, ...args: any[]): void {
-        const callback: Callback = args.pop();
-        if (!model)
-            return callback(new Error(`Missing Model`));
-        // @ts-ignore
-        model = new (this.clazz)(model);
-        const decorators = getDbDecorators(model, OperationKeys.CREATE);
-        if (!decorators)
-            return callback(undefined, model, ...args);
-
-        enforceDBDecoratorsAsync&lt;T>(this, model, decorators, (err: Err, newModel: T | undefined) => {
-            if (err)
-                return errorCallback(err, callback);
-            callback(undefined, key, newModel, ...args);
-        });
-    }
-
-    delete(key?: DbKey, ...args: any[]): void {
-        const callback: Callback = args.pop();
-        errorCallback(new Error(`Child Classes must implement this!`), callback);
-    }
-
-    read(key?: DbKey, ...args: any[]): void {
-        const callback: ModelCallback&lt;T> = args.pop();
-        errorCallback(new Error(`Child Classes must implement this!`), callback);
-    }
-
-    update(key?: DbKey, model?: T, ...args: any[]): void {
-        const callback: ModelCallback&lt;T> = args.pop();
-        errorCallback(new Error(`Child Classes must implement this!`), callback);
-    }
+    // return new constructor (will override original)
+    return newConstructor;
 }</code></pre>
         </article>
     </section>
