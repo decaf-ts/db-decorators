@@ -13,7 +13,10 @@ export const DBKeys = {
  * @memberOf model
  */
 export const DEFAULT_ERROR_MESSAGES = {
-    ID: 'This id is invalid',
+    ID: {
+        INVALID: 'This Id is invalid',
+        REQUIRED: 'The Id is mandatory'
+    },
     TIMESTAMP: {
         REQUIRED: 'Timestamp is Mandatory',
         DATE: "The Timestamp must the a valid date"

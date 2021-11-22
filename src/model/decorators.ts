@@ -17,8 +17,9 @@ const getDBKey = (str: string) => DBKeys.REFLECT + str;
  * @namespace decorators
  * @memberOf model
  */
-export function id<T extends DBModel>(generator: Generators<T>, message: string = DEFAULT_ERROR_MESSAGES.ID) {
+export function id<T extends DBModel>(generator: Generators<T>, message: string = DEFAULT_ERROR_MESSAGES.ID.INVALID) {
     return (target: any, propertyKey: string) => {
+        required(DEFAULT_ERROR_MESSAGES.ID.REQUIRED)(target, propertyKey);
         Reflect.defineMetadata(
             getDBKey(DBKeys.ID),
             {
