@@ -1,5 +1,13 @@
 import DBModel from "../model/DBModel";
-import {enforceDBDecorators, getDbDecorators, prefixMethod, prefixMethodAsync, errorCallback, LoggedError} from "../utils";
+import {
+    enforceDBDecorators,
+    getDbDecorators,
+    prefixMethod,
+    prefixMethodAsync,
+    errorCallback,
+    LoggedError,
+    enforceDBDecoratorsAsync
+} from "../utils";
 import {OperationKeys} from "../operations";
 
 export type DbKey = string | number;
@@ -29,7 +37,7 @@ export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
 
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
-        prefixMethod(this, this.create, this._create);
+        prefixMethod(this, this.create, this._create, "create");
     }
 
     create(key?: DbKey, model?: T, ...args: any[]): T {
@@ -43,7 +51,7 @@ export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
         if (!decorators)
             return [model, ...args];
         try {
-            enforceDBDecorators<T>(model, decorators);
+            model = enforceDBDecorators<T>(model, decorators);
         } catch (e) {
             throw new LoggedError(e);
         }
@@ -72,7 +80,7 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
 
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
-        prefixMethodAsync(this, this.create, this._create);
+        prefixMethodAsync(this, this.create, this._create, "create");
     }
 
     /**
@@ -91,17 +99,17 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         const callback: Callback = args.pop();
         if (!model)
             return callback(new Error(`Missing Model`));
+        // @ts-ignore
+        model = new (this.clazz)(model);
         const decorators = getDbDecorators(model, OperationKeys.CREATE);
         if (!decorators)
             return callback(undefined, model, ...args);
 
-        try{
-            enforceDBDecorators<T>(model, decorators);
-        } catch (e) {
-            return errorCallback(e, callback);
-        }
-
-        callback(undefined, key, model, ...args);
+        enforceDBDecoratorsAsync<T>(this, model, decorators, (err: Err, newModel: T | undefined) => {
+            if (err)
+                return errorCallback(err, callback);
+            callback(undefined, key, newModel, ...args);
+        });
     }
 
     delete(key?: DbKey, ...args: any[]): void {

@@ -1,6 +1,8 @@
 import "reflect-metadata";
 import {OperationKeys, DBOperations} from "./constants";
 import {OperationHandler} from "./types";
+import {hashCode} from "@tvenceslau/decorator-validation/lib";
+import {getOperationsRegistry} from "./registry";
 
 
 const getOperationKey = (str: string) => OperationKeys.REFLECT + str;
@@ -110,11 +112,15 @@ export const on = (operation: string[] = DBOperations.ALL, handler: OperationHan
             getOperationKey(op),
             {
                 operation: op,
-                handler: handler.toString(),
-                value: handler(...args, ...props.map(p => target[p]))
+                handler: hashCode(handler.toString()),
+                args: args,
+                props: props
             },
             target,
             propertyKey
         );
+    });
+    operation.forEach(op => {
+        getOperationsRegistry().register(handler, op, target, propertyKey);
     });
 }

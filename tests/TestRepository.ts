@@ -38,7 +38,7 @@ export abstract class AsyncRamRepository<T extends DBModel> extends AsyncReposit
 
     read(key: DbKey, callback: ModelCallback<T>): void {
         if (!(key in this.ram))
-            return errorCallback(new Error(DBErrors.MISSING), callback);
+            return callback(new Error(DBErrors.MISSING));
         callback(undefined, this.ram[key]);
     }
 

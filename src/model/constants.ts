@@ -5,6 +5,7 @@
 export const DBKeys = {
     REFLECT: 'model.db.',
     ID: "id",
+    READONLY: 'readonly',
     TIMESTAMP: 'timestamp'
 }
 
@@ -16,6 +17,9 @@ export const DEFAULT_ERROR_MESSAGES = {
     ID: {
         INVALID: 'This Id is invalid',
         REQUIRED: 'The Id is mandatory'
+    },
+    READONLY: {
+        INVALID: "This cannot be updated"
     },
     TIMESTAMP: {
         REQUIRED: 'Timestamp is Mandatory',

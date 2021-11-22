@@ -1,12 +1,17 @@
 
-import {constructFromObject as constrObj, construct as superConstruct} from "@tvenceslau/decorator-validation/lib";
+import {
+    constructFromObject as constrObj,
+    construct as superConstruct,
+    ModelKeys
+} from "@tvenceslau/decorator-validation/lib";
 export {getPropertyDecorators, getClassDecorators, stringFormat, formatDate} from "@tvenceslau/decorator-validation/lib";
 
 import DBModel from "../model/DBModel";
-import {Callback, Err} from "../repository";
-import {getPropertyDecorators} from "./index";
+import {AsyncRepository, Callback, Err, ModelCallback, Repository} from "../repository";
+import {errorCallback, getPropertyDecorators} from "./index";
 import {DBKeys} from "../model";
-import {OperationKeys} from "../operations";
+import {OperationHandler, OperationKeys} from "../operations";
+import {getOperationsRegistry, OperationsRegistry} from "../operations/registry";
 
 /**
  * Helper Function to override constructors
@@ -27,13 +32,14 @@ export function constructFromObject<T extends DBModel>(self: T, obj?: T | {}){
  * @param {any} obj The Base Object
  * @param {Function} after The original method
  * @param {Function} prefix The Prefix method. The output will be used as arguments in the original method
+ * @param {string} [afterName] When the after function anme cannot be extracted, pass it here
  */
-export function prefixMethod(obj: any, after: Function, prefix: Function){
+export function prefixMethod(obj: any, after: Function, prefix: Function, afterName?: string){
     function wrapper(this: any, ...args: any[]){
         const results = prefix.call(this, ...args);
         return after.call(this, ...results);
     }
-    obj[prefix.name] = wrapper.bind(obj);
+    obj[afterName ? afterName : after.name] = wrapper.bind(obj);
 }
 
 /**
@@ -41,8 +47,9 @@ export function prefixMethod(obj: any, after: Function, prefix: Function){
  * @param {any} obj The Base Object
  * @param {Function} after The original method
  * @param {Function} prefix The Prefix method. The output will be used as arguments in the original method
+ * @param {string} [afterName] When the after function anme cannot be extracted, pass it here
  */
-export function prefixMethodAsync(obj: any, after: Function, prefix: Function){
+export function prefixMethodAsync(obj: any, after: Function, prefix: Function, afterName?: string){
     function wrapper(this: any, ...args: any[]){
         const callback: Callback = args.pop();
         return prefix.call(this, ...args, (err: Err, ...results: any[]) => {
@@ -51,43 +58,69 @@ export function prefixMethodAsync(obj: any, after: Function, prefix: Function){
             after.call(this, ...results, callback);
         });
     }
-    obj[prefix.name] = wrapper.bind(obj);
+    obj[afterName ? afterName : after.name] = wrapper.bind(obj);
 }
 
-export const getAllPropertyDecorators = function<T extends DBModel>(model: T , ...prefixes: string[]): {[indexer: string]: {[indexer: string]: any[]}} | undefined {
+export const getAllPropertyDecorators = function<T extends DBModel>(model: T , ...prefixes: string[]): {[indexer: string]: any[]} | undefined {
     if (!prefixes || !prefixes.length)
         return;
 
-    const pushOrCreate = function(accum: {[indexer: string]: {[indexer: string]: any}}, key: string, values: {prop: string | symbol, decorators: any[]}){
+    const pushOrCreate = function(accum: {[indexer: string]: {[indexer: string]: any}}, key: string, decorators: any[]){
         if (!decorators)
             return;
         if (!accum[key])
-            accum[key] = {};
-        if (!accum[key][values.prop.toString()])
-            accum[key][values.prop.toString()] = [];
-        accum[key][values.prop.toString()].push(...values.decorators);
+            accum[key] = [];
+        accum[key].push(...decorators);
     }
 
-    const decorators: {[indexer: string]: {[indexer: string]: any[]}} = Object.keys(model).reduce((accum, propKey) => {
-        prefixes.forEach(p => {
-            const decorators: {prop: string | symbol, decorators: any[]} = getPropertyDecorators(p, model, propKey);
-            pushOrCreate(accum, propKey, decorators);
+    return Object.keys(model).reduce((accum: {} | undefined, propKey) => {
+        prefixes.forEach((p, index) => {
+            const decorators: {prop: string | symbol, decorators: any[]} = getPropertyDecorators(p, model, propKey, index !== 0);
+            if (!accum)
+                accum = {};
+            pushOrCreate(accum, propKey, decorators.decorators);
         });
         return accum;
-    }, {});
-
-    return decorators;
+    }, undefined);
 }
 
 export const getDbDecorators = function<T extends DBModel>(model: T, operation: string): {[indexer: string]: {[indexer: string]: any[]}} | undefined {
-    const decorators = getAllPropertyDecorators(model, DBKeys.REFLECT, OperationKeys.REFLECT);
+    const decorators = getAllPropertyDecorators(model, OperationKeys.REFLECT);
     if (!decorators)
         return;
-    return Object.keys(decorators).reduce((accum, decorator) => {
+    return Object.keys(decorators).reduce((accum: {[indexer: string]: any}, decorator) => {
+        const dec = decorators[decorator].filter(d => d.key === operation);
+        if (dec && dec.length)
+            accum[decorator] = dec;
         return accum;
     }, {});
 }
 
-export const enforceDBDecorators = function<T extends DBModel>(model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}){
+export const enforceDBDecorators = function<T extends DBModel>(model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}): T {
+    return model;
+}
 
+export const enforceDBDecoratorsAsync = function<T extends DBModel>(repo: AsyncRepository<T>, model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}, callback: ModelCallback<T>){
+
+    const propIterator = function(props: string[], callback: ModelCallback<T>){
+        const prop = props.shift();
+        if (!prop)
+            return callback(undefined, model);
+        // @ts-ignore
+        const decs: any[] = decorators[prop];
+        const handler: OperationHandler | undefined = getOperationsRegistry().get(model.constructor.name, prop, decs[0].key);
+        if (!handler)
+            return errorCallback(`Could not find registered handler for the operation ${prop}`, callback);
+        handler.call(repo, model, ...decs[0].props.args, ...decs[0].props.props, (err: Err) => {
+            if (err)
+                return callback(err);
+            propIterator(props, callback);
+        });
+    }
+
+    propIterator(Object.keys(decorators), (err: Err, model?: T) => {
+        if (err)
+            return callback(err);
+        callback(undefined, model);
+    });
 }

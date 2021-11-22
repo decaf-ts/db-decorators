@@ -2,7 +2,7 @@
 import {TestModelAsync} from "./TestModel";
 // @ts-ignore
 import {TestRamRepository} from "./TestRepository";
-import {AsyncRepository} from "../src";
+import {AsyncRepository, Err} from "../src";
 
 
 describe(`Async Repository`, function(){
@@ -18,8 +18,12 @@ describe(`Async Repository`, function(){
     it(`Fills Properties Nicely`, function(){
         const testRepository: AsyncRepository<TestModelAsync> = new TestRamRepository();
 
-        testRepository.create(testModel, (err, result) => {
-
-        })
+        testRepository.create(undefined, testModel, (err: Err, result: TestModelAsync) => {
+            expect(err).toBeUndefined();
+            expect(result).toBeDefined();
+            expect(result.id).not.toBeUndefined();
+            expect(result.updatedOn).not.toBeUndefined();
+            expect(result.createdOn).not.toBeUndefined();
+        });
     });
 });

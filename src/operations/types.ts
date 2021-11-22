@@ -1,4 +1,4 @@
-import {IGeneratorAsync, IGenerator} from "../repository";
+import {IGeneratorAsync, IGenerator, Repository} from "../repository";
 import DBModel from "../model/DBModel";
 
 export type OperationHandler = (...args: any[]) => any;

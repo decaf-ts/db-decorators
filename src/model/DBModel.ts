@@ -17,6 +17,8 @@ import ModelErrorDefinition from "@tvenceslau/decorator-validation/lib/Model/Mod
  * @memberOf Model
  */
 export default abstract class DBModel extends Model {
+    [indexer: string]: any;
+
     constructor(dbModel?: DBModel | {}){
         super();
         constructFromObject(this, dbModel);
