@@ -1,5 +1,5 @@
 {
-  "name": "db-decorators",
+  "name": "@tvenceslau/db-decorators",
   "version": "0.0.4",
   "description": "DB decorators extension for decorator validation",
   "main": "./dist/index.min.js",
