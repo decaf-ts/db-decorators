@@ -8,10 +8,9 @@ export {getPropertyDecorators, getClassDecorators, stringFormat, formatDate} fro
 
 import DBModel from "../model/DBModel";
 import {AsyncRepository, Callback, Err, ModelCallback, Repository} from "../repository";
-import {errorCallback, getPropertyDecorators} from "./index";
-import {DBKeys} from "../model";
+import {errorCallback, getPropertyDecorators, LoggedError} from "./index";
 import {OperationHandler, OperationKeys} from "../operations";
-import {getOperationsRegistry, OperationsRegistry} from "../operations/registry";
+import {getOperationsRegistry} from "../operations/registry";
 
 /**
  * Helper Function to override constructors
@@ -96,7 +95,16 @@ export const getDbDecorators = function<T extends DBModel>(model: T, operation: 
     }, {});
 }
 
-export const enforceDBDecorators = function<T extends DBModel>(model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}): T {
+export const enforceDBDecorators = function<T extends DBModel>(repo: Repository<T>, model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}): T {
+    Object.keys(decorators).forEach(prop => {
+        // @ts-ignore
+        const decs: any[] = decorators[prop];
+        const handler: OperationHandler | undefined = getOperationsRegistry().get(model.constructor.name, prop, decs[0].key);
+        if (!handler)
+            throw new LoggedError(`Could not find registered handler for the operation ${prop}`);
+        handler.call(repo, model, ...decs[0].props.args, ...decs[0].props.props);
+    });
+
     return model;
 }
 

@@ -1,7 +1,7 @@
 import {OperationHandler} from "./types";
 import {IRegistry} from "../utils";
 
-export class OperationsRegistry implements IRegistry<OperationHandler> {
+class OperationsRegistry implements IRegistry<OperationHandler> {
     private cache: { [indexer: string]: any } = {};
 
     get<OperationHandler>(targetName: string, propKey: string, operation: string): OperationHandler | undefined {
@@ -42,7 +42,7 @@ export function getOperationsRegistry(): IRegistry<OperationHandler> {
  * Returns the current OperationsRegistry
  * @function getOperationsRegistry
  * @prop {IRegistry<OperationHandler>} operationsRegistry the new implementation of Registry
- * @memberOf validation
+ * @memberOf operations
  */
 export function setOperationsRegistry(operationsRegistry: IRegistry<OperationHandler>){
    actingOperationsRegistry = operationsRegistry;

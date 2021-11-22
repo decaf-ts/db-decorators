@@ -120,7 +120,5 @@ export const on = (operation: string[] = DBOperations.ALL, handler: OperationHan
             propertyKey
         );
     });
-    operation.forEach(op => {
-        getOperationsRegistry().register(handler, op, target, propertyKey);
-    });
+    operation.forEach(op => getOperationsRegistry().register(handler, op, target, propertyKey));
 }

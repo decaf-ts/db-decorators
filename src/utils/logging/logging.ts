@@ -22,7 +22,7 @@ export class LoggerImp implements Logger {
     private readonly timestampFormat: string;
     private readonly logStackTrace: boolean;
 
-    constructor(defaultLevel: number = LOGGER_LEVELS.LOG, useTimestamp = true, logLevel: boolean = true, logStackTrace: boolean = true, timestampFormat = DEFAULT_TIMESTAMP_FORMAT){
+    constructor(defaultLevel: number = LOGGER_LEVELS.LOG, useTimestamp = true, logLevel: boolean = true, logStackTrace: boolean = false, timestampFormat = DEFAULT_TIMESTAMP_FORMAT){
         this.level = defaultLevel;
         this.useTimestamp = useTimestamp;
         this.logLevel = logLevel;
