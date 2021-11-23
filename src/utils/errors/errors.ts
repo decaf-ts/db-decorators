@@ -21,10 +21,8 @@ export function criticalCallback(message: LoggerMessage, callback: Callback){
 }
 
 export class LoggedError extends Error {
-    constructor(error: LoggerMessage, level?: number) {
+    constructor(error: LoggerMessage, level: number = LOGGER_LEVELS.ERROR) {
         super(error instanceof Error ? error.message : error);
-        if (!level)
-            level = LOGGER_LEVELS.LOG;
         getLogger().report(error, level);
     }
 }

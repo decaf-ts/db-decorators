@@ -8,6 +8,7 @@ export interface Logger {
     report(message: LoggerMessage, level: number, ...args: any[]): void;
     log(message: LoggerMessage, ...args: any[]): void;
     info(message: LoggerMessage, ...args: any[]): void;
+    debug(message: LoggerMessage, ...args: any[]): void;
     warn(message: LoggerMessage, ...args: any[]): void;
     error(message: LoggerMessage, ...args: any[]): void;
     critical(message: LoggerMessage, ...args: any[]): void;
@@ -77,6 +78,10 @@ export class LoggerImp implements Logger {
         this.report(message, LOGGER_LEVELS.LOG, ...args);
     }
 
+    debug(message: LoggerMessage, ...args: any[]): void {
+        this.report(message, LOGGER_LEVELS.DEBUG, ...args);
+    }
+
     warn(message: LoggerMessage, ...args: any[]): void {
         this.report(message, LOGGER_LEVELS.WARN, ...args);
     }
@@ -110,6 +115,7 @@ export function setLogger(logger: Logger){
 
 export const info = (message: string, ...args: any[]) => getLogger().info(message, ...args);
 export const log = (message: string, ...args: any[]) => getLogger().log(message, ...args);
+export const debug = (message: string, ...args: any[]) => getLogger().debug(message, ...args);
 export const warn = (message: string, ...args: any[]) => getLogger().warn(message, ...args);
 export const error = (message: string, ...args: any[]) => getLogger().error(message, ...args);
 export const critical = (message: string, ...args: any[]) => getLogger().critical(message, ...args);

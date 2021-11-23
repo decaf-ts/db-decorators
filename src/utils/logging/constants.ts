@@ -1,9 +1,10 @@
 export const LOGGER_LEVELS = {
     INFO: 0,
     LOG: 1,
-    WARN: 2,
-    ERROR: 3,
-    CRITICAL: 4
+    DEBUG: 2,
+    WARN: 3,
+    ERROR: 4,
+    CRITICAL: 5
 }
 
 export const LOGGING_MSG = {
