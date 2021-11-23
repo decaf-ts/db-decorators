@@ -42,7 +42,7 @@ export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
         throw new LoggedError(new Error(`Child Classes must implement this!`));
     }
 
-    _create(key?: any, model?: T, ...args: any[]): any[] {
+    protected _create(key?: any, model?: T, ...args: any[]): any[] {
         if (!model)
             throw new LoggedError(new Error('Missing Model'));
         const decorators = getDbDecorators(model, OperationKeys.CREATE);
@@ -96,7 +96,7 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    private _create(key?: any, model?: T, ...args: any[]): void {
+    protected _create(key?: any, model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!model)
             return callback(new Error(`Missing Model`));
@@ -106,7 +106,7 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         if (!decorators)
             return callback(undefined, model, ...args);
 
-        enforceDBDecoratorsAsync<T>(this, model, decorators, (err: Err, newModel: T | undefined) => {
+        enforceDBDecoratorsAsync<T>(this, model, decorators, (err?: Err, newModel?: T | undefined) => {
             if (err)
                 return criticalCallback(err, callback);
             callback(undefined, key, newModel, ...args);
@@ -118,7 +118,7 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    private _delete(key?: any, ...args: any[]): void {
+    protected _delete(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!key)
             return callback(new Error(`Missing Key`));
@@ -145,7 +145,7 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    private _read(key?: any, ...args: any[]): void {
+    protected _read(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
         callback(undefined, key, ...args);
     }
@@ -155,7 +155,7 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    private _update(key?: any, model?: T, ...args: any[]): void {
+    protected _update(key?: any, model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!model)
             return callback(new Error(`Missing Model`));
