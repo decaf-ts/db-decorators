@@ -185,7 +185,7 @@ export abstract class RepositoryImp&lt;T extends DBModel> implements Repository&
  * @typedef T extends DBModel
  */
 export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncRepository&lt;T>{
-    private readonly clazz: {new(): T};
+    protected readonly clazz: {new(): T};
 
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
@@ -237,8 +237,9 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
         this.read(key, (err?: Err, model?: T) => {
             if (err)
                 return errorCallback(`Could not find DSU to delete`, callback);
-            // @ts-ignore
-            model = new (this.clazz)(model);
+            if (!model)
+                return errorCallback(`Could not load model`, callback);
+
             const decorators = getDbDecorators(model, OperationKeys.DELETE);
             if (!decorators)
                 return callback(undefined, model, ...args);
@@ -270,8 +271,8 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
         const callback: Callback = args.pop();
         if (!model)
             return callback(new Error(`Missing Model`));
-        // @ts-ignore
-        model = new (this.clazz)(model);
+        // // @ts-ignore
+        // model = new (this.clazz)(model);
         const decorators = getDbDecorators(model, OperationKeys.UPDATE);
         if (!decorators)
             return callback(undefined, model, ...args);

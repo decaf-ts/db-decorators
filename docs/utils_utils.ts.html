@@ -198,12 +198,15 @@ export const getDbDecorators = function&lt;T extends DBModel>(model: T, operatio
     const decorators = getAllPropertyDecorators(model, OperationKeys.REFLECT);
     if (!decorators)
         return;
-    return Object.keys(decorators).reduce((accum: {[indexer: string]: any}, decorator) => {
+    return Object.keys(decorators).reduce((accum: {[indexer: string]: any} | undefined, decorator) => {
         const dec = decorators[decorator].filter(d => d.key === operation);
-        if (dec &amp;&amp; dec.length)
+        if (dec &amp;&amp; dec.length){
+            if (!accum)
+                accum = {};
             accum[decorator] = dec;
+        }
         return accum;
-    }, {});
+    }, undefined);
 }
 
 export const enforceDBDecorators = function&lt;T extends DBModel>(repo: Repository&lt;T>, model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}): T {
