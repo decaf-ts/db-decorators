@@ -117,31 +117,29 @@ import {
     prefixMethodAsync,
     errorCallback,
     LoggedError,
-    enforceDBDecoratorsAsync
+    enforceDBDecoratorsAsync, criticalCallback
 } from "../utils";
 import {OperationKeys} from "../operations";
 
-export type DbKey = string | number;
-
 export interface Repository&lt;T extends DBModel> {
-    create(key?: DbKey, model?: T, ...args: any[]): T;
-    read(key?: DbKey, ...args: any[]): T;
-    update(key?: DbKey, model?: T, ...args: any[]): T;
-    delete(key?: DbKey, ...args: any[]): void;
+    create(key?: any, model?: T, ...args: any[]): T;
+    read(key?: any, ...args: any[]): T;
+    update(key?: any, model?: T, ...args: any[]): T;
+    delete(key?: any, ...args: any[]): void;
 }
 
 export interface AsyncRepository&lt;T extends DBModel> {
-    create(key?: DbKey, model?: T, ...args: any[]): void;
-    read(key?: DbKey, ...args: any[]): void;
-    update(key?: DbKey, model?: T, ...args: any[]): void;
-    delete(key?: DbKey, ...args: any[]): void;
+    create(key?: any, model?: T, ...args: any[]): void;
+    read(key?: any, ...args: any[]): void;
+    update(key?: any, model?: T, ...args: any[]): void;
+    delete(key?: any, ...args: any[]): void;
 }
 
 export type Err = Error | string | undefined;
 
 export type Callback = (err?: Err, ...args: any[]) => void;
 
-export type ModelCallback&lt;T extends DBModel> = (err?: Err, result?: T) => void;
+export type ModelCallback&lt;T extends DBModel> = (err?: Err, result?: T, ...args: any[]) => void;
 
 export abstract class RepositoryImp&lt;T extends DBModel> implements Repository&lt;T>{
     private readonly clazz: {new(): T};
@@ -151,11 +149,11 @@ export abstract class RepositoryImp&lt;T extends DBModel> implements Repository&
         prefixMethod(this, this.create, this._create, "create");
     }
 
-    create(key?: DbKey, model?: T, ...args: any[]): T {
+    create(key?: any, model?: T, ...args: any[]): T {
         throw new LoggedError(new Error(`Child Classes must implement this!`));
     }
 
-    _create(key?: DbKey, model?: T, ...args: any[]): any[] {
+    _create(key?: any, model?: T, ...args: any[]): any[] {
         if (!model)
             throw new LoggedError(new Error('Missing Model'));
         const decorators = getDbDecorators(model, OperationKeys.CREATE);
@@ -170,15 +168,15 @@ export abstract class RepositoryImp&lt;T extends DBModel> implements Repository&
         return [key, model, ...args];
     }
 
-    delete(key?: DbKey, ...args: any[]): void {
+    delete(key?: any, ...args: any[]): void {
         throw new LoggedError(new Error(`Child Classes must implement this!`));
     }
 
-    read(key?: DbKey, ...args: any[]): T {
+    read(key?: any, ...args: any[]): T {
         throw new LoggedError(new Error(`Child Classes must implement this!`));
     }
 
-    update(key?: DbKey, model?: T, ...args: any[]): T {
+    update(key?: any, model?: T, ...args: any[]): T {
         throw new LoggedError(new Error(`Child Classes must implement this!`));
     }
 }
@@ -192,6 +190,9 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
         prefixMethodAsync(this, this.create, this._create, "create");
+        prefixMethodAsync(this, this.read, this._read, "read");
+        prefixMethodAsync(this, this.delete, this._delete, "delete");
+        prefixMethodAsync(this, this.update, this._update, "update");
     }
 
     /**
@@ -201,12 +202,12 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
      * @param {any[]} args optional Arguments. The last one must be the callback
      * implicit @param {@link ModelCallback} callback Popped from args
      */
-    create(key?: DbKey, model?: T, ...args: any[]): void {
+    create(key?: any, model?: T, ...args: any[]): void {
         const callback: ModelCallback&lt;T> = args.pop();
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    private _create(key?: DbKey, model?: T, ...args: any[]): void {
+    private _create(key?: any, model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!model)
             return callback(new Error(`Missing Model`));
@@ -218,24 +219,68 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
 
         enforceDBDecoratorsAsync&lt;T>(this, model, decorators, (err: Err, newModel: T | undefined) => {
             if (err)
-                return errorCallback(err, callback);
+                return criticalCallback(err, callback);
             callback(undefined, key, newModel, ...args);
         });
     }
 
-    delete(key?: DbKey, ...args: any[]): void {
+    delete(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    read(key?: DbKey, ...args: any[]): void {
+    private _delete(key?: any, ...args: any[]): void {
+        const callback: Callback = args.pop();
+        if (!key)
+            return callback(new Error(`Missing Key`));
+
+        this.read(key, (err?: Err, model?: T) => {
+            if (err)
+                return errorCallback(`Could not find DSU to delete`, callback);
+            // @ts-ignore
+            model = new (this.clazz)(model);
+            const decorators = getDbDecorators(model, OperationKeys.DELETE);
+            if (!decorators)
+                return callback(undefined, model, ...args);
+
+            enforceDBDecoratorsAsync&lt;T>(this, model, decorators, (err: Err, newModel: T | undefined) => {
+                if (err)
+                    return criticalCallback(err, callback);
+                callback(undefined, key, newModel, ...args);
+            });
+        });
+    }
+
+    read(key?: any, ...args: any[]): void {
         const callback: ModelCallback&lt;T> = args.pop();
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    update(key?: DbKey, model?: T, ...args: any[]): void {
+    private _read(key?: any, ...args: any[]): void {
+        const callback: Callback = args.pop();
+        callback(undefined, key, ...args);
+    }
+
+    update(key?: any, model?: T, ...args: any[]): void {
         const callback: ModelCallback&lt;T> = args.pop();
         errorCallback(new Error(`Child Classes must implement this!`), callback);
+    }
+
+    private _update(key?: any, model?: T, ...args: any[]): void {
+        const callback: Callback = args.pop();
+        if (!model)
+            return callback(new Error(`Missing Model`));
+        // @ts-ignore
+        model = new (this.clazz)(model);
+        const decorators = getDbDecorators(model, OperationKeys.UPDATE);
+        if (!decorators)
+            return callback(undefined, model, ...args);
+
+        enforceDBDecoratorsAsync&lt;T>(this, model, decorators, (err: Err, newModel: T | undefined) => {
+            if (err)
+                return criticalCallback(err, callback);
+            callback(undefined, key, newModel, ...args);
+        });
     }
 }</code></pre>
         </article>
