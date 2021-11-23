@@ -8,7 +8,7 @@ export {getPropertyDecorators, getClassDecorators, stringFormat, formatDate} fro
 
 import DBModel from "../model/DBModel";
 import {AsyncRepository, Callback, Err, ModelCallback, Repository} from "../repository";
-import {errorCallback, getPropertyDecorators, LoggedError} from "./index";
+import {errorCallback, getPropertyDecorators, LoggedError, LOGGER_LEVELS} from "./index";
 import {OperationHandler, OperationKeys} from "../operations";
 import {getOperationsRegistry} from "../operations/registry";
 
