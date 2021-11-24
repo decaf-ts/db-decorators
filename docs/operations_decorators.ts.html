@@ -92,7 +92,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li></ul></div>
                 
             </nav>
         </div>
@@ -219,6 +219,7 @@ export const onDelete = (handler: OperationHandler, args: any[], ...props: strin
  */
 export const on = (operation: string[] = DBOperations.ALL, handler: OperationHandler, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
     operation.forEach(op => {
+        op = OperationKeys.ON + op;
         Reflect.defineMetadata(
             getOperationKey(op),
             {
@@ -230,8 +231,40 @@ export const on = (operation: string[] = DBOperations.ALL, handler: OperationHan
             target,
             propertyKey
         );
+        getOperationsRegistry().register(handler, op, target, propertyKey)
     });
-    operation.forEach(op => getOperationsRegistry().register(handler, op, target, propertyKey));
+}
+
+/**
+ * Defines a behaviour to set on the defined {@link DBOperations}
+ *
+ * @param {string[]} operation One of {@link DBOperations}
+ * @param {OperationHandler} handler The method called upon the operation
+ * @param {any[]} [args] Arguments that will be passed in order to the handler method
+ * @param {string[]} [props] property keys that will be passed in order after the args
+ *
+ * ex: handler(...args, ...props.map(p => target[p]))
+ *
+ * @decorator after
+ * @namespace decorators
+ * @memberOf operations
+ */
+export const after = (operation: string[] = DBOperations.ALL, handler: OperationHandler, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
+    operation.forEach(op => {
+        op = OperationKeys.AFTER + op;
+        Reflect.defineMetadata(
+            getOperationKey(op),
+            {
+                operation: op,
+                handler: hashCode(handler.toString()),
+                args: args,
+                props: props
+            },
+            target,
+            propertyKey
+        );
+        getOperationsRegistry().register(handler, op, target, propertyKey);
+    });
 }</code></pre>
         </article>
     </section>

@@ -90,7 +90,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li></ul></div>
                 
             </nav>
         </div>
@@ -826,6 +826,267 @@
 
   
 
+  <td class="description last"><p>When the after function name cannot be extracted, pass it here</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="utils_utils.ts.html" class="button">View Source</a>
+            <span>
+                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line54">line 54</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="suffixMethod">
+        <a class="href-link" href="#suffixMethod">#</a>
+        
+        <span class="code-name">
+            
+                suffixMethod<span class="signature">(obj, before, suffix, beforeName<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary"><p>Util method to change a method of an object suffixing it with another</p>.</p>
+    
+    
+    <div class="description">
+        <p>Util method to change a method of an object suffixing it with another</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>obj</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">any</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The Base Object</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>before</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">function</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The original method</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>suffix</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">function</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The Prefix method. The output will be used as arguments in the original method</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>beforeName</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">string</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
   <td class="description last"><p>When the after function anme cannot be extracted, pass it here</p></td>
 </tr>
 
@@ -875,6 +1136,267 @@
             <a href="utils_utils.ts.html" class="button">View Source</a>
             <span>
                 <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line40">line 40</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="suffixMethodAsync">
+        <a class="href-link" href="#suffixMethodAsync">#</a>
+        
+        <span class="code-name">
+            
+                suffixMethodAsync<span class="signature">(obj, before, suffix, beforeName<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary"><p>The Async version of <a href="global.html#suffixMethod"><code>suffixMethod</code></a></p>.</p>
+    
+    
+    <div class="description">
+        <p>The Async version of <a href="global.html#suffixMethod"><code>suffixMethod</code></a></p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>obj</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">any</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The Base Object</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>before</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">function</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The original method</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>suffix</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">function</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>The Prefix method. The output will be used as arguments in the original method</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>beforeName</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">string</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>When the after function name cannot be extracted, pass it here</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="utils_utils.ts.html" class="button">View Source</a>
+            <span>
+                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line72">line 72</a>
             </span>
         </p>
     
