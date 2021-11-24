@@ -108,6 +108,7 @@ export const onDelete = (handler: OperationHandler, args: any[], ...props: strin
  */
 export const on = (operation: string[] = DBOperations.ALL, handler: OperationHandler, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
     operation.forEach(op => {
+        op = OperationKeys.ON + op;
         Reflect.defineMetadata(
             getOperationKey(op),
             {
@@ -119,6 +120,38 @@ export const on = (operation: string[] = DBOperations.ALL, handler: OperationHan
             target,
             propertyKey
         );
+        getOperationsRegistry().register(handler, op, target, propertyKey)
     });
-    operation.forEach(op => getOperationsRegistry().register(handler, op, target, propertyKey));
+}
+
+/**
+ * Defines a behaviour to set on the defined {@link DBOperations}
+ *
+ * @param {string[]} operation One of {@link DBOperations}
+ * @param {OperationHandler} handler The method called upon the operation
+ * @param {any[]} [args] Arguments that will be passed in order to the handler method
+ * @param {string[]} [props] property keys that will be passed in order after the args
+ *
+ * ex: handler(...args, ...props.map(p => target[p]))
+ *
+ * @decorator after
+ * @namespace decorators
+ * @memberOf operations
+ */
+export const after = (operation: string[] = DBOperations.ALL, handler: OperationHandler, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
+    operation.forEach(op => {
+        op = OperationKeys.AFTER + op;
+        Reflect.defineMetadata(
+            getOperationKey(op),
+            {
+                operation: op,
+                handler: hashCode(handler.toString()),
+                args: args,
+                props: props
+            },
+            target,
+            propertyKey
+        );
+        getOperationsRegistry().register(handler, op, target, propertyKey);
+    });
 }

@@ -6,7 +6,7 @@ import {
     prefixMethodAsync,
     errorCallback,
     LoggedError,
-    enforceDBDecoratorsAsync, criticalCallback
+    enforceDBDecoratorsAsync, criticalCallback, suffixMethodAsync
 } from "../utils";
 import {OperationKeys} from "../operations";
 
@@ -35,19 +35,19 @@ export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
 
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
-        prefixMethod(this, this.create, this._create, "create");
+        prefixMethod(this, this.create, this.createPrefix, "create");
     }
 
     create(key?: any, model?: T, ...args: any[]): T {
         throw new LoggedError(new Error(`Child Classes must implement this!`));
     }
 
-    protected _create(key?: any, model?: T, ...args: any[]): any[] {
+    protected createPrefix(key?: any, model?: T, ...args: any[]): any[] {
         if (!model)
             throw new LoggedError(new Error('Missing Model'));
-        const decorators = getDbDecorators(model, OperationKeys.CREATE);
+        const decorators = getDbDecorators(model, OperationKeys.CREATE, OperationKeys.ON);
         if (!decorators)
-            return [model, ...args];
+            return [key, model, ...args];
         try {
             model = enforceDBDecorators<T>(this, model, decorators);
         } catch (e) {
@@ -78,10 +78,17 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
 
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
-        prefixMethodAsync(this, this.create, this._create, "create");
-        prefixMethodAsync(this, this.read, this._read, "read");
-        prefixMethodAsync(this, this.delete, this._delete, "delete");
-        prefixMethodAsync(this, this.update, this._update, "update");
+        suffixMethodAsync(this, this.create, this.createSuffix, "create");
+        prefixMethodAsync(this, this.create, this.createPrefix, "create");
+
+        suffixMethodAsync(this, this.read, this.readSuffix, "read");
+        prefixMethodAsync(this, this.read, this.readPrefix, "read");
+
+        suffixMethodAsync(this, this.delete, this.deleteSuffix, "delete");
+        prefixMethodAsync(this, this.delete, this.deletePrefix, "delete");
+
+        suffixMethodAsync(this, this.update, this.updateSuffix, "update");
+        prefixMethodAsync(this, this.update, this.updatePrefix, "update");
     }
 
     /**
@@ -96,20 +103,39 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    protected _create(key?: any, model?: T, ...args: any[]): void {
+    protected createPrefix(key?: any, model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
+        if (!callback)
+            throw new LoggedError(`Missing Callback`);
         if (!model)
             return callback(new Error(`Missing Model`));
-        // @ts-ignore
-        model = new (this.clazz)(model);
-        const decorators = getDbDecorators(model, OperationKeys.CREATE);
-        if (!decorators)
-            return callback(undefined, model, ...args);
 
-        enforceDBDecoratorsAsync<T>(this, model, decorators, (err?: Err, newModel?: T | undefined) => {
+        const decorators = getDbDecorators(model, OperationKeys.CREATE, OperationKeys.ON);
+        if (!decorators)
+            return callback(undefined, key, model, ...args);
+
+        enforceDBDecoratorsAsync<T>(this, model, decorators, OperationKeys.ON, (err?: Err, newModel?: T | undefined) => {
             if (err)
                 return criticalCallback(err, callback);
             callback(undefined, key, newModel, ...args);
+        });
+    }
+
+    protected createSuffix(model?: T, ...args: any[]): void {
+        const callback: ModelCallback<T> = args.pop();
+        if (!callback)
+            throw new LoggedError(`Missing Callback`);
+        if (!model)
+            return callback(new Error(`Missing Model`));
+
+        const decorators = getDbDecorators(model, OperationKeys.CREATE, OperationKeys.AFTER);
+        if (!decorators)
+            return callback(undefined, model, ...args);
+
+        enforceDBDecoratorsAsync<T>(this, model, decorators, OperationKeys.AFTER, (err?: Err, newModel?: T | undefined) => {
+            if (err)
+                return criticalCallback(err, callback);
+            callback(undefined, newModel, ...args);
         });
     }
 
@@ -118,58 +144,103 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    protected _delete(key?: any, ...args: any[]): void {
+    protected deletePrefix(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
+        if (!callback)
+            throw new LoggedError(`Missing Callback`);
         if (!key)
             return callback(new Error(`Missing Key`));
 
         this.read(key, (err?: Err, model?: T) => {
             if (err)
-                return errorCallback(`Could not find DSU to delete`, callback);
+                return errorCallback(new Error(`Could not find DSU to delete`), callback);
             if (!model)
-                return errorCallback(`Could not load model`, callback);
+                return errorCallback(new Error(`Could not load model`), callback);
 
-            const decorators = getDbDecorators(model, OperationKeys.DELETE);
+            const decorators = getDbDecorators(model, OperationKeys.DELETE, OperationKeys.ON);
             if (!decorators)
-                return callback(undefined, model, ...args);
+                return callback(undefined, key, ...args);
 
-            enforceDBDecoratorsAsync<T>(this, model, decorators, (err: Err, newModel: T | undefined) => {
+            enforceDBDecoratorsAsync<T>(this, model, decorators, OperationKeys.ON, (err: Err) => {
                 if (err)
                     return criticalCallback(err, callback);
-                callback(undefined, key, newModel, ...args);
+                callback(undefined, key, ...args);
             });
         });
     }
 
+    protected deleteSuffix(...args: any[]): void {
+        const callback: ModelCallback<T> = args.pop();
+        if (!callback)
+            throw new LoggedError(`Missing Callback`);
+
+        // TODO - cant access decorators from here
+        callback(undefined, ...args);
+    }
+
     read(key?: any, ...args: any[]): void {
         const callback: ModelCallback<T> = args.pop();
+        if (!callback)
+            throw new LoggedError(`Missing Callback`);
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    protected _read(key?: any, ...args: any[]): void {
+    protected readPrefix(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
+        if (!callback)
+            throw new LoggedError(`Missing Callback`);
         callback(undefined, key, ...args);
+    }
+
+    protected readSuffix(model?: T, ...args: any[]): void {
+        const callback: ModelCallback<T> = args.pop();
+        if (!callback)
+            throw new LoggedError(`Missing Callback`);
+        if (!model)
+            return callback(new Error(`Missing Model`));
+        callback(undefined, model, ...args);
     }
 
     update(key?: any, model?: T, ...args: any[]): void {
         const callback: ModelCallback<T> = args.pop();
+        if (!callback)
+            throw new LoggedError(`Missing Callback`);
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
-    protected _update(key?: any, model?: T, ...args: any[]): void {
+    protected updatePrefix(key?: any, model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
+        if (!callback)
+            throw new LoggedError(`Missing Callback`);
         if (!model)
             return callback(new Error(`Missing Model`));
-        // // @ts-ignore
-        // model = new (this.clazz)(model);
-        const decorators = getDbDecorators(model, OperationKeys.UPDATE);
-        if (!decorators)
-            return callback(undefined, model, ...args);
 
-        enforceDBDecoratorsAsync<T>(this, model, decorators, (err: Err, newModel: T | undefined) => {
+        const decorators = getDbDecorators(model, OperationKeys.UPDATE, OperationKeys.ON);
+        if (!decorators)
+            return callback(undefined, key, model, ...args);
+
+        enforceDBDecoratorsAsync<T>(this, model, decorators, OperationKeys.ON, (err: Err, newModel: T | undefined) => {
             if (err)
                 return criticalCallback(err, callback);
             callback(undefined, key, newModel, ...args);
+        });
+    }
+
+    protected updateSuffix(model?: T, ...args: any[]): void {
+        const callback: ModelCallback<T> = args.pop();
+        if (!callback)
+            throw new LoggedError(`Missing Callback`);
+        if (!model)
+            return callback(new Error(`Missing Model`));
+
+        const decorators = getDbDecorators(model, OperationKeys.UPDATE, OperationKeys.AFTER);
+        if (!decorators)
+            return callback(undefined, model, ...args);
+
+        enforceDBDecoratorsAsync<T>(this, model, decorators, OperationKeys.AFTER, (err: Err, newModel: T | undefined) => {
+            if (err)
+                return criticalCallback(err, callback);
+            callback(undefined, newModel, ...args);
         });
     }
 }

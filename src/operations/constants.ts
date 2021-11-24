@@ -4,7 +4,9 @@ export const OperationKeys = {
     CREATE: 'create',
     READ: "read",
     UPDATE: 'update',
-    DELETE: 'delete'
+    DELETE: 'delete',
+    ON: 'on.',
+    AFTER: 'after.'
 }
 
 export const DBOperations = {

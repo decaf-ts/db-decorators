@@ -6,7 +6,7 @@ export type LoggerMessage = Error | string;
 
 export interface Logger {
     report(message: LoggerMessage, level: number, ...args: any[]): void;
-    log(message: LoggerMessage, ...args: any[]): void;
+    all(message: LoggerMessage, ...args: any[]): void;
     info(message: LoggerMessage, ...args: any[]): void;
     debug(message: LoggerMessage, ...args: any[]): void;
     warn(message: LoggerMessage, ...args: any[]): void;
@@ -23,7 +23,7 @@ export class LoggerImp implements Logger {
     private readonly timestampFormat: string;
     private readonly logStackTrace: boolean;
 
-    constructor(defaultLevel: number = LOGGER_LEVELS.LOG, useTimestamp = true, logLevel: boolean = true, logStackTrace: boolean = false, timestampFormat = DEFAULT_TIMESTAMP_FORMAT){
+    constructor(defaultLevel: number = LOGGER_LEVELS.INFO, useTimestamp = true, logLevel: boolean = true, logStackTrace: boolean = false, timestampFormat = DEFAULT_TIMESTAMP_FORMAT){
         this.level = defaultLevel;
         this.useTimestamp = useTimestamp;
         this.logLevel = logLevel;
@@ -42,10 +42,10 @@ export class LoggerImp implements Logger {
             message = `[${Object.keys(LOGGER_LEVELS)[logLevel]}] - ${message}`;
         if (this.useTimestamp)
             message = `[${formatDate(new Date(), this.timestampFormat)}]${message}`;
-        return stringFormat(message, ...args) + (this.logStackTrace && stacksTrace ? `\n-- StackStrace:\n${stacksTrace}`: '');
+        return stringFormat(message, ...args) + (this.logStackTrace && stacksTrace && (logLevel >= LOGGER_LEVELS.ERROR || logLevel === LOGGER_LEVELS.DEBUG) ? `\n-- StackStrace:\n${stacksTrace}`: '');
     }
 
-    report(message: LoggerMessage, level: number = LOGGER_LEVELS.LOG, ...args: any[]) : void {
+    report(message: LoggerMessage, level: number = LOGGER_LEVELS.INFO, ...args: any[]) : void {
         if (level < this.level)
             return;
         let reportMethod: Function;
@@ -58,7 +58,8 @@ export class LoggerImp implements Logger {
                 reportMethod = console.error;
                 break;
             case LOGGER_LEVELS.INFO:
-            case LOGGER_LEVELS.LOG:
+            case LOGGER_LEVELS.DEBUG:
+            case LOGGER_LEVELS.ALL:
             default:
                 reportMethod = console.log;
                 break;
@@ -66,7 +67,7 @@ export class LoggerImp implements Logger {
 
         let finalMessage = this.buildMessage(message, level, ...args);
         reportMethod(finalMessage);
-        if (message instanceof Error)
+        if (message instanceof Error && (level >= LOGGER_LEVELS.ERROR || level === LOGGER_LEVELS.DEBUG))
             console.log(message.stack);
     }
 
@@ -74,8 +75,8 @@ export class LoggerImp implements Logger {
         this.report(message, LOGGER_LEVELS.INFO, ...args);
     }
 
-    log(message: LoggerMessage, ...args: any[]): void {
-        this.report(message, LOGGER_LEVELS.LOG, ...args);
+    all(message: LoggerMessage, ...args: any[]): void {
+        this.report(message, LOGGER_LEVELS.ALL, ...args);
     }
 
     debug(message: LoggerMessage, ...args: any[]): void {
@@ -95,7 +96,7 @@ export class LoggerImp implements Logger {
     }
 
     setLevel(level: number): void {
-        this.log(stringFormat(LOGGING_MSG.LEVEL_CHANGED, this.level.toString(), level.toString()))
+        this.debug(stringFormat(LOGGING_MSG.LEVEL_CHANGED, this.level.toString(), level.toString()));
         this.level = level;
     }
 }
@@ -110,11 +111,11 @@ export function getLogger(){
 
 export function setLogger(logger: Logger){
     currentLogger = logger;
-    getLogger().log(LOGGING_MSG.LOGGER_CHANGED);
+    getLogger().debug(LOGGING_MSG.LOGGER_CHANGED);
 }
 
 export const info = (message: string, ...args: any[]) => getLogger().info(message, ...args);
-export const log = (message: string, ...args: any[]) => getLogger().log(message, ...args);
+export const all= (message: string, ...args: any[]) => getLogger().all(message, ...args);
 export const debug = (message: string, ...args: any[]) => getLogger().debug(message, ...args);
 export const warn = (message: string, ...args: any[]) => getLogger().warn(message, ...args);
 export const error = (message: string, ...args: any[]) => getLogger().error(message, ...args);
