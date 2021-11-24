@@ -63,15 +63,15 @@ export function suffixMethod(obj: any, before: Function, suffix: Function, befor
  * @param {string} [afterName] When the after function name cannot be extracted, pass it here
  */
 export function prefixMethodAsync(obj: any, after: Function, prefix: Function, afterName?: string){
-    function wrapperPrefix(this: any, ...args: any[]){
+    function wrapperPrefix(...args: any[]){
         const callback: Callback = args.pop();
-        return prefix.call(this, ...args, (err: Err, ...results: any[]) => {
+        return prefix.call(obj, ...args, (err: Err, ...results: any[]) => {
             if (err)
                 return callback(err);
-            after.call(this, ...results, callback);
+            after.call(obj, ...results, callback);
         });
     }
-    obj[afterName ? afterName : after.name] = wrapperPrefix.bind(obj);
+    obj[afterName ? afterName : after.name] = wrapperPrefix;
 }
 
 /**
