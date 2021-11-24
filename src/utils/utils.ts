@@ -63,7 +63,7 @@ export function suffixMethod(obj: any, before: Function, suffix: Function, befor
  * @param {string} [afterName] When the after function name cannot be extracted, pass it here
  */
 export function prefixMethodAsync(obj: any, after: Function, prefix: Function, afterName?: string){
-    function wrapper(this: any, ...args: any[]){
+    function wrapperPrefix(this: any, ...args: any[]){
         const callback: Callback = args.pop();
         return prefix.call(this, ...args, (err: Err, ...results: any[]) => {
             if (err)
@@ -71,7 +71,7 @@ export function prefixMethodAsync(obj: any, after: Function, prefix: Function, a
             after.call(this, ...results, callback);
         });
     }
-    obj[afterName ? afterName : after.name] = wrapper.bind(obj);
+    obj[afterName ? afterName : after.name] = wrapperPrefix.bind(obj);
 }
 
 /**
@@ -82,7 +82,7 @@ export function prefixMethodAsync(obj: any, after: Function, prefix: Function, a
  * @param {string} [beforeName] When the after function name cannot be extracted, pass it here
  */
 export function suffixMethodAsync(obj: any, before: Function, suffix: Function, beforeName?: string){
-    function wrapper(this: any, ...args: any[]){
+    function wrapperSuffix(this: any, ...args: any[]){
         const callback: Callback = args.pop();
         return before.call(this, ...args, (err: Err, ...results: any[]) => {
             if (err)
@@ -90,7 +90,7 @@ export function suffixMethodAsync(obj: any, before: Function, suffix: Function, 
             suffix.call(this, ...results, callback);
         });
     }
-    obj[beforeName ? beforeName : before.name] = wrapper.bind(obj);
+    obj[beforeName ? beforeName : before.name] = wrapperSuffix.bind(obj);
 }
 
 export const getAllPropertyDecorators = function<T extends DBModel>(model: T , ...prefixes: string[]): {[indexer: string]: any[]} | undefined {
