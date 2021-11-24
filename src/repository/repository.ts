@@ -10,17 +10,19 @@ import {
 } from "../utils";
 import {OperationKeys} from "../operations";
 
+export type ModelOrCallback<T extends DBModel> = T | ModelCallback<T>;
+
 export interface Repository<T extends DBModel> {
-    create(key?: any, model?: T, ...args: any[]): T;
+    create(key?: any, model?: ModelOrCallback<T>, ...args: any[]): T;
     read(key?: any, ...args: any[]): T;
-    update(key?: any, model?: T, ...args: any[]): T;
+    update(key?: any, model?: ModelOrCallback<T>, ...args: any[]): T;
     delete(key?: any, ...args: any[]): void;
 }
 
 export interface AsyncRepository<T extends DBModel> {
-    create(key?: any, model?: T, ...args: any[]): void;
+    create(key?: any, model?: ModelOrCallback<T>, ...args: any[]): void;
     read(key?: any, ...args: any[]): void;
-    update(key?: any, model?: T, ...args: any[]): void;
+    update(key?: any, model?: ModelOrCallback<T>, ...args: any[]): void;
     delete(key?: any, ...args: any[]): void;
 }
 
@@ -70,6 +72,17 @@ export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
     }
 }
 
+export const trimLeftUndefined = function(...args: any[]){
+    if (!args || !args.length)
+        return args;
+    while (args[0] === undefined){
+        args.shift();
+        if (!args.length)
+            break;
+    }
+    return args;
+}
+
 /**
  * @typedef T extends DBModel
  */
@@ -78,16 +91,16 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
 
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
-        // suffixMethodAsync(this, this.create, this.createSuffix, "create");
+        suffixMethodAsync(this, this.create, this.createSuffix, "create");
         prefixMethodAsync(this, this.create, this.createPrefix, "create");
 
-        // suffixMethodAsync(this, this.read, this.readSuffix, "read");
+        suffixMethodAsync(this, this.read, this.readSuffix, "read");
         prefixMethodAsync(this, this.read, this.readPrefix, "read");
 
-        // suffixMethodAsync(this, this.delete, this.deleteSuffix, "delete");
+        suffixMethodAsync(this, this.delete, this.deleteSuffix, "delete");
         prefixMethodAsync(this, this.delete, this.deletePrefix, "delete");
 
-        // suffixMethodAsync(this, this.update, this.updateSuffix, "update");
+        suffixMethodAsync(this, this.update, this.updateSuffix, "update");
         prefixMethodAsync(this, this.update, this.updatePrefix, "update");
     }
 
@@ -112,12 +125,12 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
 
         const decorators = getDbDecorators(model, OperationKeys.CREATE, OperationKeys.ON);
         if (!decorators)
-            return callback(undefined, key, model, ...args);
+            return callback(undefined, ...trimLeftUndefined(key, model, ...args));
 
         enforceDBDecoratorsAsync<T>(this, model, decorators, OperationKeys.ON, (err?: Err, newModel?: T | undefined) => {
             if (err)
                 return criticalCallback(err, callback);
-            callback(undefined, key, newModel, ...args);
+            callback(undefined, ...trimLeftUndefined(key, newModel, ...args));
         });
     }
 
@@ -130,12 +143,12 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
 
         const decorators = getDbDecorators(model, OperationKeys.CREATE, OperationKeys.AFTER);
         if (!decorators)
-            return callback(undefined, model, ...args);
+            return callback(undefined, ...trimLeftUndefined(model, ...args));
 
         enforceDBDecoratorsAsync<T>(this, model, decorators, OperationKeys.AFTER, (err?: Err, newModel?: T | undefined) => {
             if (err)
                 return criticalCallback(err, callback);
-            callback(undefined, newModel, ...args);
+            callback(undefined, ...trimLeftUndefined(newModel, ...args));
         });
     }
 

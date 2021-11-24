@@ -13,7 +13,7 @@ export abstract class AsyncRamRepository<T extends DBModel> extends AsyncReposit
 
     create(key: any, model: T, callback: ModelCallback<T>): void {
         const self = this;
-        self.read(model.id, (err, oldModel) => {
+        self.read(key, (err, oldModel) => {
             if (!err)
                 return callback(new Error(DBErrors.EXISTS));
 
@@ -70,5 +70,21 @@ export abstract class AsyncRamRepository<T extends DBModel> extends AsyncReposit
 export class TestRamRepository extends AsyncRamRepository<TestModelAsync>{
     constructor() {
         super(TestModelAsync);
+    }
+}
+
+export class KeylessTestRamRepository extends TestRamRepository{
+    constructor() {
+        super();
+    }
+
+    // @ts-ignore
+    create(model: TestModelAsync, callback: ModelCallback<TestModelAsync>){
+        // @ts-ignore
+        super.create(undefined, model, callback);
+    }
+
+    protected createPrefix(model?: TestModelAsync, ...args: any[]) {
+        super.createPrefix(undefined, model, ...args);
     }
 }
