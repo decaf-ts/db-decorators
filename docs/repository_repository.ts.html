@@ -189,16 +189,16 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
 
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
-        suffixMethodAsync(this, this.create, this.createSuffix, "create");
+        // suffixMethodAsync(this, this.create, this.createSuffix, "create");
         prefixMethodAsync(this, this.create, this.createPrefix, "create");
 
-        suffixMethodAsync(this, this.read, this.readSuffix, "read");
+        // suffixMethodAsync(this, this.read, this.readSuffix, "read");
         prefixMethodAsync(this, this.read, this.readPrefix, "read");
 
-        suffixMethodAsync(this, this.delete, this.deleteSuffix, "delete");
+        // suffixMethodAsync(this, this.delete, this.deleteSuffix, "delete");
         prefixMethodAsync(this, this.delete, this.deletePrefix, "delete");
 
-        suffixMethodAsync(this, this.update, this.updateSuffix, "update");
+        // suffixMethodAsync(this, this.update, this.updateSuffix, "update");
         prefixMethodAsync(this, this.update, this.updatePrefix, "update");
     }
 
