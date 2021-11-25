@@ -1,6 +1,6 @@
 {
   "name": "@tvenceslau/db-decorators",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "DB decorators extension for decorator validation",
   "main": "./dist/index.min.js",
   "module": "./dist/esm/index.min.esm.js",
