@@ -1,5 +1,5 @@
 import {OperationHandler} from "./types";
-import {IRegistry} from "../utils";
+import {IRegistry} from "@tvenceslau/decorator-validation/lib/utils/registry";
 
 class OperationsRegistry implements IRegistry<OperationHandler> {
     private cache: { [indexer: string]: any } = {};
