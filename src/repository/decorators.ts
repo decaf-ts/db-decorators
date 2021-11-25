@@ -8,6 +8,8 @@ import {RepositoryKeys} from "./constants";
  * @namespace Decorators
  * @memberOf Model
  */
-export const repository = () => (original: Function) => {
-    return injectable(RepositoryKeys.REPO, true)(original);
+export function repository(){
+    return (original: Function) => {
+        return injectable(RepositoryKeys.REPO, true)(original);
+    }
 }

@@ -34,7 +34,7 @@ export class InjectableRegistryImp implements InjectablesRegistry {
         }
     }
 
-    register<T>(obj: Injectable<T>, category: string, isSingleton: boolean = true): void {
+    register<T>(obj: Injectable<T>, category: string, isSingleton: boolean = true, force: boolean = false): void {
         // @ts-ignore
         const constructor = !obj.name && obj.constructor;
         if (!category || (typeof obj !== 'function' && !constructor))
@@ -45,7 +45,7 @@ export class InjectableRegistryImp implements InjectablesRegistry {
         // @ts-ignore
         const name = constructor && constructor.name && constructor.name !== "Function" ? constructor.name : obj.name;
 
-        if (!this.cache[category][name])
+        if (!this.cache[category][name] || force)
             this.cache[category][name] = {
                 instance: constructor ? obj : undefined,
                 constructor: !constructor ? obj : undefined,
@@ -57,7 +57,7 @@ export class InjectableRegistryImp implements InjectablesRegistry {
         try {
             const {constructor, singleton} = this.cache[defs.category][defs.name] ;
             const instance = new constructor;
-            this.cache = {
+            this.cache[defs.category][defs.name] = {
                 instance: instance,
                 constructor: constructor,
                 singleton: singleton

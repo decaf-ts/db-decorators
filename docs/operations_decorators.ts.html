@@ -92,7 +92,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li><li><a href="utils.errors.html">errors</a></li><li><a href="utils.injectables.html">injectables</a></li><li><a href="utils.logging.html">logging</a></li></ul><h3>Interfaces</h3><ul><li><a href="BuilderRegistry.html">BuilderRegistry</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li></ul></div>
                 
             </nav>
         </div>
@@ -111,9 +111,9 @@
         <article>
             <pre class="prettyprint source linenums"><code>import "reflect-metadata";
 import {OperationKeys, DBOperations} from "./constants";
-import {OperationHandler} from "./types";
 import {hashCode} from "@tvenceslau/decorator-validation/lib";
 import {getOperationsRegistry} from "./registry";
+import {AfterOperationHandler, OnOperationHandler} from "./types";
 
 
 const getOperationKey = (str: string) => OperationKeys.REFLECT + str;
@@ -121,7 +121,7 @@ const getOperationKey = (str: string) => OperationKeys.REFLECT + str;
 /**
  * Defines a behaviour to set on the defined {@link DBOperations.CREATE_UPDATE}
  *
- * @param {OperationHandler} handler The method called upon the operation
+ * @param {OnOperationHandler&lt;any>} handler The method called upon the operation
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
  * @param {string[]} [props] property keys that will be passed in order after the args
  *
@@ -131,14 +131,14 @@ const getOperationKey = (str: string) => OperationKeys.REFLECT + str;
  * @namespace decorators
  * @memberOf operations
  */
-export const onCreateUpdate = (handler: OperationHandler, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const onCreateUpdate = (handler: OnOperationHandler&lt;any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     on(DBOperations.CREATE_UPDATE, handler, args, ...props)(target, propertyKey);
 }
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations.UPDATE}
  *
- * @param {OperationHandler} handler The method called upon the operation
+ * @param {OnOperationHandler&lt;any>} handler The method called upon the operation
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
  * @param {string[]} [props] property keys that will be passed in order after the args
  *
@@ -148,14 +148,14 @@ export const onCreateUpdate = (handler: OperationHandler, args: any[], ...props:
  * @namespace decorators
  * @memberOf operations
  */
-export const onUpdate = (handler: OperationHandler, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const onUpdate = (handler: OnOperationHandler&lt;any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     on(DBOperations.UPDATE, handler, args, ...props)(target, propertyKey);
 }
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations.CREATE}
  *
- * @param {OperationHandler} handler The method called upon the operation
+ * @param {OnOperationHandler&lt;any>} handler The method called upon the operation
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
  * @param {string[]} [props] property keys that will be passed in order after the args
  *
@@ -165,14 +165,14 @@ export const onUpdate = (handler: OperationHandler, args: any[], ...props: strin
  * @namespace decorators
  * @memberOf operations
  */
-export const onCreate = (handler: OperationHandler, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const onCreate = (handler: OnOperationHandler&lt;any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     on(DBOperations.CREATE, handler, args, ...props)(target, propertyKey);
 }
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations.READ}
  *
- * @param {OperationHandler} handler The method called upon the operation
+ * @param {OnOperationHandler&lt;any>} handler The method called upon the operation
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
  * @param {string[]} [props] property keys that will be passed in order after the args
  *
@@ -182,24 +182,24 @@ export const onCreate = (handler: OperationHandler, args: any[], ...props: strin
  * @namespace decorators
  * @memberOf operations
  */
-export const onRead = (handler: OperationHandler, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const onRead = (handler: OnOperationHandler&lt;any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     on(DBOperations.READ, handler, args, ...props)(target, propertyKey);
 }
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations.DELETE}
  *
- * @param {OperationHandler} handler The method called upon the operation
+ * @param {OnOperationHandler&lt;any>} handler The method called upon the operation
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
  * @param {string[]} [props] property keys that will be passed in order after the args
  *
  * @see on
  *
- * @decorator onRead
+ * @decorator onDelete
  * @namespace decorators
  * @memberOf operations
  */
-export const onDelete = (handler: OperationHandler, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const onDelete = (handler: OnOperationHandler&lt;any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     on(DBOperations.DELETE, handler, args, ...props)(target, propertyKey);
 }
 
@@ -207,7 +207,7 @@ export const onDelete = (handler: OperationHandler, args: any[], ...props: strin
  * Defines a behaviour to set on the defined {@link DBOperations}
  *
  * @param {string[]} operation One of {@link DBOperations}
- * @param {OperationHandler} handler The method called upon the operation
+ * @param {OnOperationHandler&lt;any>} handler The method called upon the operation
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
  * @param {string[]} [props] property keys that will be passed in order after the args
  *
@@ -217,7 +217,7 @@ export const onDelete = (handler: OperationHandler, args: any[], ...props: strin
  * @namespace decorators
  * @memberOf operations
  */
-export const on = (operation: string[] = DBOperations.ALL, handler: OperationHandler, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
+export const on = (operation: string[] = DBOperations.ALL, handler: OnOperationHandler&lt;any>, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
     operation.forEach(op => {
         op = OperationKeys.ON + op;
         Reflect.defineMetadata(
@@ -235,11 +235,98 @@ export const on = (operation: string[] = DBOperations.ALL, handler: OperationHan
     });
 }
 
+
+/**
+ * Defines a behaviour to set after the defined {@link DBOperations.CREATE_UPDATE}
+ *
+ * @param {AfterOperationHandler&lt;any>} handler The method called upon the operation
+ * @param {any[]} [args] Arguments that will be passed in order to the handler method
+ * @param {string[]} [props] property keys that will be passed in order after the args
+ *
+ * @see after
+ *
+ * @decorator afterCreateUpdate
+ * @namespace decorators
+ * @memberOf operations
+ */
+export const afterCreateUpdate = (handler: AfterOperationHandler&lt;any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+    after(DBOperations.CREATE_UPDATE, handler, args, ...props)(target, propertyKey);
+}
+
+/**
+ * Defines a behaviour to set after the defined {@link DBOperations.UPDATE}
+ *
+ * @param {AfterOperationHandler&lt;any>} handler The method called upon the operation
+ * @param {any[]} [args] Arguments that will be passed in order to the handler method
+ * @param {string[]} [props] property keys that will be passed in order after the args
+ *
+ * @see after
+ *
+ * @decorator afterUpdate
+ * @namespace decorators
+ * @memberOf operations
+ */
+export const afterUpdate = (handler: AfterOperationHandler&lt;any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+    after(DBOperations.UPDATE, handler, args, ...props)(target, propertyKey);
+}
+
+/**
+ * Defines a behaviour to set after the defined {@link DBOperations.CREATE}
+ *
+ * @param {AfterOperationHandler&lt;any>} handler The method called upon the operation
+ * @param {any[]} [args] Arguments that will be passed in order to the handler method
+ * @param {string[]} [props] property keys that will be passed in order after the args
+ *
+ * @see after
+ *
+ * @decorator afterCreate
+ * @namespace decorators
+ * @memberOf operations
+ */
+export const afterCreate = (handler: AfterOperationHandler&lt;any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+    after(DBOperations.CREATE, handler, args, ...props)(target, propertyKey);
+}
+
+/**
+ * Defines a behaviour to set after the defined {@link DBOperations.READ}
+ *
+ * @param {AfterOperationHandler&lt;any>} handler The method called upon the operation
+ * @param {any[]} [args] Arguments that will be passed in order to the handler method
+ * @param {string[]} [props] property keys that will be passed in order after the args
+ *
+ * @see after
+ *
+ * @decorator afterRead
+ * @namespace decorators
+ * @memberOf operations
+ */
+export const afterRead = (handler: AfterOperationHandler&lt;any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+    after(DBOperations.READ, handler, args, ...props)(target, propertyKey);
+}
+
+/**
+ * Defines a behaviour to set after the defined {@link DBOperations.DELETE}
+ *
+ * @param {AfterOperationHandler&lt;any>} handler The method called upon the operation
+ * @param {any[]} [args] Arguments that will be passed in order to the handler method
+ * @param {string[]} [props] property keys that will be passed in order after the args
+ *
+ * @see after
+ *
+ * @decorator afterDelete
+ * @namespace decorators
+ * @memberOf operations
+ */
+export const afterDelete = (handler: AfterOperationHandler&lt;any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+    after(DBOperations.DELETE, handler, args, ...props)(target, propertyKey);
+}
+
+
 /**
  * Defines a behaviour to set on the defined {@link DBOperations}
  *
  * @param {string[]} operation One of {@link DBOperations}
- * @param {OperationHandler} handler The method called upon the operation
+ * @param {AfterOperationHandler&lt;any>} handler The method called upon the operation
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
  * @param {string[]} [props] property keys that will be passed in order after the args
  *
@@ -249,7 +336,7 @@ export const on = (operation: string[] = DBOperations.ALL, handler: OperationHan
  * @namespace decorators
  * @memberOf operations
  */
-export const after = (operation: string[] = DBOperations.ALL, handler: OperationHandler, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
+export const after = (operation: string[] = DBOperations.ALL, handler: AfterOperationHandler&lt;any>, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
     operation.forEach(op => {
         op = OperationKeys.AFTER + op;
         Reflect.defineMetadata(

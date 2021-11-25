@@ -1,5 +1,5 @@
 import Model from '@tvenceslau/decorator-validation/lib/Model/Model';
-import {constructFromObject, info} from '../utils';
+import {constructFromObject, all} from '../utils';
 import ModelErrorDefinition from "@tvenceslau/decorator-validation/lib/Model/ModelErrorDefinition";
 
 /**
@@ -26,7 +26,7 @@ export default abstract class DBModel extends Model {
 
     hasErrors(previousVersion?: DBModel | undefined, ...args: any[]): ModelErrorDefinition | undefined {
         if (previousVersion){
-            info(`Now comparing ${previousVersion.toString()} with ${this.toString()}`);
+            all(`Now comparing ${previousVersion.toString()} with ${this.toString()}`);
             return super.hasErrors(...args); // TODO: Implement a previous version comparison
         }
         return super.hasErrors(...args);

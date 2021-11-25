@@ -92,7 +92,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li><li><a href="utils.errors.html">errors</a></li><li><a href="utils.injectables.html">injectables</a></li><li><a href="utils.logging.html">logging</a></li></ul><h3>Interfaces</h3><ul><li><a href="BuilderRegistry.html">BuilderRegistry</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li></ul></div>
                 
             </nav>
         </div>
@@ -110,9 +110,9 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>import {OperationHandler} from "./types";
-import {IRegistry} from "../utils";
+import {IRegistry} from "@tvenceslau/decorator-validation/lib/utils/registry";
 
-class OperationsRegistry implements IRegistry&lt;OperationHandler> {
+export class OperationsRegistry implements IRegistry&lt;OperationHandler&lt;any>> {
     private cache: { [indexer: string]: any } = {};
 
     get&lt;OperationHandler>(targetName: string, propKey: string, operation: string): OperationHandler | undefined {
@@ -135,15 +135,15 @@ class OperationsRegistry implements IRegistry&lt;OperationHandler> {
     }
 }
 
-let actingOperationsRegistry: IRegistry&lt;OperationHandler>;
+let actingOperationsRegistry: IRegistry&lt;OperationHandler&lt;any>>;
 
 /**
  * Returns the current {@link OperationsRegistry}
  * @function getOperationsRegistry
- * @return IRegistry&lt;OperationHandler>, defaults to {@link OperationsRegistry}
+ * @return IRegistry&lt;OperationHandler&lt;any>>, defaults to {@link OperationsRegistry}
  * @memberOf operations
  */
-export function getOperationsRegistry(): IRegistry&lt;OperationHandler> {
+export function getOperationsRegistry(): IRegistry&lt;OperationHandler&lt;any>> {
     if (!actingOperationsRegistry)
         actingOperationsRegistry = new OperationsRegistry();
     return actingOperationsRegistry;
@@ -152,10 +152,10 @@ export function getOperationsRegistry(): IRegistry&lt;OperationHandler> {
 /**
  * Returns the current OperationsRegistry
  * @function getOperationsRegistry
- * @prop {IRegistry&lt;OperationHandler>} operationsRegistry the new implementation of Registry
+ * @prop {IRegistry&lt;OperationHandler&lt;any>>} operationsRegistry the new implementation of Registry
  * @memberOf operations
  */
-export function setOperationsRegistry(operationsRegistry: IRegistry&lt;OperationHandler>){
+export function setOperationsRegistry(operationsRegistry: IRegistry&lt;OperationHandler&lt;any>>){
    actingOperationsRegistry = operationsRegistry;
 }</code></pre>
         </article>

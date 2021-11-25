@@ -1,7 +1,7 @@
 import {OperationHandler} from "./types";
 import {IRegistry} from "@tvenceslau/decorator-validation/lib/utils/registry";
 
-class OperationsRegistry implements IRegistry<OperationHandler> {
+export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
     private cache: { [indexer: string]: any } = {};
 
     get<OperationHandler>(targetName: string, propKey: string, operation: string): OperationHandler | undefined {
@@ -24,15 +24,15 @@ class OperationsRegistry implements IRegistry<OperationHandler> {
     }
 }
 
-let actingOperationsRegistry: IRegistry<OperationHandler>;
+let actingOperationsRegistry: IRegistry<OperationHandler<any>>;
 
 /**
  * Returns the current {@link OperationsRegistry}
  * @function getOperationsRegistry
- * @return IRegistry<OperationHandler>, defaults to {@link OperationsRegistry}
+ * @return IRegistry<OperationHandler<any>>, defaults to {@link OperationsRegistry}
  * @memberOf operations
  */
-export function getOperationsRegistry(): IRegistry<OperationHandler> {
+export function getOperationsRegistry(): IRegistry<OperationHandler<any>> {
     if (!actingOperationsRegistry)
         actingOperationsRegistry = new OperationsRegistry();
     return actingOperationsRegistry;
@@ -41,9 +41,9 @@ export function getOperationsRegistry(): IRegistry<OperationHandler> {
 /**
  * Returns the current OperationsRegistry
  * @function getOperationsRegistry
- * @prop {IRegistry<OperationHandler>} operationsRegistry the new implementation of Registry
+ * @prop {IRegistry<OperationHandler<any>>} operationsRegistry the new implementation of Registry
  * @memberOf operations
  */
-export function setOperationsRegistry(operationsRegistry: IRegistry<OperationHandler>){
+export function setOperationsRegistry(operationsRegistry: IRegistry<OperationHandler<any>>){
    actingOperationsRegistry = operationsRegistry;
 }

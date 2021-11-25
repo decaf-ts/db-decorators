@@ -8,7 +8,7 @@ export {getPropertyDecorators, getClassDecorators, stringFormat, formatDate} fro
 import DBModel from "../model/DBModel";
 import {AsyncRepository, Callback, Err, ModelCallback, Repository} from "../repository";
 import {errorCallback, getPropertyDecorators, LoggedError, LOGGER_LEVELS} from "./index";
-import {OperationHandler, OperationKeys} from "../operations";
+import {OperationHandler, OperationHandlerAsync, OperationHandlerSync, OperationKeys} from "../operations";
 import {getOperationsRegistry} from "../operations/registry";
 
 /**
@@ -135,7 +135,7 @@ export const enforceDBDecorators = function<T extends DBModel>(repo: Repository<
     Object.keys(decorators).forEach(prop => {
         // @ts-ignore
         const decs: any[] = decorators[prop];
-        const handler: OperationHandler | undefined = getOperationsRegistry().get(model.constructor.name, prop, decs[0].key);
+        const handler: Function | undefined = getOperationsRegistry().get(model.constructor.name, prop, decs[0].key);
         if (!handler)
             throw new LoggedError(`Could not find registered handler for the operation ${prop}`);
         handler.call(repo, model, ...decs[0].props.args, ...decs[0].props.props);
@@ -152,7 +152,7 @@ export const enforceDBDecoratorsAsync = function<T extends DBModel>(repo: AsyncR
             return callback(undefined, model);
         // @ts-ignore
         const decs: any[] = decorators[prop];
-        const handler: OperationHandler | undefined = getOperationsRegistry().get(model.constructor.name, prop, keyPrefix + decs[0].key);
+        const handler: OperationHandlerAsync<T> | undefined = getOperationsRegistry().get(model.constructor.name, prop, keyPrefix + decs[0].key);
         if (!handler)
             return errorCallback(new Error(`Could not find registered handler for the operation ${prop}`), callback);
         handler.call(repo, model, ...decs[0].props.args, ...decs[0].props.props, (err: Err) => {

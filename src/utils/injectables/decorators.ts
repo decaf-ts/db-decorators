@@ -3,23 +3,24 @@ import {InjectablesKeys} from "./constants";
 import {CriticalError} from "../errors";
 import {debug} from "../logging";
 
-const getInjectKey = (key:string) => InjectablesKeys.REFLECT + key;
+const getInjectKey = (key: string) => InjectablesKeys.REFLECT + key;
 
 /**
  * Defines a class as a injectable
  *
  * @prop {boolean} [singleton] defaults to true. if the behaviour is meant to be singleton
+ * @prop {boolean} [force] defines if the injectable should override the already existing instance (if any). (only meant for extending decorators
  * @prop {any[]} [props] additional properties to pass for the decorator metadata. (only meant for 'extending' classes)
  * @decorator injectable
  * @namespace Decorators
  * @memberOf Model
  */
-export const injectable = (category: string, singleton: boolean = true, ...props: any[]) => (original: Function) => {
+export const injectable = (category: string, singleton: boolean = true, force: boolean = false, ...props: any[]) => (original: Function) => {
 
     const registry = getInjectablesRegistry();
     const instance = registry.get(category, original.name);
     if (!instance){
-        registry.register(original, category);
+        registry.register(original, category, singleton);
         debug(`Constructor for ${original.name} registered as an Injectable under '${category}.${original.name}'`);
     }
 

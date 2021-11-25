@@ -68,16 +68,17 @@ export abstract class AsyncRamRepository<T extends DBModel> extends AsyncReposit
     }
 }
 
-// @repository()
+@repository()
 export class TestRamRepository extends AsyncRamRepository<TestModelAsync>{
     constructor() {
         super(TestModelAsync);
     }
 }
 
-export class KeylessTestRamRepository extends TestRamRepository{
+@repository()
+export class KeylessTestRamRepository extends AsyncRamRepository<TestModelAsync>{
     constructor() {
-        super();
+        super(TestModelAsync);
     }
 
     // @ts-ignore

@@ -2,14 +2,14 @@
 import {TestModelAsync} from "./TestModel";
 // @ts-ignore
 import {AsyncRamRepository, KeylessTestRamRepository, TestRamRepository} from "./TestRepository";
-import {AsyncRepository, Err, getInjectablesRegistry, InjectableRegistryImp, setInjectablesRegistry} from "../src";
+import {AsyncRepository, Err, InjectableRegistryImp, setInjectablesRegistry} from "../src";
 
 
 describe(`Async Repository`, function(){
 
     const testModel = new TestModelAsync();
 
-    afterEach(() => {
+    beforeEach(() => {
         setInjectablesRegistry(new InjectableRegistryImp());
     });
 
@@ -25,9 +25,9 @@ describe(`Async Repository`, function(){
             expect(err).toBeUndefined();
             expect(result).toBeDefined();
             if (result){
-                expect(result.id).not.toBeUndefined();
-                expect(result.updatedOn).not.toBeUndefined();
-                expect(result.createdOn).not.toBeUndefined();
+                expect(result.id).toBeDefined();
+                expect(result.updatedOn).toBeDefined();
+                expect(result.createdOn).toBeDefined();
             }
         });
     });
@@ -37,7 +37,7 @@ describe(`Keyless Async Repository`, function(){
 
     const testModel = new TestModelAsync();
 
-    afterEach(() => {
+    beforeEach(() => {
         setInjectablesRegistry(new InjectableRegistryImp());
     });
 
@@ -53,9 +53,9 @@ describe(`Keyless Async Repository`, function(){
             expect(err).toBeUndefined();
             expect(result).toBeDefined();
             if (result){
-                expect(result.id).not.toBeUndefined();
-                expect(result.updatedOn).not.toBeUndefined();
-                expect(result.createdOn).not.toBeUndefined();
+                expect(result.id).toBeDefined();
+                expect(result.updatedOn).toBeDefined();
+                expect(result.createdOn).toBeDefined();
             }
         });
     });
