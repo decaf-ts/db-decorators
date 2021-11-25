@@ -1,25 +1,75 @@
-import {BuilderRegistry} from "@tvenceslau/decorator-validation/lib/utils/registry";
+import {CriticalError} from "../errors";
 
-export type InjectablesRegistry = BuilderRegistry<any>;
+/**
+ * Basic Builder Registry Interface
+ * @typedef T
+ * @interface BuilderRegistry<T>
+ */
+export interface BuilderRegistry<T>{
+    get(name: string, ...args: any[]): {new(): T} | undefined;
+    register(name: string, constructor: any, ...args: any[]): void;
+    build(obj: {[indexer: string]: any}, ...args: any[]): T;
+}
+
+export type Injectable<T> = {new: T} | T
+
+export interface InjectablesRegistry {
+    get<T>(name: string, ...args: any[]): Injectable<T> | undefined;
+    register<T>(constructor: Injectable<T>, ...args: any[]): void;
+    build<T>(obj: {[indexer: string]: any}, ...args: any[]): T;
+}
 
 export class InjectableRegistryImp implements InjectablesRegistry {
     private cache: {[indexer: string]: {[indexer: string] : any}} = {};
 
     get<T>(category: string, name: string): T | undefined {
-        return undefined;
+        try{
+            const innerCache = this.cache[category][name];
+            const buildDef = {category: category, name: name};
+            if (!innerCache.isSingleton && !innerCache.instance)
+                return this.build<T>(buildDef);
+            return innerCache.instance || this.build<T>(buildDef);
+        } catch (e) {
+            return undefined;
+        }
     }
 
-    register<T>(obj: T, category: string): void {
+    register<T>(obj: Injectable<T>, category: string, isSingleton: boolean = true): void {
+        // @ts-ignore
+        const constructor = !obj.name && obj.constructor;
+        if (!category || (typeof obj !== 'function' && !constructor))
+            throw new CriticalError(`Injectable registering failed. Missing Class name or constructor`);
+        if (!this.cache[category])
+            this.cache[category] = {};
 
+        // @ts-ignore
+        const name = constructor && constructor.name && constructor.name !== "Function" ? constructor.name : obj.name;
+
+        if (!this.cache[category][name])
+            this.cache[category][name] = {
+                instance: constructor ? obj : undefined,
+                constructor: !constructor ? obj : undefined,
+                singleton: isSingleton
+            };
     }
 
-    build(obj: { [p: string]: any }, args: any): any {
-
+    build<T>(defs: {category: string, name: string}, ...args: any[]): T {
+        try {
+            const {constructor, singleton} = this.cache[defs.category][defs.name] ;
+            const instance = new constructor;
+            this.cache = {
+                instance: instance,
+                constructor: constructor,
+                singleton: singleton
+            }
+            return instance;
+        } catch (e) {
+            throw new CriticalError(e);
+        }
     }
-
 }
 
-let actingInjectablesRegistry: InjectablesRegistry;
+let actingInjectablesRegistry: InjectablesRegistry
 
 /**
  * Returns the current {@link InjectableRegistryImp}

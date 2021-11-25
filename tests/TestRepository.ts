@@ -3,6 +3,7 @@ import {AsyncRepositoryImp, Callback, DBErrors, ModelCallback} from "../src";
 // @ts-ignore
 import {TestModelAsync} from "./TestModel";
 import ModelErrorDefinition from "@tvenceslau/decorator-validation/lib/Model/ModelErrorDefinition";
+import {repository} from "../src/repository/decorators";
 
 export abstract class AsyncRamRepository<T extends DBModel> extends AsyncRepositoryImp<T> {
     private ram: {[indexer: string]: T} = {};
@@ -67,6 +68,7 @@ export abstract class AsyncRamRepository<T extends DBModel> extends AsyncReposit
     }
 }
 
+// @repository()
 export class TestRamRepository extends AsyncRamRepository<TestModelAsync>{
     constructor() {
         super(TestModelAsync);

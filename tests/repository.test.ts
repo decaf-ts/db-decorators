@@ -2,13 +2,16 @@
 import {TestModelAsync} from "./TestModel";
 // @ts-ignore
 import {AsyncRamRepository, KeylessTestRamRepository, TestRamRepository} from "./TestRepository";
-import {AsyncRepository, Err} from "../src";
+import {AsyncRepository, Err, getInjectablesRegistry, InjectableRegistryImp, setInjectablesRegistry} from "../src";
 
 
 describe(`Async Repository`, function(){
 
     const testModel = new TestModelAsync();
 
+    afterEach(() => {
+        setInjectablesRegistry(new InjectableRegistryImp());
+    });
 
     it(`Instantiates`, function(){
         const testRepository: AsyncRepository<TestModelAsync> = new TestRamRepository();
@@ -34,6 +37,9 @@ describe(`Keyless Async Repository`, function(){
 
     const testModel = new TestModelAsync();
 
+    afterEach(() => {
+        setInjectablesRegistry(new InjectableRegistryImp());
+    });
 
     it(`Instantiates`, function(){
         const testRepository: AsyncRepository<TestModelAsync> = new KeylessTestRamRepository();
