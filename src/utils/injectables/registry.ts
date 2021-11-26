@@ -1,10 +1,10 @@
-import {CriticalError} from "../errors";
-
 /**
  * Basic Builder Registry Interface
  * @typedef T
  * @interface BuilderRegistry<T>
  */
+import {CriticalError} from "../errors";
+
 export interface BuilderRegistry<T>{
     get(name: string, ...args: any[]): {new(): T} | undefined;
     register(name: string, constructor: any, ...args: any[]): void;

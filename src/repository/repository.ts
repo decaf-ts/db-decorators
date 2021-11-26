@@ -70,6 +70,10 @@ export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
     update(key?: any, model?: T, ...args: any[]): T {
         throw new LoggedError(new Error(`Child Classes must implement this!`));
     }
+
+    toString(){
+        return JSON.stringify(this, undefined, 2);
+    }
 }
 
 export const trimLeftUndefined = function(...args: any[]){
@@ -255,5 +259,9 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
                 return criticalCallback(err, callback);
             callback(undefined, newModel, ...args);
         });
+    }
+
+    toString(){
+        return `${this.clazz.name} Repository`;
     }
 }

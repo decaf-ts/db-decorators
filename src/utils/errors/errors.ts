@@ -2,39 +2,48 @@ import {LOGGER_LEVELS} from "../logging/constants";
 import {Callback} from "../../repository";
 import {getLogger, LoggerMessage} from "../logging/logging";
 
-export function loggedCallback(message: LoggerMessage, level: number, callback: Callback){
+export function loggedCallback(this: any, message: LoggerMessage, level: number | Callback, callback: Callback){
     if (!callback){
         // @ts-ignore
         callback = level;
         level = LOGGER_LEVELS.INFO;
     }
-    getLogger().report(message, level);
+
+    getLogger().report(message instanceof Error ? message : new Error(message), level as number, this.name !== "loggedCallback" ? this : undefined);
     callback(message);
 }
 
-export function debugCallback(message: LoggerMessage, callback: Callback){
-    loggedCallback(message, LOGGER_LEVELS.DEBUG, callback);
+export function allCallback(this: any, message: LoggerMessage, callback: Callback){
+    loggedCallback.call(this, message, LOGGER_LEVELS.ALL, callback);
 }
 
-export function infoCallback(message: LoggerMessage, callback: Callback){
-    loggedCallback(message, LOGGER_LEVELS.INFO, callback);
+export function debugCallback(this: any, message: LoggerMessage, callback: Callback){
+    loggedCallback.call(this, message, LOGGER_LEVELS.DEBUG, callback);
 }
 
-export function warningCallback(message: LoggerMessage, callback: Callback){
-    loggedCallback(message, LOGGER_LEVELS.WARN, callback);
-}
-export function errorCallback(message: LoggerMessage, callback: Callback){
-    loggedCallback(message, LOGGER_LEVELS.ERROR, callback);
+export function infoCallback(this: any, message: LoggerMessage, callback: Callback){
+    loggedCallback.call(this, message, LOGGER_LEVELS.INFO, callback);
 }
 
-export function criticalCallback(message: LoggerMessage, callback: Callback){
-    loggedCallback(message, LOGGER_LEVELS.CRITICAL, callback);
+export function warningCallback(this: any, message: LoggerMessage, callback: Callback){
+    loggedCallback.call(this, message, LOGGER_LEVELS.WARN, callback);
+}
+export function errorCallback(this: any, message: LoggerMessage, callback: Callback){
+    loggedCallback.call(this, message, LOGGER_LEVELS.ERROR, callback);
+}
+
+export function criticalCallback(this: any, message: LoggerMessage, callback: Callback){
+    loggedCallback.call(this, message, LOGGER_LEVELS.CRITICAL, callback);
 }
 
 export class LoggedError extends Error {
+    readonly logged = false;
+
     constructor(error: LoggerMessage, level: number = LOGGER_LEVELS.ERROR) {
         super(error instanceof Error ? error.message : error);
-        getLogger().report(error, level);
+        this.logged = error instanceof LoggedError && error.logged;
+        if (!this.logged)
+            getLogger().report(error, level);
     }
 }
 

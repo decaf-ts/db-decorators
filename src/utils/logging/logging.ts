@@ -1,6 +1,7 @@
 import {LOGGER_LEVELS, LOGGING_MSG} from "./constants";
 import {stringFormat, formatDate} from "../utils";
 import {DEFAULT_TIMESTAMP_FORMAT} from "../../model";
+import {LoggedError} from "../errors";
 
 export type LoggerMessage = Error | string;
 
@@ -12,7 +13,7 @@ export interface Logger {
     warn(message: LoggerMessage, ...args: any[]): void;
     error(message: LoggerMessage, ...args: any[]): void;
     critical(message: LoggerMessage, ...args: any[]): void;
-    setLevel(level: number): void;
+    setLevel(level: number, ...args: any[]): void;
 }
 
 export class LoggerImp implements Logger {
@@ -31,7 +32,7 @@ export class LoggerImp implements Logger {
         this.timestampFormat = timestampFormat;
     }
 
-    protected buildMessage(message: LoggerMessage, logLevel: number, ...args: any[]){
+    protected buildMessage(message: LoggerMessage, logLevel: number, issuer: any = undefined, ...args: any[]){
         let stacksTrace: string | undefined = undefined;
         if (message instanceof Error){
             stacksTrace = message.stack;
@@ -40,14 +41,19 @@ export class LoggerImp implements Logger {
 
         if (this.logLevel)
             message = `[${Object.keys(LOGGER_LEVELS)[logLevel]}] - ${message}`;
+        if (issuer)
+            message = `[${issuer.toString()}]${message}`;
         if (this.useTimestamp)
             message = `[${formatDate(new Date(), this.timestampFormat)}]${message}`;
-        return stringFormat(message, ...args) + (this.logStackTrace && stacksTrace && (logLevel >= LOGGER_LEVELS.ERROR || logLevel === LOGGER_LEVELS.DEBUG) ? `\n-- StackStrace:\n${stacksTrace}`: '');
+        return stringFormat(message, ...args);
     }
 
     report(message: LoggerMessage, level: number = LOGGER_LEVELS.INFO, ...args: any[]) : void {
         if (level < this.level)
             return;
+        if (message instanceof LoggedError && message.logged)
+            return;
+
         let reportMethod: Function;
         switch (level){
             case LOGGER_LEVELS.WARN:
@@ -65,10 +71,18 @@ export class LoggerImp implements Logger {
                 break;
         }
 
-        let finalMessage = this.buildMessage(message, level, ...args);
+        let finalMessage = this.buildMessage(message, level, undefined, ...args);
         reportMethod(finalMessage);
-        if (message instanceof Error && (level >= LOGGER_LEVELS.ERROR || level === LOGGER_LEVELS.DEBUG))
-            console.log(message.stack);
+
+        if (message instanceof Error)
+            if ((!(message instanceof LoggedError) || !message.logged) && message.stack && (level >= LOGGER_LEVELS.ERROR || level === LOGGER_LEVELS.DEBUG)){
+                console.log(message.stack);
+                if (this.logStackTrace)
+                    reportMethod(this.buildMessage(`\n-- StackStrace:\n${message.stack}`, level));
+                // @ts-ignore
+                message.logged = true;
+            }
+
     }
 
     info(message: LoggerMessage, ...args: any[]): void {
