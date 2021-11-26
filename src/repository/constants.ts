@@ -1,3 +1,4 @@
 export const RepositoryKeys = {
-    REPO: 'repository'
+    REPO: 'repository',
+    REPO_CACHE: '__cache'
 }

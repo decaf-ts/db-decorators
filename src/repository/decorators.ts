@@ -23,3 +23,12 @@ export function repository(...props: any[]){
         return injectable(RepositoryKeys.REPO, true, true, ...props)(original);
     }
 }
+
+export type Transaction = {id: string, transaction: () => void};
+
+export function transactional() {
+    return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+        target[RepositoryKeys.REPO_CACHE] = target[RepositoryKeys.REPO_CACHE] || [];
+        //console.log(target, propertyKey, descriptor)
+    };
+}

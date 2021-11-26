@@ -5,6 +5,15 @@ import {AsyncRamRepository, KeylessTestRamRepository, TestRamRepository} from ".
 import {AsyncRepository, Err, InjectableRegistryImp, setInjectablesRegistry} from "../src";
 
 
+// declare var process : {
+//     env: {
+//         NODE_ENV: string
+//     },
+//     on: (...args: any[]) => void,
+//     exit: (...args: any[]) => void,
+//     send: (...args: any[]) => void
+// }
+
 describe(`Async Repository`, function(){
 
     const testModel = new TestModelAsync();
@@ -18,7 +27,7 @@ describe(`Async Repository`, function(){
         expect(testRepository).not.toBeNull();
     });
 
-    it(`Fills Properties Nicely`, function(){
+    it(`Fills Properties Nicely`, function(testFinished){
         const testRepository: AsyncRepository<TestModelAsync> = new TestRamRepository();
 
         testRepository.create("testModel.id", testModel, (err: Err, result?: TestModelAsync) => {
@@ -29,6 +38,7 @@ describe(`Async Repository`, function(){
                 expect(result.updatedOn).toBeDefined();
                 expect(result.createdOn).toBeDefined();
             }
+            testFinished();
         });
     });
 });
@@ -46,7 +56,7 @@ describe(`Keyless Async Repository`, function(){
         expect(testRepository).not.toBeNull();
     });
 
-    it(`Fills Properties Nicely`, function(){
+    it(`Fills Properties Nicely`, function(testfinished){
         const testRepository: KeylessTestRamRepository = new KeylessTestRamRepository();
 
         testRepository.create(testModel, (err: Err, result?: TestModelAsync) => {
@@ -57,6 +67,7 @@ describe(`Keyless Async Repository`, function(){
                 expect(result.updatedOn).toBeDefined();
                 expect(result.createdOn).toBeDefined();
             }
+            testfinished();
         });
     });
 });
