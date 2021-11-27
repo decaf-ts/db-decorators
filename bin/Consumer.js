@@ -1,6 +1,52 @@
 
 const {fork} = require('child_process');
 
+const defaultComparer = function(consumerData, producerData, callback){
+    const parseData = function(data){
+        data = data.split(' - ');
+        return {
+            timestamp: parseInt(data[0]),
+            child: data[2],
+            action: data[3]
+        }
+    }
+    const sortedConsumerData = Object.keys(consumerData).reduce((accum, key) => {
+            accum.push(...(consumerData[key].map(data => parseData(data))))
+            return accum;
+        }, []).sort((a,b) => a.timestamp - b.timestamp);
+
+
+    const sortedProducerData = Object.keys(producerData).reduce((accum, key) => {
+            accum.push(...(producerData[key].map(data => parseData(data))))
+            return accum;
+        }, []).sort((a,b) => a.timestamp - b.timestamp);
+
+    if (sortedProducerData.length !== sortedConsumerData.length)
+        return callback(`Producer data and consumer data does not match in length`, sortedConsumerData, sortedProducerData);
+
+    let counter;
+
+    if (!sortedProducerData.every((p, i) => {
+        counter = i;
+        const cons = sortedConsumerData[i];
+        return p.child === cons.child && p.action === cons.action;
+    })){
+        const error = [
+            `Producer data and consumer data do not sort the same way as of record ${counter}:`,
+            `    |             CONSUMER            |              PRODUCER            |`,
+            `    | id | action    | timestamp      | id | action    | timestamp       |`
+        ];
+        sortedProducerData.forEach((p,i) => {
+            if (i < counter || i > counter + 15)
+                return;
+            const c = sortedConsumerData[i];
+            error.push(`  ${i < 10 ? `0${i}`: i}|  ${c.child} | ${c.action}    | ${c.timestamp}  | ${p.child}  | ${p.action}    | ${p.timestamp}   |`)
+        })
+        return callback(error.join('\n'), sortedConsumerData, sortedProducerData);
+    }
+
+    callback(undefined, sortedConsumerData, sortedProducerData);
+}
 
 class ConsumerRunner {
 
@@ -8,7 +54,7 @@ class ConsumerRunner {
         this.action = action;
         this.isAsync = isAsync;
         this._handler = consumerHandler;
-        this._comparerHandle = compareHandler;
+        this._comparerHandle = compareHandler || defaultComparer;
         this._reset();
     }
 
@@ -91,5 +137,6 @@ class ConsumerRunner {
 }
 
 module.exports = {
-    ConsumerRunner
+    ConsumerRunner,
+    defaultComparer
 }

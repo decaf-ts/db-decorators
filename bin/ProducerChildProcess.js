@@ -12,6 +12,7 @@ process.on('message', (args) => {
             log.push(`${count}/${times}`, random || false);
 
         log = log.join(' - ');
+        console.log(log)
         result.push(log);
 
         const res = {identifier: identifier}
@@ -21,7 +22,8 @@ process.on('message', (args) => {
     }
 
     if (terminate){
-        console.log([Date.now(), `PRODUCER`, identifier, `Received termination notice. Shutting down listener for ${identifier}`].join(' - '));
+        let log = [Date.now(), "PRODUCER", identifier, action, `Quitting!`]
+        console.log(log.join(' - '))
         process.exit(0);
     }
 

@@ -45,9 +45,9 @@ describe(`Transactional Context Test`, function(){
     });
 
     it(`Schedules transactions properly`, (testFinished) => {
-        const testRepository: AsyncRepository<TestModelAsync> = new TransactionalRepository(1000, false);
+        const testRepository: AsyncRepository<TestModelAsync> = new TransactionalRepository(1500, true);
 
-        const {ConsumerRunner} = require('../bin/Consumer');
+        const {ConsumerRunner, defaultComparer} = require('../bin/Consumer');
 
         const consumerRunner = new ConsumerRunner("create", true, (callback: Callback) => {
 
@@ -58,14 +58,10 @@ describe(`Transactional Context Test`, function(){
                 expect(model).toBeDefined();
                 callback(err, model);
             });
-        }, (consumerLog: {[indexer: string]: []}, producersLog: {[indexer: string]: []}, callback: Callback) => {
-            console.log(consumerLog, producersLog)
-            callback();
-        });
+        }, defaultComparer);
 
-        consumerRunner.run(10, 300, 20, true, (err: Err) => {
-            expect(err).toBeUndefined();
-            testFinished()
+        consumerRunner.run(10, 100, 20, true, (err: Err) => {
+            testFinished(err)
         })
     });
 });
