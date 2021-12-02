@@ -1,6 +1,6 @@
-import {LOGGER_LEVELS} from "../logging/constants";
-import {Callback} from "../../repository";
-import {getLogger, LoggerMessage} from "../logging/logging";
+import {Callback} from "../repository";
+import {getLogger, LOGGER_LEVELS, LoggerMessage} from "../logging";
+
 
 export function loggedCallback(this: any, message: LoggerMessage, level: number | Callback, callback: Callback){
     if (!callback){

@@ -1,5 +1,6 @@
 import DBModel from "../src/model/DBModel";
 import {DBOperations, timestamp, id, IGeneratorAsync, Callback, constructFromObject, readonly} from "../src";
+import {minlength} from "@tvenceslau/decorator-validation/lib";
 
 export class TimeStampGeneratorAsync<T extends DBModel> implements IGeneratorAsync<T> {
     generate(model: T, ...args: any[]): void {
@@ -13,6 +14,12 @@ export class TestModelAsync extends DBModel {
 
     @id<TestModelAsync>(TimeStampGeneratorAsync)
     id?: string | number = undefined;
+
+    @readonly()
+    name?: string = undefined;
+
+    @minlength(5)
+    address?: string = undefined;
 
     @timestamp()
     updatedOn?: Date = undefined;

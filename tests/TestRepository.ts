@@ -22,7 +22,7 @@ export abstract class AsyncRamRepository<T extends DBModel> extends AsyncReposit
             if (errors)
                 return callback(errors.toString());
 
-            self.ram[model.id] = model;
+            self.ram[key] = model;
             callback(undefined, model);
         });
     }
@@ -47,7 +47,6 @@ export abstract class AsyncRamRepository<T extends DBModel> extends AsyncReposit
         if (!callback){
             // @ts-ignore
             callback = model as ModelCallback<T>;
-            // @ts-ignore
             model = key as T;
             key = model.id;
         }

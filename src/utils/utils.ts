@@ -1,15 +1,14 @@
-
 import {
     constructFromObject as constrObj,
-    construct as superConstruct
+    construct as superConstruct, getPropertyDecorators
 } from "@tvenceslau/decorator-validation/lib";
-export {getPropertyDecorators, getClassDecorators, stringFormat, formatDate} from "@tvenceslau/decorator-validation/lib";
+export {getClassDecorators, stringFormat, formatDate} from "@tvenceslau/decorator-validation/lib";
 
 import DBModel from "../model/DBModel";
 import {AsyncRepository, Callback, Err, ModelCallback, Repository} from "../repository";
-import {errorCallback, getPropertyDecorators, LoggedError, LOGGER_LEVELS} from "./index";
-import {OperationHandler, OperationHandlerAsync, OperationHandlerSync, OperationKeys} from "../operations";
+import {OperationHandlerAsync, OperationKeys} from "../operations";
 import {getOperationsRegistry} from "../operations/registry";
+import {errorCallback, LoggedError} from "../errors";
 
 /**
  * Helper Function to override constructors

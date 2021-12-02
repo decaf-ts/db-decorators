@@ -4,11 +4,57 @@ import {
     getDbDecorators,
     prefixMethod,
     prefixMethodAsync,
-    errorCallback,
-    LoggedError,
-    enforceDBDecoratorsAsync, criticalCallback, suffixMethodAsync
+    enforceDBDecoratorsAsync, suffixMethodAsync
 } from "../utils";
 import {OperationKeys} from "../operations";
+import {info} from "../logging";
+import {criticalCallback, CriticalError, errorCallback, LoggedError} from "../errors";
+
+export class Transaction {
+    readonly id: number;
+    readonly action?: (callback?: Callback) => void;
+    readonly method?: string;
+    readonly source?: string;
+    readonly isAsync?: boolean;
+    readonly log: string[];
+
+    constructor(source: string | Transaction, method?: string, isAsync?: boolean, action?: () => void) {
+        this.id = Date.now();
+        this.action = action;
+        this.method = method;
+        this.isAsync = isAsync;
+        this.log = [[this.id, source, method].join(' | ')]
+
+        if (typeof source === 'string'){
+            this.source = source;
+        } else {
+            source.bindTransaction(this);
+            return source;
+        }
+    }
+
+    bindTransaction(nextTransaction: Transaction){
+        info(``)
+        this.log.push(...nextTransaction.log);
+    }
+
+    fire(callback?: Callback){
+        if (!this.action)
+            throw new CriticalError(`Missing the method`);
+        if (this.isAsync){
+            try{
+                return this.action();
+            } catch (e){
+                throw new CriticalError(e);
+            }
+        }
+        this.action(callback);
+    }
+
+    toString(withId: boolean = true){
+        return `${withId ? `[${this.id}]` : ''}[Transaction][${this.source}.${this.method}`;
+    }
+}
 
 export type ModelOrCallback<T extends DBModel> = T | ModelCallback<T>;
 
@@ -41,12 +87,12 @@ export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
     }
 
     create(key?: any, model?: T, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
+        throw new LoggedError(`Child Classes must implement this!`);
     }
 
     protected createPrefix(key?: any, model?: T, ...args: any[]): any[] {
         if (!model)
-            throw new LoggedError(new Error('Missing Model'));
+            throw new LoggedError('Missing Model');
         const decorators = getDbDecorators(model, OperationKeys.CREATE, OperationKeys.ON);
         if (!decorators)
             return [key, model, ...args];
@@ -60,15 +106,15 @@ export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
     }
 
     delete(key?: any, ...args: any[]): void {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
+        throw new LoggedError(`Child Classes must implement this!`);
     }
 
     read(key?: any, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
+        throw new LoggedError(`Child Classes must implement this!`);
     }
 
     update(key?: any, model?: T, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
+        throw new LoggedError(`Child Classes must implement this!`);
     }
 
     toString(){
@@ -91,7 +137,7 @@ export const trimLeftUndefined = function(...args: any[]){
  * @typedef T extends DBModel
  */
 export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepository<T>{
-    protected readonly clazz: {new(): T};
+    readonly clazz: {new(): T};
 
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
@@ -166,7 +212,7 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         if (!callback)
             throw new LoggedError(`Missing Callback`);
         if (!key)
-            return callback(new Error(`Missing Key`));
+            return errorCallback(new Error(`Missing Key`), callback);
 
         this.read(key, (err?: Err, model?: T) => {
             if (err)
@@ -210,12 +256,21 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
     }
 
     protected readSuffix(model?: T, ...args: any[]): void {
-        const callback: ModelCallback<T> = args.pop();
+        const callback: Callback = args.pop();
         if (!callback)
             throw new LoggedError(`Missing Callback`);
         if (!model)
-            return callback(new Error(`Missing Model`));
-        callback(undefined, model, ...args);
+            return errorCallback(new Error(`Could not read model`), callback);
+
+        const decorators = getDbDecorators(model, OperationKeys.READ, OperationKeys.AFTER);
+        if (!decorators)
+            return callback(undefined, model, ...args);
+
+        enforceDBDecoratorsAsync<T>(this, model, decorators, OperationKeys.AFTER, (err: Err) => {
+            if (err)
+                return criticalCallback(err, callback);
+            callback(undefined, model, ...args);
+        });
     }
 
     update(key?: any, model?: T, ...args: any[]): void {
@@ -262,6 +317,6 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
     }
 
     toString(){
-        return `${this.clazz.name} Repository`;
+        return `${this.clazz ? this.clazz.name : "Async"} Repository`;
     }
 }

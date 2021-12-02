@@ -20,11 +20,10 @@ describe(`Transactional Context Test`, function(){
     const testModel = new TestModelAsync();
 
     beforeEach(() => {
-        jest.setTimeout(5000);
         setInjectablesRegistry(new InjectableRegistryImp());
     });
 
-    it(`Instantiates`, function(){
+    it.only(`Instantiates`, function(){
         const testRepository: AsyncRepository<TestModelAsync> = new TransactionalRepository(1000, false);
         expect(testRepository).not.toBeNull();
     });

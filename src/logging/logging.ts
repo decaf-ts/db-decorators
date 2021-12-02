@@ -1,7 +1,7 @@
 import {LOGGER_LEVELS, LOGGING_MSG} from "./constants";
 import {stringFormat, formatDate} from "../utils";
-import {DEFAULT_TIMESTAMP_FORMAT} from "../../model";
 import {LoggedError} from "../errors";
+import {DEFAULT_TIMESTAMP_FORMAT} from "../model";
 
 export type LoggerMessage = Error | string;
 

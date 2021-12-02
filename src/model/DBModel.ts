@@ -1,14 +1,13 @@
 import Model from '@tvenceslau/decorator-validation/lib/Model/Model';
-import {constructFromObject, all} from '../utils';
+import {constructFromObject} from '../utils';
 import ModelErrorDefinition from "@tvenceslau/decorator-validation/lib/Model/ModelErrorDefinition";
+import {validateCompare} from "../validation/validation";
+import {all} from "../logging";
 
 /**
- * Abstract class representing a Validatable Model object
+ * Abstract class representing a Validatable DBModel object
  *
- * Model objects must:
- *  - Have all their properties defined as optional via '?' or as 'defined in constructor' via '!';
- *  - Have all their properties initialized (only the '@required()' decorated properties
- *  <strong>need</strong> to be initialized, but all of them should be as good practice);
+ * @see Model
  *
  * @class DBModel
  * @abstract
@@ -24,11 +23,21 @@ export default abstract class DBModel extends Model {
         constructFromObject(this, dbModel);
     }
 
-    hasErrors(previousVersion?: DBModel | undefined, ...args: any[]): ModelErrorDefinition | undefined {
-        if (previousVersion){
-            all(`Now comparing ${previousVersion.toString()} with ${this.toString()}`);
-            return super.hasErrors(...args); // TODO: Implement a previous version comparison
+    /**
+     * @param {DBModel | any} [previousVersion] validates an update via the {@link DBModel} decorators
+     * @param {any[]} [exclusions] {@see Model#hasErrors}
+     */
+    hasErrors(previousVersion?: DBModel | any, ...exclusions: any[]): ModelErrorDefinition | undefined {
+        if (!(previousVersion instanceof DBModel)){
+            exclusions.unshift(previousVersion);
+            previousVersion = undefined;
         }
-        return super.hasErrors(...args);
+
+        let errs = super.hasErrors(...exclusions);
+        if (!previousVersion)
+            return errs;
+
+        all(`Now comparing ${previousVersion.toString()} with ${this.toString()}`);
+        return validateCompare(previousVersion, this, ...exclusions);
     }
 }

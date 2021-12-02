@@ -24,7 +24,6 @@ export const injectable = (category: string, singleton: boolean = true, force: b
         debug(`Constructor for ${original.name} registered as an Injectable under '${category}.${original.name}'`);
     }
 
-
     // the new constructor behaviour
     const newConstructor : any = function (...args: any[]) {
         const injectable: any = registry.get<any>(category, original.name, ...args);

@@ -23,7 +23,8 @@ export const DEFAULT_ERROR_MESSAGES = {
     },
     TIMESTAMP: {
         REQUIRED: 'Timestamp is Mandatory',
-        DATE: "The Timestamp must the a valid date"
+        DATE: "The Timestamp must the a valid date",
+        INVALID: "This value must always increase"
     }
 }
 
