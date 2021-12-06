@@ -4,57 +4,11 @@ import {
     getDbDecorators,
     prefixMethod,
     prefixMethodAsync,
-    enforceDBDecoratorsAsync, suffixMethodAsync
+    enforceDBDecoratorsAsync, suffixMethodAsync, wrapMethodAsync
 } from "../utils";
 import {OperationKeys} from "../operations";
 import {info} from "../logging";
 import {criticalCallback, CriticalError, errorCallback, LoggedError} from "../errors";
-
-export class Transaction {
-    readonly id: number;
-    readonly action?: (callback?: Callback) => void;
-    readonly method?: string;
-    readonly source?: string;
-    readonly isAsync?: boolean;
-    readonly log: string[];
-
-    constructor(source: string | Transaction, method?: string, isAsync?: boolean, action?: () => void) {
-        this.id = Date.now();
-        this.action = action;
-        this.method = method;
-        this.isAsync = isAsync;
-        this.log = [[this.id, source, method].join(' | ')]
-
-        if (typeof source === 'string'){
-            this.source = source;
-        } else {
-            source.bindTransaction(this);
-            return source;
-        }
-    }
-
-    bindTransaction(nextTransaction: Transaction){
-        info(``)
-        this.log.push(...nextTransaction.log);
-    }
-
-    fire(callback?: Callback){
-        if (!this.action)
-            throw new CriticalError(`Missing the method`);
-        if (this.isAsync){
-            try{
-                return this.action();
-            } catch (e){
-                throw new CriticalError(e);
-            }
-        }
-        this.action(callback);
-    }
-
-    toString(withId: boolean = true){
-        return `${withId ? `[${this.id}]` : ''}[Transaction][${this.source}.${this.method}`;
-    }
-}
 
 export type ModelOrCallback<T extends DBModel> = T | ModelCallback<T>;
 
@@ -141,17 +95,10 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
 
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
-        suffixMethodAsync(this, this.create, this.createSuffix, "create");
-        prefixMethodAsync(this, this.create, this.createPrefix, "create");
-
-        suffixMethodAsync(this, this.read, this.readSuffix, "read");
-        prefixMethodAsync(this, this.read, this.readPrefix, "read");
-
-        suffixMethodAsync(this, this.delete, this.deleteSuffix, "delete");
-        prefixMethodAsync(this, this.delete, this.deletePrefix, "delete");
-
-        suffixMethodAsync(this, this.update, this.updateSuffix, "update");
-        prefixMethodAsync(this, this.update, this.updatePrefix, "update");
+        wrapMethodAsync(this, this.createPrefix, this.create, this.createSuffix, "create");
+        wrapMethodAsync(this, this.readPrefix, this.read, this.readSuffix, "read");
+        wrapMethodAsync(this, this.deletePrefix, this.delete, this.deleteSuffix, "delete");
+        wrapMethodAsync(this, this.updatePrefix, this.update, this.updateSuffix, "update");
     }
 
     /**

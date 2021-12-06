@@ -28,8 +28,8 @@ describe(`Transactional Context Test`, function(){
         expect(testRepository).not.toBeNull();
     });
 
-    it(`Fills Properties Nicely`, function(testFinished){
-        const testRepository: AsyncRepository<TestModelAsync> = new TransactionalRepository(1000, false);
+    it.only(`Fills Properties Nicely`, function(testFinished){
+        const testRepository: TransactionalRepository = new TransactionalRepository(1000, false);
 
         testRepository.create("testModel.id", testModel, (err: Err, result?: TestModelAsync) => {
             expect(err).toBeUndefined();

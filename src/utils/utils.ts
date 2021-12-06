@@ -55,7 +55,26 @@ export function suffixMethod(obj: any, before: Function, suffix: Function, befor
 }
 
 /**
+ * Util method to wrap a method of an object with additional logic
+ *
+ * @param {any} obj The Base Object
+ * @param {Function} before the method to be prefixed
+ * @param {Function} method the method to be wrapped
+ * @param {Function} after The method to be suffixed
+ * @param {string} [methodName] When the after function anme cannot be extracted, pass it here
+ */
+export function wrapMethod(obj: any, before: Function, method: Function, after: Function, methodName?: string){
+    function wrapper(this: any, ...args: any[]){
+        const transformedArgs = before.call(obj, ...args);
+        const results = method.call(obj, ...transformedArgs);
+        return after.call(this, ...results);
+    }
+    obj[methodName ? methodName : before.name] = wrapper.bind(obj);
+}
+
+/**
  * The Async version of {@link prefixMethod}
+ *
  * @param {any} obj The Base Object
  * @param {Function} after The original method
  * @param {Function} prefix The Prefix method. The output will be used as arguments in the original method
@@ -75,6 +94,7 @@ export function prefixMethodAsync(obj: any, after: Function, prefix: Function, a
 
 /**
  * The Async version of {@link suffixMethod}
+ *
  * @param {any} obj The Base Object
  * @param {Function} before The original method
  * @param {Function} suffix The Prefix method. The output will be used as arguments in the original method
@@ -92,12 +112,42 @@ export function suffixMethodAsync(obj: any, before: Function, suffix: Function, 
     obj[beforeName ? beforeName : before.name] = wrapperSuffix.bind(obj);
 }
 
+/**
+ * The Async version of {@link wrapMethod}
+ *
+ * @param {any} obj The Base Object
+ * @param {Function} before the method to be prefixed
+ * @param {Function} method the method to be wrapped
+ * @param {Function} after The method to be suffixed
+ * @param {string} [methodName] When the after function name cannot be extracted, pass it here
+ */
+export function wrapMethodAsync(obj: any, before: Function, method: Function, after: Function, methodName?: string){
+    function wrapper(this: any, ...args: any[]){
+        const callback: Callback = args.pop();
+        return before.call(obj, ...args, (err: Err, ...transformedArgs: any[]) => {
+            if (err)
+                return callback(err);
+            method.call(obj, ...transformedArgs, (err: Err, ...results: any[]) => {
+                if (err)
+                    return callback(err);
+                after.call(obj, ...results, (err: Err, ...otherResults: any[]) => {
+                    if (err)
+                        return callback(err);
+                    callback(undefined, ...otherResults);
+                });
+            });
+        });
+    }
+
+    obj[methodName ? methodName : method.name] = wrapper.bind(obj);
+}
+
 export const getAllPropertyDecorators = function<T extends DBModel>(model: T , ...prefixes: string[]): {[indexer: string]: any[]} | undefined {
     if (!prefixes || !prefixes.length)
         return;
 
     const pushOrCreate = function(accum: {[indexer: string]: {[indexer: string]: any}}, key: string, decorators: any[]){
-        if (!decorators)
+        if (!decorators || !decorators.length)
             return;
         if (!accum[key])
             accum[key] = [];

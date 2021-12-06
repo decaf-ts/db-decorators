@@ -22,13 +22,13 @@ export interface InjectablesRegistry {
 export class InjectableRegistryImp implements InjectablesRegistry {
     private cache: {[indexer: string]: {[indexer: string] : any}} = {};
 
-    get<T>(category: string, name: string): T | undefined {
+    get<T>(category: string, name: string, ...args: any[]): T | undefined {
         try{
             const innerCache = this.cache[category][name];
             const buildDef = {category: category, name: name};
             if (!innerCache.isSingleton && !innerCache.instance)
-                return this.build<T>(buildDef);
-            return innerCache.instance || this.build<T>(buildDef);
+                return this.build<T>(buildDef, ...args);
+            return innerCache.instance || this.build<T>(buildDef, ...args);
         } catch (e) {
             return undefined;
         }
@@ -56,7 +56,7 @@ export class InjectableRegistryImp implements InjectablesRegistry {
     build<T>(defs: {category: string, name: string}, ...args: any[]): T {
         try {
             const {constructor, singleton} = this.cache[defs.category][defs.name] ;
-            const instance = new constructor;
+            const instance = new constructor(...args);
             this.cache[defs.category][defs.name] = {
                 instance: instance,
                 constructor: constructor,

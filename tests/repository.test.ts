@@ -4,16 +4,6 @@ import {TestModelAsync} from "./TestModel";
 import {AsyncRamRepository, KeylessTestRamRepository, TestRamRepository} from "./TestRepository";
 import {AsyncRepository, Err, InjectableRegistryImp, setInjectablesRegistry} from "../src";
 
-
-// declare var process : {
-//     env: {
-//         NODE_ENV: string
-//     },
-//     on: (...args: any[]) => void,
-//     exit: (...args: any[]) => void,
-//     send: (...args: any[]) => void
-// }
-
 describe(`Async Repository`, function(){
 
     const testModel = new TestModelAsync();

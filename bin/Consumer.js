@@ -1,6 +1,13 @@
 
 const {fork} = require('child_process');
 
+/**
+ * Util method to compare Consumer/Producer logs by sorting them according to their timestamp and verifying the order of operations is the same
+ * @param {string[]} consumerData
+ * @param {string[]} producerData
+ * @param {() => void} callback
+ * @return {*}
+ */
 const defaultComparer = function(consumerData, producerData, callback){
     const parseData = function(data){
         data = data.split(' - ');
@@ -48,8 +55,20 @@ const defaultComparer = function(consumerData, producerData, callback){
     callback(undefined, sortedConsumerData, sortedProducerData);
 }
 
+/**
+ * Util Class to simulate Producer Consumer scenarios for tests
+ *
+ * @class
+ */
 class ConsumerRunner {
 
+    /**
+     *
+     * @param {string} action
+     * @param {boolean} isAsync
+     * @param {Function} consumerHandler method that will be called on each child's tick
+     * @param {Function} [compareHandler] defaults to {@link defaultComparer}
+     */
     constructor(action, isAsync, consumerHandler, compareHandler){
         this.action = action;
         this.isAsync = isAsync;
@@ -94,6 +113,14 @@ class ConsumerRunner {
         }
     }
 
+    /**
+     *
+     * @param {number} count how many child processes to spawn
+     * @param {number} timeout delay, in ms, of child actions
+     * @param {number} times how many times each child wil perform the action
+     * @param {boolean} random if meant to apply randomness to the timeouts. if true, the provided {@param timeout} will be the max value;
+     * @param {Function} callback
+     */
     run(count, timeout, times, random, callback) {
         const self = this;
         self._reset();
