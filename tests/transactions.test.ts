@@ -1,7 +1,6 @@
 // @ts-ignore
 import {TestModelAsync} from "./TestModel";
 import {
-    all,
     AsyncRepository,
     Callback,
     Err,
@@ -14,15 +13,6 @@ import {
 import {TransactionalRepository} from "./TestRepository";
 
 jest.setTimeout(1000000)
-
-// declare var process : {
-//     env: {
-//         NODE_ENV: string
-//     },
-//     on: (...args: any[]) => void,
-//     exit: (...args: any[]) => void,
-//     send: (...args: any[]) => void
-// }
 
 describe(`Transactional Context Test`, function(){
 
@@ -61,7 +51,6 @@ describe(`Transactional Context Test`, function(){
         const consumerRunner = new ConsumerRunner("create", true, (identifier: string, callback: Callback) => {
 
             const tm = new TestModelAsync();
-            all(`Received tick from Producer {0} at {1}`, identifier, Date.now())
             testRepository.create(Date.now(), tm, (err: Err, model?: TestModelAsync) => {
                 try {
                     expect(err).toBeUndefined();
@@ -73,7 +62,7 @@ describe(`Transactional Context Test`, function(){
             });
         }, defaultComparer);
 
-        consumerRunner.run(10, 100, 20, true, (err: Err) => {
+        consumerRunner.run(5, 100, 5, true, (err: Err) => {
             testFinished(err)
         })
     });
