@@ -83,8 +83,16 @@ class ConsumerRunner {
         this._producerResults = {};
     }
 
-    _store(identifier, result){
-        this._producerResults[identifier] = result;
+    _store(identifier, action, timeout, times, count, random){
+        let log = [Date.now(), "PRODUCER", identifier, action]
+        if (timeout)
+            log.push(timeout);
+        if (times && count)
+            log.push(`${count}/${times}`, random || false);
+
+        log = log.join(' - ');
+        this._producerResults[identifier] = this._producerResults[identifier] || [];
+        this._producerResults[identifier].push(log);
     }
 
     _compareResults(callback){
@@ -97,20 +105,25 @@ class ConsumerRunner {
         }
     }
 
-    _tick(identifier, count, callback){
+    _tick(identifier, count, times, callback){
         const log = [Date.now(), "CONSUMER", identifier, this.action]
         this._consumerResults[identifier] = this._consumerResults[identifier] || [];
         this._consumerResults[identifier].push(log.join(' - '));
 
-        if (Object.keys(this._producerResults).length === count){
-            this._forkedCache.forEach((forked, i) => {
-                forked.send({
-                    identifier: i,
-                    terminate: true
+        if (Object.keys(this._producerResults).length === count && Object.keys(this._producerResults).every(k => this._producerResults[k].length === times)){
+            if (this._forkedCache){
+                this._forkedCache.forEach((forked, i) => {
+                    forked.send({
+                        identifier: i,
+                        terminate: true
+                    });
                 });
-            });
-            this._compareResults(callback)
+                this._forkedCache = undefined;
+            }
         }
+
+        if (Object.keys(this._consumerResults).length === count && Object.keys(this._consumerResults).every(k => this._consumerResults[k].length === times))
+            this._compareResults(callback)
     }
 
     /**
@@ -128,23 +141,21 @@ class ConsumerRunner {
             const forked = fork('./bin/ProducerChildProcess.js');
             self._forkedCache.push(forked);
             forked.on('message', (message) => {
-                let {identifier, result, args} = message;
-                if (result){
-                    self._store(identifier, result, count);
-                    return self._tick(identifier, count, callback);
-                }
+                let {identifier, result, args, action, timeout, times, random} = message;
+
+                self._store(identifier, action, timeout, times, count, random);
 
                 args = args || [];
 
                 try{
                     if (self.isAsync){
-                        return self._handler(...args, () => {
-                            self._tick(identifier, count, callback);
+                        return self._handler(identifier, ...args, () => {
+                            self._tick(identifier, count, times, callback);
                         });
                     }
 
-                    self._handler(...args);
-                    self._tick(identifier, count, callback);
+                    self._handler(identifier, ...args);
+                    self._tick(identifier, count, times, callback);
                 } catch (e) {
                     return callback(e);
                 }

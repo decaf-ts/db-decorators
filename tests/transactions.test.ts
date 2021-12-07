@@ -1,6 +1,15 @@
 // @ts-ignore
 import {TestModelAsync} from "./TestModel";
-import {AsyncRepository, Callback, Err, InjectableRegistryImp, setInjectablesRegistry} from "../src";
+import {
+    all,
+    AsyncRepository,
+    Callback,
+    Err,
+    getLogger,
+    InjectableRegistryImp,
+    LOGGER_LEVELS,
+    setInjectablesRegistry
+} from "../src";
 // @ts-ignore
 import {TransactionalRepository} from "./TestRepository";
 
@@ -23,12 +32,12 @@ describe(`Transactional Context Test`, function(){
         setInjectablesRegistry(new InjectableRegistryImp());
     });
 
-    it.only(`Instantiates`, function(){
+    it(`Instantiates`, function(){
         const testRepository: AsyncRepository<TestModelAsync> = new TransactionalRepository(1000, false);
         expect(testRepository).not.toBeNull();
     });
 
-    it.only(`Fills Properties Nicely`, function(testFinished){
+    it(`Fills Properties Nicely`, function(testFinished){
         const testRepository: TransactionalRepository = new TransactionalRepository(1000, false);
 
         testRepository.create("testModel.id", testModel, (err: Err, result?: TestModelAsync) => {
@@ -44,17 +53,22 @@ describe(`Transactional Context Test`, function(){
     });
 
     it(`Schedules transactions properly`, (testFinished) => {
-        const testRepository: AsyncRepository<TestModelAsync> = new TransactionalRepository(1500, true);
+        const testRepository: AsyncRepository<TestModelAsync> = new TransactionalRepository(200, false);
 
+        getLogger().setLevel(LOGGER_LEVELS.ALL);
         const {ConsumerRunner, defaultComparer} = require('../bin/Consumer');
 
-        const consumerRunner = new ConsumerRunner("create", true, (callback: Callback) => {
+        const consumerRunner = new ConsumerRunner("create", true, (identifier: string, callback: Callback) => {
 
-            let tm = new TestModelAsync();
-
-            testRepository.create("testModel.id", tm, (err: Err, model?: TestModelAsync) => {
-                expect(err).toBeUndefined();
-                expect(model).toBeDefined();
+            const tm = new TestModelAsync();
+            all(`Received tick from Producer {0} at {1}`, identifier, Date.now())
+            testRepository.create(Date.now(), tm, (err: Err, model?: TestModelAsync) => {
+                try {
+                    expect(err).toBeUndefined();
+                    expect(model).toBeDefined();
+                } catch (e){
+                    return callback(e)
+                }
                 callback(err, model);
             });
         }, defaultComparer);

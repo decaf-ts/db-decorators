@@ -31,19 +31,23 @@ export class SyncronousLock implements TransactionLock {
     }
 
     submit(transaction: Transaction): void {
-        if (this.currentTransaction && this.currentTransaction === transaction.id)
+        if (this.currentTransaction && this.currentTransaction === transaction.id){
+            all(`Continuing transaction {0}`, transaction.id);
             return transaction.fire();
+        }
 
         if (this.counter > 0) {
             this.counter--;
             return this.fireTransaction(transaction);
         } else {
+            all(`Locking transaction {0}`, transaction.id);
             this.pendingTransactions.push(transaction);
         }
     }
 
     private fireTransaction(transaction: Transaction){
         this.currentTransaction = transaction.id;
+        all(`Firing transaction {0}. {1} remaining...`, transaction.id, this.pendingTransactions.length);
         return transaction.fire();
     }
 
@@ -54,6 +58,8 @@ export class SyncronousLock implements TransactionLock {
 
             const self = this;
             const cb = () => self.fireTransaction.call(self, transaction);
+
+            all(`Releasing Transaction Lock on transaction {0}`, transaction.id);
 
             // @ts-ignore
             if(typeof window === 'undefined')
@@ -165,7 +171,7 @@ export function transactionalAsync() {
             let transaction = args.shift();
             if (transaction instanceof Transaction){
                 const updatedTransaction: Transaction = new Transaction(this.constructor.name, propertyKey,  () => {
-                    return originalMethod.call(updatedTransaction.bindToTransaction(self), ...args, cb);
+                    return originalMethod.call(updatedTransaction.bindToTransaction(self), ...args, callback);
                 });
 
                 transaction.bindTransaction(updatedTransaction);

@@ -12,10 +12,9 @@ process.on('message', (args) => {
             log.push(`${count}/${times}`, random || false);
 
         log = log.join(' - ');
-        console.log(log)
         result.push(log);
 
-        const res = {identifier: identifier}
+        const res = {identifier: identifier, action: action, timeout: timeout, times: times, random: random}
         if (result.length === times)
             res.result = result;
         process.send(res);
