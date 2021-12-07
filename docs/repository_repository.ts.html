@@ -92,7 +92,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li><li><a href="repository.decorators.html">decorators</a></li><li><a href="utils.errors.html">errors</a></li><li><a href="utils.injectables.html">injectables</a></li><li><a href="utils.logging.html">logging</a></li></ul><h3>Interfaces</h3><ul><li><a href="BuilderRegistry.html">BuilderRegistry</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="db-decorators.validation.html">validation</a></li><li><a href="Model.Decorators.html">Decorators</a></li><li><a href="model.decorators_.html">decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li><li><a href="repository.decorators.html">decorators</a></li><li><a href="utils.errors.html">errors</a></li><li><a href="utils.injectables.html">injectables</a></li><li><a href="utils.logging.html">logging</a></li><li><a href="validation.decorators.html">decorators</a></li></ul><h3>Classes</h3><ul><li><a href="SyncronousLock.html">SyncronousLock</a></li></ul><h3>Interfaces</h3><ul><li>BuilderRegistry.&lt;<a href="global.html#T">T</a>></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#hasErrors">hasErrors</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li><li><a href="global.html#wrapMethod">wrapMethod</a></li><li><a href="global.html#wrapMethodAsync">wrapMethodAsync</a></li></ul></div>
                 
             </nav>
         </div>
@@ -115,11 +115,11 @@ import {
     getDbDecorators,
     prefixMethod,
     prefixMethodAsync,
-    errorCallback,
-    LoggedError,
-    enforceDBDecoratorsAsync, criticalCallback, suffixMethodAsync
+    enforceDBDecoratorsAsync, suffixMethodAsync, wrapMethodAsync
 } from "../utils";
 import {OperationKeys} from "../operations";
+import {info} from "../logging";
+import {criticalCallback, CriticalError, errorCallback, LoggedError} from "../errors";
 
 export type ModelOrCallback&lt;T extends DBModel> = T | ModelCallback&lt;T>;
 
@@ -152,12 +152,12 @@ export abstract class RepositoryImp&lt;T extends DBModel> implements Repository&
     }
 
     create(key?: any, model?: T, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
+        throw new LoggedError(`Child Classes must implement this!`);
     }
 
     protected createPrefix(key?: any, model?: T, ...args: any[]): any[] {
         if (!model)
-            throw new LoggedError(new Error('Missing Model'));
+            throw new LoggedError('Missing Model');
         const decorators = getDbDecorators(model, OperationKeys.CREATE, OperationKeys.ON);
         if (!decorators)
             return [key, model, ...args];
@@ -171,15 +171,19 @@ export abstract class RepositoryImp&lt;T extends DBModel> implements Repository&
     }
 
     delete(key?: any, ...args: any[]): void {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
+        throw new LoggedError(`Child Classes must implement this!`);
     }
 
     read(key?: any, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
+        throw new LoggedError(`Child Classes must implement this!`);
     }
 
     update(key?: any, model?: T, ...args: any[]): T {
-        throw new LoggedError(new Error(`Child Classes must implement this!`));
+        throw new LoggedError(`Child Classes must implement this!`);
+    }
+
+    toString(){
+        return JSON.stringify(this, undefined, 2);
     }
 }
 
@@ -198,21 +202,14 @@ export const trimLeftUndefined = function(...args: any[]){
  * @typedef T extends DBModel
  */
 export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncRepository&lt;T>{
-    protected readonly clazz: {new(): T};
+    readonly clazz: {new(): T};
 
     constructor(clazz: {new(): T}) {
         this.clazz = clazz;
-        suffixMethodAsync(this, this.create, this.createSuffix, "create");
-        prefixMethodAsync(this, this.create, this.createPrefix, "create");
-
-        suffixMethodAsync(this, this.read, this.readSuffix, "read");
-        prefixMethodAsync(this, this.read, this.readPrefix, "read");
-
-        suffixMethodAsync(this, this.delete, this.deleteSuffix, "delete");
-        prefixMethodAsync(this, this.delete, this.deletePrefix, "delete");
-
-        suffixMethodAsync(this, this.update, this.updateSuffix, "update");
-        prefixMethodAsync(this, this.update, this.updatePrefix, "update");
+        wrapMethodAsync(this, this.createPrefix, this.create, this.createSuffix, "create");
+        wrapMethodAsync(this, this.readPrefix, this.read, this.readSuffix, "read");
+        wrapMethodAsync(this, this.deletePrefix, this.delete, this.deleteSuffix, "delete");
+        wrapMethodAsync(this, this.updatePrefix, this.update, this.updateSuffix, "update");
     }
 
     /**
@@ -273,7 +270,7 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
         if (!callback)
             throw new LoggedError(`Missing Callback`);
         if (!key)
-            return callback(new Error(`Missing Key`));
+            return errorCallback(new Error(`Missing Key`), callback);
 
         this.read(key, (err?: Err, model?: T) => {
             if (err)
@@ -317,12 +314,21 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
     }
 
     protected readSuffix(model?: T, ...args: any[]): void {
-        const callback: ModelCallback&lt;T> = args.pop();
+        const callback: Callback = args.pop();
         if (!callback)
             throw new LoggedError(`Missing Callback`);
         if (!model)
-            return callback(new Error(`Missing Model`));
-        callback(undefined, model, ...args);
+            return errorCallback(new Error(`Could not read model`), callback);
+
+        const decorators = getDbDecorators(model, OperationKeys.READ, OperationKeys.AFTER);
+        if (!decorators)
+            return callback(undefined, model, ...args);
+
+        enforceDBDecoratorsAsync&lt;T>(this, model, decorators, OperationKeys.AFTER, (err: Err) => {
+            if (err)
+                return criticalCallback(err, callback);
+            callback(undefined, model, ...args);
+        });
     }
 
     update(key?: any, model?: T, ...args: any[]): void {
@@ -366,6 +372,10 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
                 return criticalCallback(err, callback);
             callback(undefined, newModel, ...args);
         });
+    }
+
+    toString(){
+        return `${this.clazz ? this.clazz.name : "Async"} Repository`;
     }
 }</code></pre>
         </article>

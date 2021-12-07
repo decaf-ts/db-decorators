@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Decorator Validation Engine Decorators</title>
+  <title>Decorator Validation Engine SyncronousLock</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -90,15 +90,15 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li><li><a href="repository.decorators.html">decorators</a></li><li><a href="utils.errors.html">errors</a></li><li><a href="utils.injectables.html">injectables</a></li><li><a href="utils.logging.html">logging</a></li></ul><h3>Interfaces</h3><ul><li><a href="BuilderRegistry.html">BuilderRegistry</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="db-decorators.validation.html">validation</a></li><li><a href="Model.Decorators.html">Decorators</a></li><li><a href="model.decorators_.html">decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li><li><a href="repository.decorators.html">decorators</a></li><li><a href="utils.errors.html">errors</a></li><li><a href="utils.injectables.html">injectables</a></li><li><a href="utils.logging.html">logging</a></li><li><a href="validation.decorators.html">decorators</a></li></ul><h3>Classes</h3><ul><li><a href="SyncronousLock.html">SyncronousLock</a></li></ul><h3>Interfaces</h3><ul><li>BuilderRegistry.&lt;<a href="global.html#T">T</a>></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#hasErrors">hasErrors</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li><li><a href="global.html#wrapMethod">wrapMethod</a></li><li><a href="global.html#wrapMethodAsync">wrapMethodAsync</a></li></ul></div>
                 
             </nav>
         </div>
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Namespace</p>
-                    <h1>Decorators</h1>
+                    <p>Class</p>
+                    <h1>SyncronousLock</h1>
                 </header>
                 
 
@@ -109,7 +109,10 @@
 
 <header>
     
-        <h2>Decorators</h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>SyncronousLock<span class="signature">(counter<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description"><p>Simple Synchronous Lock implementation for transaction management
+adapted from <a href="https://www.talkinghightech.com/en/creating-a-js-lock-for-a-resource/">https://www.talkinghightech.com/en/creating-a-js-lock-for-a-resource/</a></p></div>
         
     
 </header>
@@ -118,17 +121,42 @@
     <div class="container-overview">
     
         
-            <div class="description"><p>Defines a class as a injectable</p></div>
-        
+            <div class='vertical-section'>
+                <div class="members">
+                    <div class="member">
+                        <div class=name>
+                            <span class="tag">Constructor</span>
+                        </div>
+                        
 
-        
-
-
-    <h5 class="subsection-title">Properties:</h5>
 
     
+    <h4 class="name" id="SyncronousLock">
+        <a class="href-link" href="#SyncronousLock">#</a>
+        
+        <span class="code-name">
+            
+                new SyncronousLock<span class="signature">(counter<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
 <div class="table-container">
-    <table class="props table">
+    <table class="params table">
         <thead>
         <tr>
             
@@ -142,6 +170,8 @@
             
 
             
+            <th>Default</th>
+            
 
             <th class="last">Description</th>
         </tr>
@@ -149,102 +179,52 @@
 
         <tbody>
         
+
             
 <tr class="deep-level-0">
-    
-        <td class="name"><code>singleton</code></td>
-    
+  
+      <td class="name"><code>counter</code></td>
+  
 
-    <td class="type">
-    
-        
-<span class="param-type">boolean</span>
+  <td class="type">
+  
+      
+<span class="param-type">number</span>
 
 
-    
-    </td>
+  
+  </td>
 
-    
-        <td class="attributes">
-        
-            &lt;optional><br>
-        
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
 
-        
-        </td>
-    
+      
 
-    
+      
+      </td>
+  
 
-    <td class="description last"><p>defaults to true. if the behaviour is meant to be singleton</p></td>
+  
+      <td class="default">
+      
+          1
+      
+      </td>
+  
+
+  <td class="description last"><p>the number of simultaneous transactions allowed. defaults to 1</p></td>
 </tr>
 
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>force</code></td>
-    
-
-    <td class="type">
-    
-        
-<span class="param-type">boolean</span>
-
-
-    
-    </td>
-
-    
-        <td class="attributes">
-        
-            &lt;optional><br>
-        
-
-        
-        </td>
-    
-
-    
-
-    <td class="description last"><p>defines if the injectable should override the already existing instance (if any). (only meant for extending decorators</p></td>
-</tr>
-
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>props</code></td>
-    
-
-    <td class="type">
-    
-        
-<span class="param-type">Array.&lt;any></span>
-
-
-    
-    </td>
-
-    
-        <td class="attributes">
-        
-            &lt;optional><br>
-        
-
-        
-        </td>
-    
-
-    
-
-    <td class="description last"><p>additional properties to pass for the decorator metadata. (only meant for 'extending' classes)</p></td>
-</tr>
 
         
         </tbody>
     </table>
 </div>
+
+
 
 
 
@@ -281,15 +261,38 @@
 
     
         <p class="tag-source">
-            <a href="utils_injectables_decorators.ts.html" class="button">View Source</a>
+            <a href="repository_transactions.ts.html" class="button">View Source</a>
             <span>
-                <a href="utils_injectables_decorators.ts.html">utils/injectables/decorators.ts</a>, <a href="utils_injectables_decorators.ts.html#line7">line 7</a>
+                <a href="repository_transactions.ts.html">repository/transactions.ts</a>, <a href="repository_transactions.ts.html#line11">line 11</a>
             </span>
         </p>
     
 </dl>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
         
     
     </div>
@@ -298,6 +301,13 @@
 
     
 
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="SyncronousLock.html">SyncronousLock</a></dt>
+            <dd></dd>
+        </dl>
     
 
     

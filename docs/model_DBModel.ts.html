@@ -92,7 +92,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="model.decorators.html">decorators</a></li><li><a href="Model.Decorators_.html">Decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li><li><a href="repository.decorators.html">decorators</a></li><li><a href="utils.errors.html">errors</a></li><li><a href="utils.injectables.html">injectables</a></li><li><a href="utils.logging.html">logging</a></li></ul><h3>Interfaces</h3><ul><li><a href="BuilderRegistry.html">BuilderRegistry</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="db-decorators.validation.html">validation</a></li><li><a href="Model.Decorators.html">Decorators</a></li><li><a href="model.decorators_.html">decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li><li><a href="repository.decorators.html">decorators</a></li><li><a href="utils.errors.html">errors</a></li><li><a href="utils.injectables.html">injectables</a></li><li><a href="utils.logging.html">logging</a></li><li><a href="validation.decorators.html">decorators</a></li></ul><h3>Classes</h3><ul><li><a href="SyncronousLock.html">SyncronousLock</a></li></ul><h3>Interfaces</h3><ul><li>BuilderRegistry.&lt;<a href="global.html#T">T</a>></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#hasErrors">hasErrors</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li><li><a href="global.html#wrapMethod">wrapMethod</a></li><li><a href="global.html#wrapMethodAsync">wrapMethodAsync</a></li></ul></div>
                 
             </nav>
         </div>
@@ -110,16 +110,15 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>import Model from '@tvenceslau/decorator-validation/lib/Model/Model';
-import {constructFromObject, all} from '../utils';
+import {constructFromObject} from '../utils';
 import ModelErrorDefinition from "@tvenceslau/decorator-validation/lib/Model/ModelErrorDefinition";
+import {validateCompare} from "../validation/validation";
+import {all} from "../logging";
 
 /**
- * Abstract class representing a Validatable Model object
+ * Abstract class representing a Validatable DBModel object
  *
- * Model objects must:
- *  - Have all their properties defined as optional via '?' or as 'defined in constructor' via '!';
- *  - Have all their properties initialized (only the '@required()' decorated properties
- *  &lt;strong>need&lt;/strong> to be initialized, but all of them should be as good practice);
+ * @see Model
  *
  * @class DBModel
  * @abstract
@@ -135,12 +134,22 @@ export default abstract class DBModel extends Model {
         constructFromObject(this, dbModel);
     }
 
-    hasErrors(previousVersion?: DBModel | undefined, ...args: any[]): ModelErrorDefinition | undefined {
-        if (previousVersion){
-            all(`Now comparing ${previousVersion.toString()} with ${this.toString()}`);
-            return super.hasErrors(...args); // TODO: Implement a previous version comparison
+    /**
+     * @param {DBModel | any} [previousVersion] validates an update via the {@link DBModel} decorators
+     * @param {any[]} [exclusions] {@see Model#hasErrors}
+     */
+    hasErrors(previousVersion?: DBModel | any, ...exclusions: any[]): ModelErrorDefinition | undefined {
+        if (!(previousVersion instanceof DBModel)){
+            exclusions.unshift(previousVersion);
+            previousVersion = undefined;
         }
-        return super.hasErrors(...args);
+
+        let errs = super.hasErrors(...exclusions);
+        if (!previousVersion)
+            return errs;
+
+        all(`Now comparing ${previousVersion.toString()} with ${this.toString()}`);
+        return validateCompare(previousVersion, this, ...exclusions);
     }
 }
 </code></pre>
