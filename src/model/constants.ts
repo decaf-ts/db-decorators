@@ -28,4 +28,4 @@ export const DEFAULT_ERROR_MESSAGES = {
     }
 }
 
-export const DEFAULT_TIMESTAMP_FORMAT = "dd/MM/yyyy hh:mm:ss:S";
+export const DEFAULT_TIMESTAMP_FORMAT = "dd/MM/yyyy HH:mm:ss:S";

@@ -124,7 +124,6 @@ export const on = (operation: string[] = DBOperations.ALL, handler: OnOperationH
     });
 }
 
-
 /**
  * Defines a behaviour to set after the defined {@link DBOperations.CREATE_UPDATE}
  *
@@ -209,7 +208,6 @@ export const afterRead = (handler: AfterOperationHandler<any>, args: any[], ...p
 export const afterDelete = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     after(DBOperations.DELETE, handler, args, ...props)(target, propertyKey);
 }
-
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations}
