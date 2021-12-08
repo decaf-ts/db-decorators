@@ -3,12 +3,10 @@ import {
     enforceDBDecorators,
     getDbDecorators,
     prefixMethod,
-    prefixMethodAsync,
-    enforceDBDecoratorsAsync, suffixMethodAsync, wrapMethodAsync
+    enforceDBDecoratorsAsync, wrapMethodAsync
 } from "../utils";
 import {OperationKeys} from "../operations";
-import {info} from "../logging";
-import {criticalCallback, CriticalError, errorCallback, LoggedError} from "../errors";
+import {criticalCallback, errorCallback, LoggedError} from "../errors";
 
 export type ModelOrCallback<T extends DBModel> = T | ModelCallback<T>;
 
@@ -33,9 +31,9 @@ export type Callback = (err?: Err, ...args: any[]) => void;
 export type ModelCallback<T extends DBModel> = (err?: Err, result?: T, ...args: any[]) => void;
 
 export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
-    private readonly clazz: {new(): T};
+    private readonly clazz: {new(...args: any[]): T};
 
-    constructor(clazz: {new(): T}) {
+    constructor(clazz: {new(...args: any[]): T}) {
         this.clazz = clazz;
         prefixMethod(this, this.create, this.createPrefix, "create");
     }
@@ -91,9 +89,9 @@ export const trimLeftUndefined = function(...args: any[]){
  * @typedef T extends DBModel
  */
 export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepository<T>{
-    readonly clazz: {new(): T};
+    readonly clazz: {new(...args: any[]): T};
 
-    constructor(clazz: {new(): T}) {
+    constructor(clazz: {new(...args: any[]): T}) {
         this.clazz = clazz;
         wrapMethodAsync(this, this.createPrefix, this.create, this.createSuffix, "create");
         wrapMethodAsync(this, this.readPrefix, this.read, this.readSuffix, "read");

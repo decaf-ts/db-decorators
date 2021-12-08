@@ -28,7 +28,7 @@ export default abstract class DBModel extends Model {
      * @param {any[]} [exclusions] {@see Model#hasErrors}
      */
     hasErrors(previousVersion?: DBModel | any, ...exclusions: any[]): ModelErrorDefinition | undefined {
-        if (!(previousVersion instanceof DBModel)){
+        if (previousVersion && !(previousVersion instanceof DBModel)){
             exclusions.unshift(previousVersion);
             previousVersion = undefined;
         }
