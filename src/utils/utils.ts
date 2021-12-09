@@ -1,6 +1,6 @@
 import {
     constructFromObject as constrObj,
-    construct as superConstruct, getPropertyDecorators
+    construct as superConstruct, getPropertyDecorators, ModelKeys
 } from "@tvenceslau/decorator-validation/lib";
 export {getClassDecorators, stringFormat, formatDate} from "@tvenceslau/decorator-validation/lib";
 
@@ -216,4 +216,15 @@ export const enforceDBDecoratorsAsync = function<T extends DBModel>(repo: AsyncR
             return callback(err);
         callback(undefined, model);
     });
+}
+
+export function getTypeFromDecorator(model: any, propKey: string | symbol): string | undefined {
+    const decorators: {prop: string | symbol, decorators: any[]} = getPropertyDecorators(ModelKeys.REFLECT, model, propKey, false);
+    if (!decorators || !decorators.decorators)
+        return;
+
+    // TODO handle @type decorators. for now we stick with design:type
+    const typeDecorator = decorators.decorators.shift();
+    const name = typeDecorator.props ? typeDecorator.props.name : undefined;
+    return name !== "Function" ? name : undefined;
 }

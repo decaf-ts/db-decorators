@@ -1,5 +1,4 @@
 import {injectable} from "../";
-import {RepositoryKeys} from "./constants";
 
 /**
  * Defines a class as a repository (makes it injectable)
@@ -9,7 +8,6 @@ import {RepositoryKeys} from "./constants";
  *
  * @see injectable
  * with args:
- *  - category: {@link RepositoryKeys.REPO};
  *  - singleton: true;
  *  - force: true;
  *  - args: {@param props}
@@ -20,6 +18,6 @@ import {RepositoryKeys} from "./constants";
  */
 export function repository(...props: any[]){
     return (original: Function) => {
-        return injectable(RepositoryKeys.REPO, true, true, ...props)(original);
+        return injectable(true, true, ...props)(original);
     }
 }
