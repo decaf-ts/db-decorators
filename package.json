@@ -42,7 +42,7 @@
   "homepage": "https://github.com/TiagoVenceslau/db-decorators#readme",
   "devDependencies": {
     "@babel/preset-env": "^7.16.4",
-    "@tvenceslau/decorator-validation": "1.7.2",
+    "@tvenceslau/decorator-validation": "1.7.3",
     "@types/jest": "^26.0.24",
     "@types/node": "^16.0.1",
     "jest": "^27.0.6",
