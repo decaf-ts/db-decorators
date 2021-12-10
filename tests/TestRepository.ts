@@ -1,10 +1,11 @@
 import DBModel from "../src/model/DBModel";
-import {AsyncRepositoryImp, Callback, DBErrors, ModelCallback} from "../src";
+import {AsyncRepositoryImp, Callback, CriticalError, DBErrors, ModelCallback} from "../src";
 // @ts-ignore
 import {TestModelAsync} from "./TestModel";
 import ModelErrorDefinition from "@tvenceslau/decorator-validation/lib/Model/ModelErrorDefinition";
 import {repository} from "../src/repository/decorators";
 import {transactionalAsync} from "../src/repository/transactions";
+import {logAsync} from "../src/logging/decorators";
 
 export abstract class AsyncRamRepository<T extends DBModel> extends AsyncRepositoryImp<T> {
     private ram: {[indexer: string]: T} = {};
@@ -40,6 +41,8 @@ export abstract class AsyncRamRepository<T extends DBModel> extends AsyncReposit
     }
 
     read(key: any, callback: ModelCallback<T>): void {
+        if (!this.ram)
+            return callback(new CriticalError("Should not be possible"));
         if (!(key in this.ram))
             return callback(new Error(DBErrors.MISSING));
         callback(undefined, this.ram[key]);
@@ -105,43 +108,51 @@ export class TransactionalRepository extends AsyncRamRepository<TestModelAsync>{
         this.isRandom = isRandom;
     }
 
+    private getTimeout(){
+        return !this.isRandom ? this.timeout : Math.floor(Math.random() * this.timeout)
+    }
+
     @transactionalAsync()
+    @logAsync(true)
     create(key: any, model: TestModelAsync, callback: ModelCallback<TestModelAsync>) : void{
         const self = this;
         super.create(key, model, (...args) => {
             setTimeout(() => {
                 callback(...args)
-            }, !self.isRandom ? self.timeout : Math.floor(Math.random() * self.timeout))
+            }, self.getTimeout())
         });
     }
 
     @transactionalAsync()
+    @logAsync(true)
     delete(key: any, callback: Callback) {
         const self = this;
         super.delete(key, (...args) => {
             setTimeout(() => {
                 callback(...args)
-            }, !self.isRandom ? self.timeout : Math.floor(Math.random() * self.timeout))
+            }, self.getTimeout())
         });
     }
 
     @transactionalAsync()
+    @logAsync(true)
     read(key: any, callback: ModelCallback<TestModelAsync>) {
         const self = this;
         super.read(key, (...args) => {
             setTimeout(() => {
                 callback(...args)
-            }, !self.isRandom ? self.timeout : Math.floor(Math.random() * self.timeout))
+            }, self.getTimeout())
         });
     }
 
     @transactionalAsync()
+    @logAsync(true)
     update(key: any, model: TestModelAsync, callback: ModelCallback<TestModelAsync>) {
         const self = this;
         super.update(key, model, (...args) => {
             setTimeout(() => {
                 callback(...args)
-            }, !self.isRandom ? self.timeout : Math.floor(Math.random() * self.timeout))
+            }, self.getTimeout())
         });
     }
 }

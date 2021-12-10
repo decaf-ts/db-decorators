@@ -218,6 +218,38 @@ export const enforceDBDecoratorsAsync = function<T extends DBModel>(repo: AsyncR
     });
 }
 
+/**
+ * Retrieves all properties of an object:
+ *  - and of all its prototypes if {@param climbTree} until it reaches {@param stopAt} (or ends the prototype chain)
+ *
+ * @param obj
+ * @param {boolean} [climbTree] default to true
+ * @param {string} [stopAt] defaults to 'Object'
+ */
+export function getAllProperties(obj: {}, climbTree = true, stopAt = 'Object'){
+    const allProps: string[] = [];
+    let curr: {} = obj
+
+    const keepAtIt = function(){
+        if (!climbTree)
+            return;
+        let prototype = Object.getPrototypeOf(curr);
+        if (!prototype || prototype.constructor.name === stopAt)
+            return;
+        curr = prototype;
+        return curr;
+    }
+
+    do{
+        let props = Object.getOwnPropertyNames(curr)
+        props.forEach(function(prop){
+            if (allProps.indexOf(prop) === -1)
+                allProps.push(prop)
+        })
+    } while(keepAtIt())
+    return allProps
+}
+
 export function getTypeFromDecorator(model: any, propKey: string | symbol): string | undefined {
     const decorators: {prop: string | symbol, decorators: any[]} = getPropertyDecorators(ModelKeys.REFLECT, model, propKey, false);
     if (!decorators || !decorators.decorators)

@@ -2,7 +2,7 @@ import {Callback, Err} from "./repository";
 import {RepositoryKeys} from "./constants";
 import {all, info} from "../logging";
 import {CriticalError} from "../errors";
-import {getAllPropertyDecorators, prefixMethodAsync} from "../utils";
+import {getAllProperties, getAllPropertyDecorators, prefixMethodAsync} from "../utils";
 import {DBKeys, DEFAULT_ERROR_MESSAGES} from "../model";
 import {ValidationKeys} from "@tvenceslau/decorator-validation/lib";
 
@@ -123,13 +123,17 @@ export class Transaction {
             return obj;
         const self = this;
 
-        const boundObj = Object.keys(obj).reduce((accum: any, k) => {
+        const boundObj = getAllProperties(obj).reduce((accum: any, k) => {
             if (Object.keys(transactionalMethods).indexOf(k) !== -1 && transactionalMethods[k].find(o => o.key === RepositoryKeys.TRANSACTIONAL))
-                accum[k] = (...args: any[]) => obj[k].call(obj, self, ...args);
+                accum[k] = (...args: any[]) => obj[k].call(obj.__originalObj || obj, self, ...args);
+            else if (k === 'clazz' || k === 'constructor')
+                accum[k] = obj[k];
             else
-                accum[k] = typeof obj[k] === 'function' ? obj[k].bind(obj) : obj[k];
+                accum[k] = typeof obj[k] === 'function' ? obj[k].bind(obj. __originalObj || obj) : obj[k];
             return accum;
         }, {});
+
+        boundObj[DBKeys.ORIGINAL] = obj.__originalObj || obj;
 
         return boundObj;
     }

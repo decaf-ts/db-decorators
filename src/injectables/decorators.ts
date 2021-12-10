@@ -64,6 +64,21 @@ export const injectable = (singleton: boolean = true, force: boolean = false, ..
  *
  * Only concrete classes. No generics are supported
  *
+ * Injected properties should be described like so:
+ * <pre>
+ *     class ClassName {
+ *         ...
+ *
+ *         @inject()
+ *         propertyName!: InjectableClass;
+ *
+ *         ...
+ *     }
+ * </pre>
+ *
+ * where InjectableClass is the class you want to inject.
+ * Notice the use of '!:' to ensure the transpiler the property will be set outside the constructor but will always be defined
+ *
  * @decorator
  */
 export const inject = () => (target: any, propertyKey: string) => {
