@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Decorator Validation Engine repository/repository.ts</title>
+  <title>Database Decorator Engine repository/repository.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -44,7 +44,7 @@
             
              
                 <a href="index.html">
-                    <h1 class="navbar-item">Decorator Validation Engine</h1>
+                    <h1 class="navbar-item">Database Decorator Engine</h1>
                 </a>
             
         </div>
@@ -62,7 +62,7 @@
                     
                         <a
                             class="link user-link "
-                            href="https://github.com/TiagoVenceslau/decorator-validation#readme"
+                            href="https://github.com/TiagoVenceslau/db-decorators#readme"
                         >
                             Github Repository
                         </a>
@@ -92,7 +92,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.errors.html">errors</a></li><li><a href="db-decorators.logging.html">logging</a></li><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="db-decorators.validation.html">validation</a></li><li><a href="Model.Decorators.html">Decorators</a></li><li><a href="model.decorators_.html">decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li><li><a href="repository.decorators.html">decorators</a></li><li><a href="utils.injectables.html">injectables</a></li><li><a href="validation.decorators.html">decorators</a></li></ul><h3>Classes</h3><ul><li><a href="db-decorators.errors.CriticalError.html">CriticalError</a></li><li><a href="db-decorators.errors.CriticalError_LoggedError.html">LoggedError</a></li><li><a href="db-decorators.errors.LoggedError.html">LoggedError</a></li><li><a href="db-decorators.logging.LoggerImp.html">LoggerImp</a></li><li><a href="db-decorators.logging.StopWatch.html">StopWatch</a></li><li><a href="LoggedError_LoggedError.html">LoggedError</a></li><li><a href="LoggerImp_LoggerImp.html">LoggerImp</a></li><li><a href="SyncronousLock.html">SyncronousLock</a></li></ul><h3>Interfaces</h3><ul><li>BuilderRegistry.&lt;<a href="global.html#T">T</a>></li><li><a href="db-decorators.logging.Logger.html">Logger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#getAllProperties">getAllProperties</a></li><li><a href="global.html#hasErrors">hasErrors</a></li><li><a href="global.html#inject">inject</a></li><li><a href="global.html#logAsync">logAsync</a></li><li><a href="global.html#logSync">logSync</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li><li><a href="global.html#wrapMethod">wrapMethod</a></li><li><a href="global.html#wrapMethodAsync">wrapMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.errors.html">errors</a></li><li><a href="db-decorators.injectables.html">injectables</a></li><li><a href="db-decorators.logging.html">logging</a></li><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.operations.decorators.html">decorators</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="db-decorators.validation.html">validation</a></li></ul><h3>Classes</h3><ul><li><a href="AsyncRepositoryImp_AsyncRepositoryImp.html">AsyncRepositoryImp</a></li><li><a href="db-decorators.errors.CriticalError.html">CriticalError</a></li><li><a href="db-decorators.errors.CriticalError_LoggedError.html">LoggedError</a></li><li><a href="db-decorators.errors.LoggedError.html">LoggedError</a></li><li><a href="db-decorators.injectables.InjectableRegistryImp.html">InjectableRegistryImp</a></li><li><a href="db-decorators.logging.LoggerImp.html">LoggerImp</a></li><li><a href="db-decorators.logging.StopWatch.html">StopWatch</a></li><li><a href="db-decorators.model.DBModel.html">DBModel</a></li><li><a href="db-decorators.operations.OperationsRegistry.html">OperationsRegistry</a></li><li><a href="db-decorators.repository.AsyncRepositoryImp.html">AsyncRepositoryImp</a></li><li><a href="db-decorators.repository.transactions.SyncronousLock.html">SyncronousLock</a></li><li><a href="db-decorators.repository.transactions.Transaction.html">Transaction</a></li><li><a href="LoggedError_LoggedError.html">LoggedError</a></li><li><a href="LoggerImp_LoggerImp.html">LoggerImp</a></li><li><a href="SyncronousLock_SyncronousLock.html">SyncronousLock</a></li><li><a href="Transaction_Transaction.html">Transaction</a></li></ul><h3>Interfaces</h3><ul><li><a href="db-decorators.injectables.BuilderRegistry.html">BuilderRegistry</a></li><li><a href="db-decorators.injectables.InjectablesRegistry.html">InjectablesRegistry</a></li><li><a href="db-decorators.logging.Logger.html">Logger</a></li><li><a href="db-decorators.repository.AsyncRepository.html">AsyncRepository</a></li><li><a href="db-decorators.repository.IGenerator.html">IGenerator</a></li><li><a href="db-decorators.repository.IGeneratorAsync.html">IGeneratorAsync</a></li><li><a href="db-decorators.repository.Repository.html">Repository</a></li><li><a href="db-decorators.repository.TransactionLock.html">TransactionLock</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getOperationKey">getOperationKey</a></li><li><a href="global.html#hasErrors">hasErrors</a></li></ul></div><div class="category"><h2>Decorators</h2><h3>Global</h3><ul><li><a href="global.html#after">after</a></li><li><a href="global.html#afterCreate">afterCreate</a></li><li><a href="global.html#afterCreateUpdate">afterCreateUpdate</a></li><li><a href="global.html#afterDelete">afterDelete</a></li><li><a href="global.html#afterRead">afterRead</a></li><li><a href="global.html#afterUpdate">afterUpdate</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#inject">inject</a></li><li><a href="global.html#injectable">injectable</a></li><li><a href="global.html#logAsync">logAsync</a></li><li><a href="global.html#logSync">logSync</a></li><li><a href="global.html#on">on</a></li><li><a href="global.html#onCreate">onCreate</a></li><li><a href="global.html#onCreateUpdate">onCreateUpdate</a></li><li><a href="global.html#onDelete">onDelete</a></li><li><a href="global.html#onRead">onRead</a></li><li><a href="global.html#onUpdate">onUpdate</a></li><li><a href="global.html#readonly">readonly</a></li><li><a href="global.html#repository">repository</a></li><li><a href="global.html#timestamp">timestamp</a></li></ul></div><div class="category"><h2>Validators</h2><h3>Classes</h3><ul><li><a href="ReadOnlyValidator.html">ReadOnlyValidator</a></li><li><a href="TimestampValidator.html">TimestampValidator</a></li><li><a href="UpdateValidator.html">UpdateValidator</a></li></ul></div>
                 
             </nav>
         </div>
@@ -119,26 +119,87 @@ import {
 import {OperationKeys} from "../operations";
 import {criticalCallback, errorCallback, LoggedError} from "../errors";
 
+
+/**
+ * @typedef ModelOrCallback
+ * @memberOf db-decorators.repository
+ * */
 export type ModelOrCallback&lt;T extends DBModel> = T | ModelCallback&lt;T>;
 
+/**
+ * @interface Repository
+ * @memberOf db-decorators.repository
+ */
 export interface Repository&lt;T extends DBModel> {
+    /**
+     * @param {any} key
+     * @param {ModelOrCallback} model
+     * @param {any[]} args
+     * @return {T}
+     */
     create(key?: any, model?: ModelOrCallback&lt;T>, ...args: any[]): T;
+    /**
+     * @param {any} key
+     * @param {any[]} args
+     * @return {T}
+     */
     read(key?: any, ...args: any[]): T;
+    /**
+     * @param {any} key
+     * @param {ModelOrCallback} model
+     * @param {any[]} args
+     * @return {T}
+     */
     update(key?: any, model?: ModelOrCallback&lt;T>, ...args: any[]): T;
+    /**
+     * @param {any} key
+     * @param {any[]} args
+     */
     delete(key?: any, ...args: any[]): void;
 }
 
+/**
+ * @interface AsyncRepository
+ * @memberOf db-decorators.repository
+ */
 export interface AsyncRepository&lt;T extends DBModel> {
+    /**
+     * @param {any} key
+     * @param {ModelOrCallback} model
+     * @param {any[]} args
+     */
     create(key?: any, model?: ModelOrCallback&lt;T>, ...args: any[]): void;
+    /**
+     * @param {any} key
+     * @param {any[]} args
+     */
     read(key?: any, ...args: any[]): void;
+    /**
+     * @param {any} key
+     * @param {ModelOrCallback} model
+     * @param {any[]} args
+     */
     update(key?: any, model?: ModelOrCallback&lt;T>, ...args: any[]): void;
+    /**
+     * @param {any} key
+     * @param {any[]} args
+     */
     delete(key?: any, ...args: any[]): void;
 }
-
+/**
+ * @typedef Err
+ * @memberOf db-decorators.repository
+ * */
 export type Err = Error | string | undefined;
-
+/**
+ * @typedef Callback
+ * @memberOf db-decorators.repository
+ * */
 export type Callback = (err?: Err, ...args: any[]) => void;
-
+/**
+ * @typedef ModelCallback
+ * @memberOf db-decorators.repository
+ * */
 export type ModelCallback&lt;T extends DBModel> = (err?: Err, result?: T, ...args: any[]) => void;
 
 export abstract class RepositoryImp&lt;T extends DBModel> implements Repository&lt;T>{
@@ -185,6 +246,15 @@ export abstract class RepositoryImp&lt;T extends DBModel> implements Repository&
     }
 }
 
+/**
+ * trims the top of a list if its elements are undefined
+ * @param {any[]} args
+ * @return {any[]}
+ *
+ * @function trimLeftUndefined
+ *
+ * @memberOf db-decorators.repository
+ */
 export const trimLeftUndefined = function(...args: any[]){
     if (!args || !args.length)
         return args;
@@ -197,11 +267,24 @@ export const trimLeftUndefined = function(...args: any[]){
 }
 
 /**
- * @typedef T extends DBModel
+ * Base Async Repository Implementation
+ *
+ * To wire the on and after events, all CRUD methods will be prefixed/suffixed with their counterpart methods on initialization.
+ *
+ * This means that extending classes, if they have optional arguments must override the prefixes to handle them
+ *
+ * @class AsyncRepositoryImp
+ * @implements AsyncRepository
+ *
+ * @memberOf db-decorators.repository
  */
 export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncRepository&lt;T>{
     readonly clazz: {new(...args: any[]): T};
 
+    /**
+     * @constructor
+     * @param {{new: any}} clazz the class the repo is meant to instantiate
+     */
     constructor(clazz: {new(...args: any[]): T}) {
         this.clazz = clazz;
         wrapMethodAsync(this, this.createPrefix, this.create, this.createSuffix, "create");
@@ -211,6 +294,7 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
     }
 
     /**
+     * Creates an object
      *
      * @param {any} [key]
      * @param {T} model Model object
@@ -222,6 +306,16 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
+    /**
+     * Method that will prefix the actual create method to wire the 'on' event logic
+     *
+     * @param {any} [key]
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected createPrefix(key?: any, model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!callback)
@@ -240,6 +334,15 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
         });
     }
 
+    /**
+     * Method that will suffix the actual create method to wire the 'after' event logic
+     *
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected createSuffix(model?: T, ...args: any[]): void {
         const callback: ModelCallback&lt;T> = args.pop();
         if (!callback)
@@ -257,12 +360,26 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
             callback(undefined, ...trimLeftUndefined(newModel, ...args));
         });
     }
-
+    /**
+     * Deletes an object
+     *
+     * @param {any} [key]
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link Callback} callback Popped from args
+     */
     delete(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
-
+    /**
+     * Method that will prefix the actual delete method to wire the 'on' event logic
+     *
+     * @param {any} [key]
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link Callback} callback Popped from args
+     *
+     * @protected
+     */
     protected deletePrefix(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!callback)
@@ -287,7 +404,15 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
             });
         });
     }
-
+    /**
+     * Method that will suffix the actual delete method to wire the 'after' event logic
+     *
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected deleteSuffix(...args: any[]): void {
         const callback: ModelCallback&lt;T> = args.pop();
         if (!callback)
@@ -296,21 +421,43 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
         // TODO - cant access decorators from here
         callback(undefined, ...args);
     }
-
+    /**
+     * Reads an object
+     *
+     * @param {any} [key]
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     */
     read(key?: any, ...args: any[]): void {
         const callback: ModelCallback&lt;T> = args.pop();
         if (!callback)
             throw new LoggedError(`Missing Callback`);
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
-
+    /**
+     * Method that will prefix the actual read method to wire the 'on' event logic
+     *
+     * @param {any} [key]
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link Callback} callback Popped from args
+     *
+     * @protected
+     */
     protected readPrefix(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!callback)
             throw new LoggedError(`Missing Callback`);
         callback(undefined, key, ...args);
     }
-
+    /**
+     * Method that will suffix the actual read method to wire the 'after' event logic
+     *
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected readSuffix(model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!callback)
@@ -328,14 +475,30 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
             callback(undefined, model, ...args);
         });
     }
-
+    /**
+     * Updates an object
+     *
+     * @param {any} [key]
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     */
     update(key?: any, model?: T, ...args: any[]): void {
         const callback: ModelCallback&lt;T> = args.pop();
         if (!callback)
             throw new LoggedError(`Missing Callback`);
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
-
+    /**
+     * Method that will prefix the actual update method to wire the 'on' event logic
+     *
+     * @param {any} [key]
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected updatePrefix(key?: any, model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!callback)
@@ -353,7 +516,15 @@ export abstract class AsyncRepositoryImp&lt;T extends DBModel> implements AsyncR
             callback(undefined, key, newModel, ...args);
         });
     }
-
+    /**
+     * Method that will suffix the actual create method to wire the 'after' event logic
+     *
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected updateSuffix(model?: T, ...args: any[]): void {
         const callback: ModelCallback&lt;T> = args.pop();
         if (!callback)

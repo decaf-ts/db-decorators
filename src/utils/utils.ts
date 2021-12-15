@@ -1,8 +1,6 @@
 import {
-    constructFromObject as constrObj,
-    construct as superConstruct, getPropertyDecorators, ModelKeys
+    getPropertyDecorators, ModelKeys
 } from "@tvenceslau/decorator-validation/lib";
-export {getClassDecorators, stringFormat, formatDate} from "@tvenceslau/decorator-validation/lib";
 
 import DBModel from "../model/DBModel";
 import {AsyncRepository, Callback, Err, ModelCallback, Repository} from "../repository";
@@ -11,25 +9,15 @@ import {getOperationsRegistry} from "../operations/registry";
 import {errorCallback, LoggedError} from "../errors";
 
 /**
- * Helper Function to override constructors
- * @param {Function} constructor
- * @param {any[]} args
- * @return {T} the new instance
- */
-export function construct<T extends DBModel>(constructor: any, ...args: any[]) {
-    return superConstruct<T>(constructor, ...args);
-}
-
-export function constructFromObject<T extends DBModel>(self: T, obj?: T | {}){
-    return constrObj<T>(self, obj);
-}
-
-/**
  * Util method to change a method of an object prefixing it with another
  * @param {any} obj The Base Object
  * @param {Function} after The original method
  * @param {Function} prefix The Prefix method. The output will be used as arguments in the original method
  * @param {string} [afterName] When the after function anme cannot be extracted, pass it here
+ *
+ * @function prefixMethod
+ *
+ * @memberOf db-decorators.utils
  */
 export function prefixMethod(obj: any, after: Function, prefix: Function, afterName?: string){
     function wrapper(this: any, ...args: any[]){
@@ -45,6 +33,10 @@ export function prefixMethod(obj: any, after: Function, prefix: Function, afterN
  * @param {Function} before The original method
  * @param {Function} suffix The Prefix method. The output will be used as arguments in the original method
  * @param {string} [beforeName] When the after function anme cannot be extracted, pass it here
+ *
+ * @function suffixMethod
+ *
+ * @memberOf db-decorators.utils
  */
 export function suffixMethod(obj: any, before: Function, suffix: Function, beforeName?: string){
     function wrapper(this: any, ...args: any[]){
@@ -62,6 +54,10 @@ export function suffixMethod(obj: any, before: Function, suffix: Function, befor
  * @param {Function} method the method to be wrapped
  * @param {Function} after The method to be suffixed
  * @param {string} [methodName] When the after function anme cannot be extracted, pass it here
+ *
+ * @function wrapMethod
+ *
+ * @memberOf db-decorators.utils
  */
 export function wrapMethod(obj: any, before: Function, method: Function, after: Function, methodName?: string){
     function wrapper(this: any, ...args: any[]){
@@ -79,6 +75,10 @@ export function wrapMethod(obj: any, before: Function, method: Function, after: 
  * @param {Function} after The original method
  * @param {Function} prefix The Prefix method. The output will be used as arguments in the original method
  * @param {string} [afterName] When the after function name cannot be extracted, pass it here
+ *
+ * @function prefixMethodAsync
+ *
+ * @memberOf db-decorators.utils
  */
 export function prefixMethodAsync(obj: any, after: Function, prefix: Function, afterName?: string){
     function wrapperPrefix(...args: any[]){
@@ -99,6 +99,10 @@ export function prefixMethodAsync(obj: any, after: Function, prefix: Function, a
  * @param {Function} before The original method
  * @param {Function} suffix The Prefix method. The output will be used as arguments in the original method
  * @param {string} [beforeName] When the after function name cannot be extracted, pass it here
+ *
+ * @function suffixMethodAsync
+ *
+ * @memberOf db-decorators.utils
  */
 export function suffixMethodAsync(obj: any, before: Function, suffix: Function, beforeName?: string){
     function wrapperSuffix(this: any, ...args: any[]){
@@ -120,6 +124,10 @@ export function suffixMethodAsync(obj: any, before: Function, suffix: Function, 
  * @param {Function} method the method to be wrapped
  * @param {Function} after The method to be suffixed
  * @param {string} [methodName] When the after function name cannot be extracted, pass it here
+ *
+ * @function wrapMethodAsync
+ *
+ * @memberOf db-decorators.utils
  */
 export function wrapMethodAsync(obj: any, before: Function, method: Function, after: Function, methodName?: string){
     function wrapper(this: any, ...args: any[]){
@@ -142,6 +150,16 @@ export function wrapMethodAsync(obj: any, before: Function, method: Function, af
     obj[methodName ? methodName : method.name] = wrapper.bind(obj);
 }
 
+/**
+ * Retrieves the decorators for an object's properties prefixed by {@param prefixes}
+ *
+ * @param {T} model
+ * @param {string[]} prefixes
+ *
+ * @function getAllPropertyDecorators
+ *
+ * @memberOf db-decorators.utils
+ */
 export const getAllPropertyDecorators = function<T extends DBModel>(model: T , ...prefixes: string[]): {[indexer: string]: any[]} | undefined {
     if (!prefixes || !prefixes.length)
         return;
@@ -164,7 +182,16 @@ export const getAllPropertyDecorators = function<T extends DBModel>(model: T , .
         return accum;
     }, undefined);
 }
-
+/**
+ * Specific for DB Decorators
+ * @param {T} model
+ * @param {string} operation CRUD {@link OperationKeys}
+ * @param {string} [extraPrefix]
+ *
+ * @function getDbPropertyDecorators
+ *
+ * @memberOf db-decorators.utils
+ */
 export const getDbDecorators = function<T extends DBModel>(model: T, operation: string, extraPrefix?: string): {[indexer: string]: {[indexer: string]: any[]}} | undefined {
     const decorators = getAllPropertyDecorators(model, OperationKeys.REFLECT + (extraPrefix ? extraPrefix : ''));
     if (!decorators)
@@ -179,7 +206,17 @@ export const getDbDecorators = function<T extends DBModel>(model: T, operation: 
         return accum;
     }, undefined);
 }
-
+/**
+ * Calls the handlers for each db decorator
+ *
+ * @param {Repository<T>} repo
+ * @param {T} model
+ * @param {{}} decorators
+ *
+ * @function enforceDBPropertyDecorators
+ *
+ * @memberOf db-decorators.utils
+ */
 export const enforceDBDecorators = function<T extends DBModel>(repo: Repository<T>, model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}): T {
     Object.keys(decorators).forEach(prop => {
         // @ts-ignore
@@ -192,7 +229,18 @@ export const enforceDBDecorators = function<T extends DBModel>(repo: Repository<
 
     return model;
 }
-
+/**
+ *
+ * @param {Repository<T>} repo
+ * @param {T} model
+ * @param {{}} decorators
+ * @param {string} [keyPrefix] defaults to ''
+ * @param {ModelCallback} callback
+ *
+ * @function enforceDBPropertyDecoratorsAsync
+ *
+ * @memberOf db-decorators.utils
+ */
 export const enforceDBDecoratorsAsync = function<T extends DBModel>(repo: AsyncRepository<T>, model: T, decorators: {[indexer: string]: {[indexer:string]: any[]}}, keyPrefix: string = "", callback: ModelCallback<T>){
 
     const propIterator = function(props: string[], callback: ModelCallback<T>){
@@ -225,6 +273,10 @@ export const enforceDBDecoratorsAsync = function<T extends DBModel>(repo: AsyncR
  * @param obj
  * @param {boolean} [climbTree] default to true
  * @param {string} [stopAt] defaults to 'Object'
+ *
+ * @function getAllProperties
+ *
+ * @memberOf db-decorators.utils
  */
 export function getAllProperties(obj: {}, climbTree = true, stopAt = 'Object'){
     const allProps: string[] = [];
@@ -250,6 +302,16 @@ export function getAllProperties(obj: {}, climbTree = true, stopAt = 'Object'){
     return allProps
 }
 
+/**
+ *
+ * @param {any} model
+ * @param {string | symbol} propKey
+ * @return {string | undefined}
+ *
+ * @function geTypeFromDecorators
+ *
+ * @memberOf db-decorators.utils
+ */
 export function getTypeFromDecorator(model: any, propKey: string | symbol): string | undefined {
     const decorators: {prop: string | symbol, decorators: any[]} = getPropertyDecorators(ModelKeys.REFLECT, model, propKey, false);
     if (!decorators || !decorators.decorators)

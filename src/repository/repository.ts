@@ -8,26 +8,87 @@ import {
 import {OperationKeys} from "../operations";
 import {criticalCallback, errorCallback, LoggedError} from "../errors";
 
+
+/**
+ * @typedef ModelOrCallback
+ * @memberOf db-decorators.repository
+ * */
 export type ModelOrCallback<T extends DBModel> = T | ModelCallback<T>;
 
+/**
+ * @interface Repository
+ * @memberOf db-decorators.repository
+ */
 export interface Repository<T extends DBModel> {
+    /**
+     * @param {any} key
+     * @param {ModelOrCallback} model
+     * @param {any[]} args
+     * @return {T}
+     */
     create(key?: any, model?: ModelOrCallback<T>, ...args: any[]): T;
+    /**
+     * @param {any} key
+     * @param {any[]} args
+     * @return {T}
+     */
     read(key?: any, ...args: any[]): T;
+    /**
+     * @param {any} key
+     * @param {ModelOrCallback} model
+     * @param {any[]} args
+     * @return {T}
+     */
     update(key?: any, model?: ModelOrCallback<T>, ...args: any[]): T;
+    /**
+     * @param {any} key
+     * @param {any[]} args
+     */
     delete(key?: any, ...args: any[]): void;
 }
 
+/**
+ * @interface AsyncRepository
+ * @memberOf db-decorators.repository
+ */
 export interface AsyncRepository<T extends DBModel> {
+    /**
+     * @param {any} key
+     * @param {ModelOrCallback} model
+     * @param {any[]} args
+     */
     create(key?: any, model?: ModelOrCallback<T>, ...args: any[]): void;
+    /**
+     * @param {any} key
+     * @param {any[]} args
+     */
     read(key?: any, ...args: any[]): void;
+    /**
+     * @param {any} key
+     * @param {ModelOrCallback} model
+     * @param {any[]} args
+     */
     update(key?: any, model?: ModelOrCallback<T>, ...args: any[]): void;
+    /**
+     * @param {any} key
+     * @param {any[]} args
+     */
     delete(key?: any, ...args: any[]): void;
 }
-
+/**
+ * @typedef Err
+ * @memberOf db-decorators.repository
+ * */
 export type Err = Error | string | undefined;
-
+/**
+ * @typedef Callback
+ * @memberOf db-decorators.repository
+ * */
 export type Callback = (err?: Err, ...args: any[]) => void;
-
+/**
+ * @typedef ModelCallback
+ * @memberOf db-decorators.repository
+ * */
 export type ModelCallback<T extends DBModel> = (err?: Err, result?: T, ...args: any[]) => void;
 
 export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
@@ -74,6 +135,15 @@ export abstract class RepositoryImp<T extends DBModel> implements Repository<T>{
     }
 }
 
+/**
+ * trims the top of a list if its elements are undefined
+ * @param {any[]} args
+ * @return {any[]}
+ *
+ * @function trimLeftUndefined
+ *
+ * @memberOf db-decorators.repository
+ */
 export const trimLeftUndefined = function(...args: any[]){
     if (!args || !args.length)
         return args;
@@ -86,11 +156,24 @@ export const trimLeftUndefined = function(...args: any[]){
 }
 
 /**
- * @typedef T extends DBModel
+ * Base Async Repository Implementation
+ *
+ * To wire the on and after events, all CRUD methods will be prefixed/suffixed with their counterpart methods on initialization.
+ *
+ * This means that extending classes, if they have optional arguments must override the prefixes to handle them
+ *
+ * @class AsyncRepositoryImp
+ * @implements AsyncRepository
+ *
+ * @memberOf db-decorators.repository
  */
 export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepository<T>{
     readonly clazz: {new(...args: any[]): T};
 
+    /**
+     * @constructor
+     * @param {{new: any}} clazz the class the repo is meant to instantiate
+     */
     constructor(clazz: {new(...args: any[]): T}) {
         this.clazz = clazz;
         wrapMethodAsync(this, this.createPrefix, this.create, this.createSuffix, "create");
@@ -100,6 +183,7 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
     }
 
     /**
+     * Creates an object
      *
      * @param {any} [key]
      * @param {T} model Model object
@@ -111,6 +195,16 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
 
+    /**
+     * Method that will prefix the actual create method to wire the 'on' event logic
+     *
+     * @param {any} [key]
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected createPrefix(key?: any, model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!callback)
@@ -129,6 +223,15 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         });
     }
 
+    /**
+     * Method that will suffix the actual create method to wire the 'after' event logic
+     *
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected createSuffix(model?: T, ...args: any[]): void {
         const callback: ModelCallback<T> = args.pop();
         if (!callback)
@@ -146,12 +249,26 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
             callback(undefined, ...trimLeftUndefined(newModel, ...args));
         });
     }
-
+    /**
+     * Deletes an object
+     *
+     * @param {any} [key]
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link Callback} callback Popped from args
+     */
     delete(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
-
+    /**
+     * Method that will prefix the actual delete method to wire the 'on' event logic
+     *
+     * @param {any} [key]
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link Callback} callback Popped from args
+     *
+     * @protected
+     */
     protected deletePrefix(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!callback)
@@ -176,7 +293,15 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
             });
         });
     }
-
+    /**
+     * Method that will suffix the actual delete method to wire the 'after' event logic
+     *
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected deleteSuffix(...args: any[]): void {
         const callback: ModelCallback<T> = args.pop();
         if (!callback)
@@ -185,21 +310,43 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
         // TODO - cant access decorators from here
         callback(undefined, ...args);
     }
-
+    /**
+     * Reads an object
+     *
+     * @param {any} [key]
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     */
     read(key?: any, ...args: any[]): void {
         const callback: ModelCallback<T> = args.pop();
         if (!callback)
             throw new LoggedError(`Missing Callback`);
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
-
+    /**
+     * Method that will prefix the actual read method to wire the 'on' event logic
+     *
+     * @param {any} [key]
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link Callback} callback Popped from args
+     *
+     * @protected
+     */
     protected readPrefix(key?: any, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!callback)
             throw new LoggedError(`Missing Callback`);
         callback(undefined, key, ...args);
     }
-
+    /**
+     * Method that will suffix the actual read method to wire the 'after' event logic
+     *
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected readSuffix(model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!callback)
@@ -217,14 +364,30 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
             callback(undefined, model, ...args);
         });
     }
-
+    /**
+     * Updates an object
+     *
+     * @param {any} [key]
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     */
     update(key?: any, model?: T, ...args: any[]): void {
         const callback: ModelCallback<T> = args.pop();
         if (!callback)
             throw new LoggedError(`Missing Callback`);
         errorCallback(new Error(`Child Classes must implement this!`), callback);
     }
-
+    /**
+     * Method that will prefix the actual update method to wire the 'on' event logic
+     *
+     * @param {any} [key]
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected updatePrefix(key?: any, model?: T, ...args: any[]): void {
         const callback: Callback = args.pop();
         if (!callback)
@@ -242,7 +405,15 @@ export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepo
             callback(undefined, key, newModel, ...args);
         });
     }
-
+    /**
+     * Method that will suffix the actual create method to wire the 'after' event logic
+     *
+     * @param {T} model Model object
+     * @param {any[]} args optional Arguments. The last one must be the callback
+     * implicit @param {@link ModelCallback} callback Popped from args
+     *
+     * @protected
+     */
     protected updateSuffix(model?: T, ...args: any[]): void {
         const callback: ModelCallback<T> = args.pop();
         if (!callback)

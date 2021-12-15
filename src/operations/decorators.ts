@@ -4,7 +4,17 @@ import {hashCode} from "@tvenceslau/decorator-validation/lib";
 import {getOperationsRegistry} from "./registry";
 import {AfterOperationHandler, OnOperationHandler} from "./types";
 
+/**
+ * @namespace db-decorators.operations.decorators
+ * @memberOf db-decorators.operations
+ */
 
+/**
+ *
+ * @param {string} str
+ * @function getOperationKey
+ * @me\ db-decorators.operations.decorators
+ */
 const getOperationKey = (str: string) => OperationKeys.REFLECT + str;
 
 /**
@@ -17,8 +27,8 @@ const getOperationKey = (str: string) => OperationKeys.REFLECT + str;
  * @see on
  *
  * @decorator onCreateUpdate
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const onCreateUpdate = (handler: OnOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     on(DBOperations.CREATE_UPDATE, handler, args, ...props)(target, propertyKey);
@@ -34,8 +44,8 @@ export const onCreateUpdate = (handler: OnOperationHandler<any>, args: any[], ..
  * @see on
  *
  * @decorator onUpdate
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const onUpdate = (handler: OnOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     on(DBOperations.UPDATE, handler, args, ...props)(target, propertyKey);
@@ -51,8 +61,8 @@ export const onUpdate = (handler: OnOperationHandler<any>, args: any[], ...props
  * @see on
  *
  * @decorator onCreate
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const onCreate = (handler: OnOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     on(DBOperations.CREATE, handler, args, ...props)(target, propertyKey);
@@ -68,8 +78,8 @@ export const onCreate = (handler: OnOperationHandler<any>, args: any[], ...props
  * @see on
  *
  * @decorator onRead
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const onRead = (handler: OnOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     on(DBOperations.READ, handler, args, ...props)(target, propertyKey);
@@ -85,8 +95,8 @@ export const onRead = (handler: OnOperationHandler<any>, args: any[], ...props: 
  * @see on
  *
  * @decorator onDelete
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const onDelete = (handler: OnOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     on(DBOperations.DELETE, handler, args, ...props)(target, propertyKey);
@@ -103,8 +113,8 @@ export const onDelete = (handler: OnOperationHandler<any>, args: any[], ...props
  * ex: handler(...args, ...props.map(p => target[p]))
  *
  * @decorator on
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const on = (operation: string[] = DBOperations.ALL, handler: OnOperationHandler<any>, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
     operation.forEach(op => {
@@ -134,8 +144,8 @@ export const on = (operation: string[] = DBOperations.ALL, handler: OnOperationH
  * @see after
  *
  * @decorator afterCreateUpdate
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const afterCreateUpdate = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     after(DBOperations.CREATE_UPDATE, handler, args, ...props)(target, propertyKey);
@@ -151,8 +161,8 @@ export const afterCreateUpdate = (handler: AfterOperationHandler<any>, args: any
  * @see after
  *
  * @decorator afterUpdate
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const afterUpdate = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     after(DBOperations.UPDATE, handler, args, ...props)(target, propertyKey);
@@ -168,8 +178,8 @@ export const afterUpdate = (handler: AfterOperationHandler<any>, args: any[], ..
  * @see after
  *
  * @decorator afterCreate
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const afterCreate = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     after(DBOperations.CREATE, handler, args, ...props)(target, propertyKey);
@@ -185,8 +195,8 @@ export const afterCreate = (handler: AfterOperationHandler<any>, args: any[], ..
  * @see after
  *
  * @decorator afterRead
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const afterRead = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     after(DBOperations.READ, handler, args, ...props)(target, propertyKey);
@@ -202,8 +212,8 @@ export const afterRead = (handler: AfterOperationHandler<any>, args: any[], ...p
  * @see after
  *
  * @decorator afterDelete
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const afterDelete = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
     after(DBOperations.DELETE, handler, args, ...props)(target, propertyKey);
@@ -220,8 +230,8 @@ export const afterDelete = (handler: AfterOperationHandler<any>, args: any[], ..
  * ex: handler(...args, ...props.map(p => target[p]))
  *
  * @decorator after
- * @namespace decorators
- * @memberOf operations
+ *
+ * @category Decorators
  */
 export const after = (operation: string[] = DBOperations.ALL, handler: AfterOperationHandler<any>, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
     operation.forEach(op => {

@@ -3,8 +3,14 @@ import {InjectablesKeys} from "./constants";
 import {CriticalError} from "../errors";
 import {debug} from "../logging";
 import {getTypeFromDecorator} from "../utils";
-import {DBKeys} from "../model";
 
+/**
+ *
+ * @param {string} key
+ * @function getInjectkey
+ *
+ * @memberOf db-decorators.injectables
+ */
 const getInjectKey = (key: string) => InjectablesKeys.REFLECT + key;
 
 /**
@@ -13,9 +19,10 @@ const getInjectKey = (key: string) => InjectablesKeys.REFLECT + key;
  * @prop {boolean} [singleton] defaults to true. if the behaviour is meant to be singleton
  * @prop {boolean} [force] defines if the injectable should override the already existing instance (if any). (only meant for extending decorators
  * @prop {any[]} [props] additional properties to pass for the decorator metadata. (only meant for 'extending' classes)
+ *
  * @decorator injectable
- * @namespace Decorators
- * @memberOf Model
+ *
+ * @category Decorators
  */
 export const injectable = (singleton: boolean = true, force: boolean = false, ...props: any[]) => (original: Function) => {
 
@@ -79,7 +86,9 @@ export const injectable = (singleton: boolean = true, force: boolean = false, ..
  * where InjectableClass is the class you want to inject.
  * Notice the use of '!:' to ensure the transpiler the property will be set outside the constructor but will always be defined
  *
- * @decorator
+ * @decorator inject
+ *
+ * @category Decorators
  */
 export const inject = () => (target: any, propertyKey: string) => {
 

@@ -1,6 +1,6 @@
 /**
  * @enum DBKeys
- * @memberOf model
+ * @memberOf db-decorators.model
  */
 export const DBKeys = {
     REFLECT: 'model.db.',
@@ -12,7 +12,7 @@ export const DBKeys = {
 
 /**
  * @enum DEFAULT_ERROR_MESSAGES
- * @memberOf model
+ * @memberOf db-decorators.model
  */
 export const DEFAULT_ERROR_MESSAGES = {
     ID: {
@@ -29,4 +29,8 @@ export const DEFAULT_ERROR_MESSAGES = {
     }
 }
 
+/**
+ * @constant DEFAULT_TIMESTAMP_FORMAT
+ * @memberOf db-decorators.model
+ */
 export const DEFAULT_TIMESTAMP_FORMAT = "dd/MM/yyyy HH:mm:ss:S";

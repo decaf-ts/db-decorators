@@ -8,6 +8,13 @@ import {DEFAULT_ERROR_MESSAGES} from "../model";
 import Validator from "@tvenceslau/decorator-validation/lib/validation/Validators/Validator";
 import {UpdateValidationKeys} from "./constants";
 
+/**
+ * @class UpdateValidator
+ * @abstract
+ * @extends Validator
+ *
+ * @category Validators
+ */
 export abstract class UpdateValidator extends Validator{
     constructor(validationKey: string, message: string = DecoratorMessages.DEFAULT, ...acceptedTypes: string[]) {
         super(validationKey, message, ...acceptedTypes);
@@ -16,6 +23,12 @@ export abstract class UpdateValidator extends Validator{
     public abstract updateHasErrors(value: any, oldValue: any, ...args: any[]): Errors
 }
 
+/**
+ * @class ReadOnlyValidator
+ * @extends Validator
+ *
+ * @category Validators
+ */
 export class ReadOnlyValidator extends Validator{
     constructor() {
         super(UpdateValidationKeys.READONLY, DEFAULT_ERROR_MESSAGES.READONLY.INVALID);
@@ -32,7 +45,12 @@ export class ReadOnlyValidator extends Validator{
         return isEqual(value, oldValue) ? undefined : this.getMessage(message || this.message);
     }
 }
-
+/**
+ * @class TimestampValidator
+ * @extends Validator
+ *
+ * @category Validators
+ */
 export class TimestampValidator extends Validator{
     constructor() {
         super(UpdateValidationKeys.TIMESTAMP, DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID);
@@ -59,6 +77,17 @@ export class TimestampValidator extends Validator{
     }
 }
 
+/**
+ *
+ * @param {T} oldModel
+ * @param {T} newModel
+ * @param {string[]} [exceptions]
+ *
+ * @function validateCompare
+ * @return {ModelErrorDefinition | undefined}
+ *
+ * @memberOf db-decorators.validation
+ */
 export function validateCompare<T extends DBModel>(oldModel: T, newModel: T, ...exceptions: string[]): ModelErrorDefinition | undefined{
     const decoratedProperties: ValidationPropertyDecoratorDefinition[] = [];
     for (let prop in newModel)

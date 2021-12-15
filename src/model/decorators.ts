@@ -7,6 +7,11 @@ import {IGeneratorAsync, IGenerator} from "../repository/generators";
 import {Err, ModelCallback, Repository} from "../repository";
 import {readonly} from "../validation";
 
+/**
+ *
+ * @param {str} str
+ * @memberOf db-decorators.model
+ */
 const getDBKey = (str: string) => DBKeys.REFLECT + str;
 
 
@@ -17,9 +22,10 @@ const getDBKey = (str: string) => DBKeys.REFLECT + str;
  *
  * @param {Generators<T>} generator
  * @param {string} [message] the error message. Defaults to {@link DEFAULT_ERROR_MESSAGES.ID.INVALID}
+ *
  * @decorator id
- * @namespace decorators
- * @memberOf model
+ *
+ * @category Decorators
  */
 export function id<T extends DBModel>(generator: Generators<T>, message: string = DEFAULT_ERROR_MESSAGES.ID.INVALID) {
     return (target: T, propertyKey: string) => {

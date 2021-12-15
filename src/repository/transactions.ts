@@ -6,16 +6,43 @@ import {getAllProperties, getAllPropertyDecorators, prefixMethodAsync} from "../
 import {DBKeys, DEFAULT_ERROR_MESSAGES} from "../model";
 import {ValidationKeys} from "@tvenceslau/decorator-validation/lib";
 
+/**
+ * @namespace db-decorators.repository.transactions
+ * @memberOf db-decorators.repository
+ */
+
+/**
+ * @interface TransactionLock
+ * @memberOf db-decorators.repository.transactions
+ */
 export interface TransactionLock {
+    /**
+     * Submits a transaction to be processed
+     * @param {Transaction} transaction
+     */
     submit(transaction: Transaction): void;
+
+    /**
+     * Releases The lock after the conclusion of a transaction
+     */
     release(): void;
 }
 
+/**
+ * @function getRepoKey
+ * @param {string} key
+ * @memberOf db-decorators.repository.transactions
+ */
 const getRepoKeyKey = (key: string) => RepositoryKeys.REFLECT + key;
 
 /**
  * Simple Synchronous Lock implementation for transaction management
  * adapted from {@link https://www.talkinghightech.com/en/creating-a-js-lock-for-a-resource/}
+ *
+ * @class SyncronousLock
+ * @implements TransactionLock
+ *
+ * @memberOf db-decorators.repository.transactions
  */
 export class SyncronousLock implements TransactionLock {
     private counter: number;
@@ -23,6 +50,7 @@ export class SyncronousLock implements TransactionLock {
     private currentTransaction?: number = undefined;
 
     /**
+     * @constructor
      * @param {number} [counter] the number of simultaneous transactions allowed. defaults to 1
      */
     constructor(counter: number = 1) {
@@ -30,6 +58,10 @@ export class SyncronousLock implements TransactionLock {
         this.pendingTransactions = [];
     }
 
+    /**
+     * Submits a transaction to be processed
+     * @param {Transaction} transaction
+     */
     submit(transaction: Transaction): void {
         if (this.currentTransaction && this.currentTransaction === transaction.id){
             all(`Continuing transaction {0}`, transaction.id);
@@ -45,12 +77,20 @@ export class SyncronousLock implements TransactionLock {
         }
     }
 
+    /**
+     * Executes a transaction
+     *
+     * @param {Transaction} transaction
+     * @private
+     */
     private fireTransaction(transaction: Transaction){
         this.currentTransaction = transaction.id;
         all(`Firing transaction {0}. {1} remaining...`, transaction.id, this.pendingTransactions.length);
         return transaction.fire();
     }
-
+    /**
+     * Releases The lock after the conclusion of a transaction
+     */
     release(): void {
         this.currentTransaction = undefined;
         if (this.pendingTransactions.length > 0) {
@@ -74,16 +114,30 @@ export class SyncronousLock implements TransactionLock {
 
 let currentLock: TransactionLock;
 
+/**
+ * @function getTransactionLock
+ * @memberOf db-decorators.repository.transactions
+ */
 export function getTransactionLock(){
     if (!currentLock)
         currentLock = new SyncronousLock();
     return currentLock;
 }
 
+/**
+ * sets a new transaction lock
+ * @param {TransactionLock} newLock
+ *
+ * @memberOf db-decorators.repository.transactions
+ */
 export function setTransactionLock(newLock: TransactionLock){
     currentLock = newLock;
 }
 
+/**
+ * @class Transaction
+ * @memberOf db-decorators.repository.transactions
+ */
 export class Transaction {
     readonly id: number;
     protected action?: () => any;
@@ -91,6 +145,12 @@ export class Transaction {
     readonly source?: string;
     readonly log: string[];
 
+    /**
+     *
+     * @param {string} source
+     * @param {string} [method]
+     * @param {function(): void} [action]
+     */
     constructor(source: string, method?: string, action?: () => any) {
         this.id = Date.now();
         this.action = action;
@@ -138,6 +198,9 @@ export class Transaction {
         return boundObj;
     }
 
+    /**
+     * Fires the Transaction
+     */
     fire(){
         if (!this.action)
             throw new CriticalError(`Missing the method`);
@@ -149,6 +212,15 @@ export class Transaction {
     }
 }
 
+/**
+ * Sets a class Async method as transactional
+ *
+ * @decorator transactionalAsync
+ *
+ * @category Decorators
+ *
+ * @memberOf db-decorators.repository.transactions
+ */
 export function transactionalAsync() {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
         Reflect.defineMetadata(
@@ -194,6 +266,15 @@ export function transactionalAsync() {
     }
 }
 
+/**
+ * Sets a class Async method as transactional
+ *
+ * @decorator transactionalAsync
+ *
+ * @category Decorators
+ *
+ * @memberOf db-decorators.repository.transactions
+ */
 export function transactional() {
     return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
 

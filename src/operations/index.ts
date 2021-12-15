@@ -1,5 +1,5 @@
 /**
- * @namespace operations
+ * @namespace db-decorators.operations
  * @memberOf db-decorators
  */
 

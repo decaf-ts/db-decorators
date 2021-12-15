@@ -1,9 +1,24 @@
 import {OperationHandler} from "./types";
 import {IRegistry} from "@tvenceslau/decorator-validation/lib/utils/registry";
 
+/**
+ * @class OperationsRegistry
+ * @implements IRegistry<OperationHandler<any>>
+ *
+ * @see OperationHandler
+ *
+ * @memberOf db-decorators.operations
+ */
 export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
     private cache: { [indexer: string]: any } = {};
 
+    /**
+     *
+     * @param {string} targetName
+     * @param {string} propKey
+     * @param {string} operation
+     * @return {OperationHandler | undefined}
+     */
     get<OperationHandler>(targetName: string, propKey: string, operation: string): OperationHandler | undefined {
         try{
             return this.cache[targetName][propKey][operation];
@@ -12,6 +27,13 @@ export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
         }
     }
 
+    /**
+     *
+     * @param {OperationHandler} handler
+     * @param {string} operation
+     * @param {{}} target
+     * @param {string | symbol} propKey
+     */
     register<OperationHandler>(handler: OperationHandler, operation: string, target: { [indexer: string]: any }, propKey: string | symbol): void {
         const name = target.constructor.name;
         if (!this.cache[name])
@@ -30,7 +52,7 @@ let actingOperationsRegistry: IRegistry<OperationHandler<any>>;
  * Returns the current {@link OperationsRegistry}
  * @function getOperationsRegistry
  * @return IRegistry<OperationHandler<any>>, defaults to {@link OperationsRegistry}
- * @memberOf operations
+ * @memberOf db-decorators.operations
  */
 export function getOperationsRegistry(): IRegistry<OperationHandler<any>> {
     if (!actingOperationsRegistry)
@@ -42,7 +64,7 @@ export function getOperationsRegistry(): IRegistry<OperationHandler<any>> {
  * Returns the current OperationsRegistry
  * @function getOperationsRegistry
  * @prop {IRegistry<OperationHandler<any>>} operationsRegistry the new implementation of Registry
- * @memberOf operations
+ * @memberOf db-decorators.operations
  */
 export function setOperationsRegistry(operationsRegistry: IRegistry<OperationHandler<any>>){
    actingOperationsRegistry = operationsRegistry;

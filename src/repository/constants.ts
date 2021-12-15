@@ -1,3 +1,7 @@
+/**
+ * @enum RepositoryKeys
+ * @memberOf db-decorators.repository
+ */
 export const RepositoryKeys = {
     REFLECT: "db.repository.",
     TRANSACTIONAL: 'transactional',

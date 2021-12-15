@@ -1,6 +1,6 @@
 /**
- * @namespace injectables
- * @memberOf utils
+ * @namespace db-decorators.injectables
+ * @memberOf db-decorators
  */
 
 export * from './decorators';

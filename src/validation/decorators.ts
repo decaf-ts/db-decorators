@@ -13,9 +13,10 @@ const getDBUpdateKey = (str: string) => UpdateValidationKeys.REFLECT + str;
  *
  * @param {string} [message] the error message. Defaults to {@link DEFAULT_ERROR_MESSAGES.READONLY.INVALID}
  * @param {{new: UpdateValidator}} [validator] defaults to {@link ReadOnlyValidator}
+ *
  * @decorator readonly
- * @namespace decorators
- * @memberOf validation
+ *
+ * @category Decorators
  */
 export function readonly(message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID, validator: {new(): UpdateValidator} = ReadOnlyValidator) {
     return (target: any, propertyKey: string) => {
@@ -57,9 +58,10 @@ export function readonly(message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVAL
  * @param {string[]} operation The {@link DBOperations} to act on. Defaults to {@link DBOperations.CREATE_UPDATE}
  * @param {string} [format] The TimeStamp format. defaults to {@link DEFAULT_TIMESTAMP_FORMAT}
  * @param {{new: UpdateValidator}} [validator] defaults to {@link TimestampValidator}
+ *
  * @decorator timestamp
- * @namespace decorators
- * @memberOf validation
+ *
+ * @category Decorators
  */
 export const timestamp = (operation: string[] = DBOperations.CREATE_UPDATE, format: string = DEFAULT_TIMESTAMP_FORMAT, validator: {new(): UpdateValidator} = TimestampValidator) => (target: any, propertyKey: string) => {
     date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE)(target, propertyKey);

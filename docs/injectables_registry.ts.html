@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Decorator Validation Engine injectables/registry.ts</title>
+  <title>Database Decorator Engine injectables/registry.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -44,7 +44,7 @@
             
              
                 <a href="index.html">
-                    <h1 class="navbar-item">Decorator Validation Engine</h1>
+                    <h1 class="navbar-item">Database Decorator Engine</h1>
                 </a>
             
         </div>
@@ -62,7 +62,7 @@
                     
                         <a
                             class="link user-link "
-                            href="https://github.com/TiagoVenceslau/decorator-validation#readme"
+                            href="https://github.com/TiagoVenceslau/db-decorators#readme"
                         >
                             Github Repository
                         </a>
@@ -92,7 +92,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.errors.html">errors</a></li><li><a href="db-decorators.logging.html">logging</a></li><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="db-decorators.validation.html">validation</a></li><li><a href="Model.Decorators.html">Decorators</a></li><li><a href="model.decorators_.html">decorators</a></li><li><a href="Model.Model.html">Model</a></li><li><a href="operations.decorators.html">decorators</a></li><li><a href="repository.decorators.html">decorators</a></li><li><a href="utils.injectables.html">injectables</a></li><li><a href="validation.decorators.html">decorators</a></li></ul><h3>Classes</h3><ul><li><a href="db-decorators.errors.CriticalError.html">CriticalError</a></li><li><a href="db-decorators.errors.CriticalError_LoggedError.html">LoggedError</a></li><li><a href="db-decorators.errors.LoggedError.html">LoggedError</a></li><li><a href="db-decorators.logging.LoggerImp.html">LoggerImp</a></li><li><a href="db-decorators.logging.StopWatch.html">StopWatch</a></li><li><a href="LoggedError_LoggedError.html">LoggedError</a></li><li><a href="LoggerImp_LoggerImp.html">LoggerImp</a></li><li><a href="SyncronousLock.html">SyncronousLock</a></li></ul><h3>Interfaces</h3><ul><li>BuilderRegistry.&lt;<a href="global.html#T">T</a>></li><li><a href="db-decorators.logging.Logger.html">Logger</a></li></ul><h3>Global</h3><ul><li><a href="global.html#construct">construct</a></li><li><a href="global.html#getAllProperties">getAllProperties</a></li><li><a href="global.html#hasErrors">hasErrors</a></li><li><a href="global.html#inject">inject</a></li><li><a href="global.html#logAsync">logAsync</a></li><li><a href="global.html#logSync">logSync</a></li><li><a href="global.html#prefixMethod">prefixMethod</a></li><li><a href="global.html#prefixMethodAsync">prefixMethodAsync</a></li><li><a href="global.html#suffixMethod">suffixMethod</a></li><li><a href="global.html#suffixMethodAsync">suffixMethodAsync</a></li><li><a href="global.html#wrapMethod">wrapMethod</a></li><li><a href="global.html#wrapMethodAsync">wrapMethodAsync</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Modules</h3><ul><li><a href="module-db-decorators.html">db-decorators</a></li></ul><h3>Namespaces</h3><ul><li><a href="db-decorators.errors.html">errors</a></li><li><a href="db-decorators.injectables.html">injectables</a></li><li><a href="db-decorators.logging.html">logging</a></li><li><a href="db-decorators.model.html">model</a></li><li><a href="db-decorators.operations.html">operations</a></li><li><a href="db-decorators.operations.decorators.html">decorators</a></li><li><a href="db-decorators.repository.html">repository</a></li><li><a href="db-decorators.utils.html">utils</a></li><li><a href="db-decorators.validation.html">validation</a></li></ul><h3>Classes</h3><ul><li><a href="AsyncRepositoryImp_AsyncRepositoryImp.html">AsyncRepositoryImp</a></li><li><a href="db-decorators.errors.CriticalError.html">CriticalError</a></li><li><a href="db-decorators.errors.CriticalError_LoggedError.html">LoggedError</a></li><li><a href="db-decorators.errors.LoggedError.html">LoggedError</a></li><li><a href="db-decorators.injectables.InjectableRegistryImp.html">InjectableRegistryImp</a></li><li><a href="db-decorators.logging.LoggerImp.html">LoggerImp</a></li><li><a href="db-decorators.logging.StopWatch.html">StopWatch</a></li><li><a href="db-decorators.model.DBModel.html">DBModel</a></li><li><a href="db-decorators.operations.OperationsRegistry.html">OperationsRegistry</a></li><li><a href="db-decorators.repository.AsyncRepositoryImp.html">AsyncRepositoryImp</a></li><li><a href="db-decorators.repository.transactions.SyncronousLock.html">SyncronousLock</a></li><li><a href="db-decorators.repository.transactions.Transaction.html">Transaction</a></li><li><a href="LoggedError_LoggedError.html">LoggedError</a></li><li><a href="LoggerImp_LoggerImp.html">LoggerImp</a></li><li><a href="SyncronousLock_SyncronousLock.html">SyncronousLock</a></li><li><a href="Transaction_Transaction.html">Transaction</a></li></ul><h3>Interfaces</h3><ul><li><a href="db-decorators.injectables.BuilderRegistry.html">BuilderRegistry</a></li><li><a href="db-decorators.injectables.InjectablesRegistry.html">InjectablesRegistry</a></li><li><a href="db-decorators.logging.Logger.html">Logger</a></li><li><a href="db-decorators.repository.AsyncRepository.html">AsyncRepository</a></li><li><a href="db-decorators.repository.IGenerator.html">IGenerator</a></li><li><a href="db-decorators.repository.IGeneratorAsync.html">IGeneratorAsync</a></li><li><a href="db-decorators.repository.Repository.html">Repository</a></li><li><a href="db-decorators.repository.TransactionLock.html">TransactionLock</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getOperationKey">getOperationKey</a></li><li><a href="global.html#hasErrors">hasErrors</a></li></ul></div><div class="category"><h2>Decorators</h2><h3>Global</h3><ul><li><a href="global.html#after">after</a></li><li><a href="global.html#afterCreate">afterCreate</a></li><li><a href="global.html#afterCreateUpdate">afterCreateUpdate</a></li><li><a href="global.html#afterDelete">afterDelete</a></li><li><a href="global.html#afterRead">afterRead</a></li><li><a href="global.html#afterUpdate">afterUpdate</a></li><li><a href="global.html#id">id</a></li><li><a href="global.html#inject">inject</a></li><li><a href="global.html#injectable">injectable</a></li><li><a href="global.html#logAsync">logAsync</a></li><li><a href="global.html#logSync">logSync</a></li><li><a href="global.html#on">on</a></li><li><a href="global.html#onCreate">onCreate</a></li><li><a href="global.html#onCreateUpdate">onCreateUpdate</a></li><li><a href="global.html#onDelete">onDelete</a></li><li><a href="global.html#onRead">onRead</a></li><li><a href="global.html#onUpdate">onUpdate</a></li><li><a href="global.html#readonly">readonly</a></li><li><a href="global.html#repository">repository</a></li><li><a href="global.html#timestamp">timestamp</a></li></ul></div><div class="category"><h2>Validators</h2><h3>Classes</h3><ul><li><a href="ReadOnlyValidator.html">ReadOnlyValidator</a></li><li><a href="TimestampValidator.html">TimestampValidator</a></li><li><a href="UpdateValidator.html">UpdateValidator</a></li></ul></div>
                 
             </nav>
         </div>
@@ -109,30 +109,92 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
+            <pre class="prettyprint source linenums"><code>import {CriticalError} from "../errors";
+
+/**
  * Basic Builder Registry Interface
  * @typedef T
- * @interface BuilderRegistry&lt;T>
+ * @interface BuilderRegistry
+ *
+ * @memberOf db-decorators.injectables
  */
-import {CriticalError} from "../errors";
-
 export interface BuilderRegistry&lt;T>{
+    /**
+     *
+     * @param {string} name
+     * @param {args[]} args
+     */
     get(name: string, ...args: any[]): {new(): T} | undefined;
+
+    /**
+     *
+     * @param {string} name
+     * @param {any} constructor
+     * @param {any[]} args
+     */
     register(name: string, constructor: any, ...args: any[]): void;
+
+    /**
+     *
+     * @param {{}} obj
+     * @param {any[]} args
+     */
     build(obj: {[indexer: string]: any}, ...args: any[]): T;
 }
 
+/**
+ * @typedef Injectable
+ *
+ * @memberOf db-decorators.injectables
+ */
 export type Injectable&lt;T> = {new: T} | T
 
+/**
+ * @interface InjectableRegistry
+ *
+ * @memberOf db-decorators.injectables
+ */
 export interface InjectablesRegistry {
+    /**
+     *
+     * @param {string} name
+     * @param {any[]} args
+     * @return {Injectable | undefined}
+     *
+     * @memberOf InjectablesRegistry
+     */
     get&lt;T>(name: string, ...args: any[]): Injectable&lt;T> | undefined;
+
+    /**
+     *
+     * @param {Injectable} constructor
+     * @param {any[]} args
+     *
+     * @memberOf InjectablesRegistry
+     */
     register&lt;T>(constructor: Injectable&lt;T>, ...args: any[]): void;
+
+    /**
+     *
+     * @param {{}} obj
+     * @param {any[]} args
+     * @return T
+     */
     build&lt;T>(obj: {[indexer: string]: any}, ...args: any[]): T;
 }
 
+/**
+ * @class InjectableRegistryImp
+ * @implements InjectablesRegistry
+ *
+ * @memberOf db-decorators.injectables
+ */
 export class InjectableRegistryImp implements InjectablesRegistry {
     private cache: {[indexer: string] : any} = {};
 
+    /**
+     * @inheritDoc
+     */
     get&lt;T>(name: string, ...args: any[]): T | undefined {
         try{
             const innerCache = this.cache[name];
@@ -144,7 +206,9 @@ export class InjectableRegistryImp implements InjectablesRegistry {
             return undefined;
         }
     }
-
+    /**
+     * @inheritDoc
+     */
     register&lt;T>(obj: Injectable&lt;T>, isSingleton: boolean = true, force: boolean = false): void {
         // @ts-ignore
         const constructor = !obj.name &amp;&amp; obj.constructor;
@@ -161,7 +225,9 @@ export class InjectableRegistryImp implements InjectablesRegistry {
                 singleton: isSingleton
             };
     }
-
+    /**
+     * @inheritDoc
+     */
     build&lt;T>(defs: {name: string}, ...args: any[]): T {
         try {
             const {constructor, singleton} = this.cache[defs.name] ;
@@ -184,7 +250,7 @@ let actingInjectablesRegistry: InjectablesRegistry
  * Returns the current {@link InjectableRegistryImp}
  * @function getInjectablesRegistry
  * @return InjectablesRegistry, defaults to {@link InjectableRegistryImp}
- * @memberOf injectables
+ * @memberOf db-decorators.injectables
  */
 export function getInjectablesRegistry(): InjectablesRegistry {
     if (!actingInjectablesRegistry)
@@ -196,7 +262,7 @@ export function getInjectablesRegistry(): InjectablesRegistry {
  * Returns the current OperationsRegistry
  * @function getOperationsRegistry
  * @prop {InjectablesRegistry} injectablesRegistry the new implementation of Registry
- * @memberOf injectables
+ * @memberOf db-decorators.injectables
  */
 export function setInjectablesRegistry(operationsRegistry: InjectablesRegistry){
     actingInjectablesRegistry = operationsRegistry;

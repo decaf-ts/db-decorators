@@ -1,5 +1,5 @@
 /**
- * @namespace validation
+ * @namespace db-decorators.validation
  * @memberOf db-decorators
  */
 

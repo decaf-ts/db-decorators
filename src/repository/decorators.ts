@@ -13,8 +13,8 @@ import {injectable} from "../";
  *  - args: {@param props}
  *
  * @decorator repository
- * @namespace decorators
- * @memberOf repository
+ *
+ * @category Decorators
  */
 export function repository(...props: any[]){
     return (original: Function) => {

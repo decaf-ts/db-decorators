@@ -1,7 +1,6 @@
-import {constructFromObject} from '../utils';
 import {validateCompare} from "../validation/validation";
 import {all} from "../logging";
-import {Model, ModelErrorDefinition} from "@tvenceslau/decorator-validation/lib";
+import {constructFromObject, Model, ModelErrorDefinition} from "@tvenceslau/decorator-validation/lib";
 
 /**
  * Abstract class representing a Validatable DBModel object
@@ -11,8 +10,8 @@ import {Model, ModelErrorDefinition} from "@tvenceslau/decorator-validation/lib"
  * @class DBModel
  * @abstract
  * @extends Model
- * @namespace Model
- * @memberOf Model
+ *
+ * @memberOf db-decorators.model
  */
 export default abstract class DBModel extends Model {
     [indexer: string]: any;
