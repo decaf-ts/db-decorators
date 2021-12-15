@@ -2,10 +2,10 @@ import DBModel from "../src/model/DBModel";
 import {AsyncRepositoryImp, Callback, CriticalError, DBErrors, ModelCallback} from "../src";
 // @ts-ignore
 import {TestModelAsync} from "./TestModel";
-import ModelErrorDefinition from "@tvenceslau/decorator-validation/lib/Model/ModelErrorDefinition";
 import {repository} from "../src/repository/decorators";
 import {transactionalAsync} from "../src/repository/transactions";
 import {logAsync} from "../src/logging/decorators";
+import {ModelErrorDefinition} from "@tvenceslau/decorator-validation/lib";
 
 export abstract class AsyncRamRepository<T extends DBModel> extends AsyncRepositoryImp<T> {
     private ram: {[indexer: string]: T} = {};

@@ -1,6 +1,6 @@
 /**
- * @namespace errors
- * @memberOf utils
+ * @namespace db-decorators.errors
+ * @memberOf db-decorators
  */
 
 export * from './errors';

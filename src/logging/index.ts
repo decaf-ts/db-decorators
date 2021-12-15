@@ -1,6 +1,6 @@
 /**
- * @namespace logging
- * @memberOf utils
+ * @namespace db-decorators.logging
+ * @memberOf db-decorators
  */
 
 export * from './constants';

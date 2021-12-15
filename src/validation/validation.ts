@@ -1,11 +1,10 @@
-import ModelErrorDefinition from "@tvenceslau/decorator-validation/lib/Model/ModelErrorDefinition";
 import {
     DEFAULT_ERROR_MESSAGES as DecoratorMessages,
-    Errors, getPropertyDecorators, getValidatorRegistry, isEqual, ModelErrors,
+    Errors, getPropertyDecorators, getValidatorRegistry, isEqual, ModelErrorDefinition, ModelErrors,
     ValidationPropertyDecoratorDefinition
 } from "@tvenceslau/decorator-validation/lib";
 import DBModel from "../model/DBModel";
-import {DBKeys, DEFAULT_ERROR_MESSAGES} from "../model";
+import {DEFAULT_ERROR_MESSAGES} from "../model";
 import Validator from "@tvenceslau/decorator-validation/lib/validation/Validators/Validator";
 import {UpdateValidationKeys} from "./constants";
 

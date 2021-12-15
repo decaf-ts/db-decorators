@@ -1,8 +1,7 @@
-import Model from '@tvenceslau/decorator-validation/lib/Model/Model';
 import {constructFromObject} from '../utils';
-import ModelErrorDefinition from "@tvenceslau/decorator-validation/lib/Model/ModelErrorDefinition";
 import {validateCompare} from "../validation/validation";
 import {all} from "../logging";
+import {Model, ModelErrorDefinition} from "@tvenceslau/decorator-validation/lib";
 
 /**
  * Abstract class representing a Validatable DBModel object

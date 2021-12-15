@@ -5,8 +5,10 @@ import {LOGGER_LEVELS} from "./constants";
 
 /**
  * Util class to measure time between two points in time;
- * @namespace logging
- * @class
+ *
+ * @class StopWatch
+ *
+ * @memberOf db-decorators.logging
  */
 export class StopWatch{
     private startTime?: number;
@@ -43,8 +45,10 @@ export class StopWatch{
  *
  * @param {number} [level] Logging Level as in {@link LOGGER_LEVELS} defaults to {@link LOGGER_LEVELS.DEBUG}
  * @param {boolean} [benchmark] determines if the logging includes the duration in ms. defaults to false
- * @decorator
- * @namespace logging
+ *
+ * @decorator logAsync
+ *
+ * @category Decorators
  */
 export function logAsync(level: number | boolean = LOGGER_LEVELS.DEBUG, benchmark?: boolean) {
 
@@ -96,8 +100,10 @@ export function logAsync(level: number | boolean = LOGGER_LEVELS.DEBUG, benchmar
  *
  * @param {number} [level] Logging Level as in {@link LOGGER_LEVELS} defaults to {@link LOGGER_LEVELS.DEBUG}
  * @param {boolean} [benchmark] determines if the logging includes the duration in ms. defaults to false
- * @decorator
- * @namespace logging
+ *
+ * @decorator logSync
+ *
+ * @category Decorators
  */
 export function logSync(level: number | boolean = LOGGER_LEVELS.DEBUG, benchmark?: boolean) {
 
