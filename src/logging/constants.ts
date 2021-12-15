@@ -1,7 +1,7 @@
 /**
  * @enum LOGGER_LEVELS
  *
- * @memberOf db-decorators.logging
+ * @category Constants
  */
 export const LOGGER_LEVELS = {
     ALL: 0,

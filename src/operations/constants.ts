@@ -2,7 +2,7 @@
  * Set of constants to define db CRUD operations and their equivalent 'on' and 'after' phases
  * @enum OperationKeys
  *
- * @memberOf db-decorators.operations
+ * @category Constants
  */
 export const OperationKeys = {
     REFLECT: 'operations.db.',

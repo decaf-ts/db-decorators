@@ -1,7 +1,7 @@
 /**
  * @enum InjectablesKeys
  *
- * @memberOf db-decorators.injectables
+ * @category Constants
  */
 export const InjectablesKeys = {
     REFLECT: "inject.db.",

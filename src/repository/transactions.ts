@@ -13,7 +13,6 @@ import {ValidationKeys} from "@tvenceslau/decorator-validation/lib";
 
 /**
  * @interface TransactionLock
- * @memberOf db-decorators.repository.transactions
  */
 export interface TransactionLock {
     /**
@@ -42,7 +41,6 @@ const getRepoKeyKey = (key: string) => RepositoryKeys.REFLECT + key;
  * @class SyncronousLock
  * @implements TransactionLock
  *
- * @memberOf db-decorators.repository.transactions
  */
 export class SyncronousLock implements TransactionLock {
     private counter: number;
@@ -136,7 +134,6 @@ export function setTransactionLock(newLock: TransactionLock){
 
 /**
  * @class Transaction
- * @memberOf db-decorators.repository.transactions
  */
 export class Transaction {
     readonly id: number;

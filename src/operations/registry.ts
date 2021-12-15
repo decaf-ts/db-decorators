@@ -7,7 +7,6 @@ import {IRegistry} from "@tvenceslau/decorator-validation/lib/utils/registry";
  *
  * @see OperationHandler
  *
- * @memberOf db-decorators.operations
  */
 export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
     private cache: { [indexer: string]: any } = {};

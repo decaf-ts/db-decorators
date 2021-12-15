@@ -8,7 +8,6 @@ import {LOGGER_LEVELS} from "./constants";
  *
  * @class StopWatch
  *
- * @memberOf db-decorators.logging
  */
 export class StopWatch{
     private startTime?: number;

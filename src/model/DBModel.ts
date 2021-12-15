@@ -11,7 +11,6 @@ import {constructFromObject, Model, ModelErrorDefinition} from "@tvenceslau/deco
  * @abstract
  * @extends Model
  *
- * @memberOf db-decorators.model
  */
 export default abstract class DBModel extends Model {
     [indexer: string]: any;
@@ -24,6 +23,7 @@ export default abstract class DBModel extends Model {
     /**
      * @param {DBModel | any} [previousVersion] validates an update via the {@link DBModel} decorators
      * @param {any[]} [exclusions] {@see Model#hasErrors}
+     * @return {ModelErrorDefinition | undefined}
      */
     hasErrors(previousVersion?: DBModel | any, ...exclusions: any[]): ModelErrorDefinition | undefined {
         if (previousVersion && !(previousVersion instanceof DBModel)){

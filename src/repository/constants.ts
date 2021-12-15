@@ -1,6 +1,6 @@
 /**
  * @enum RepositoryKeys
- * @memberOf db-decorators.repository
+ * @category Constants
  */
 export const RepositoryKeys = {
     REFLECT: "db.repository.",

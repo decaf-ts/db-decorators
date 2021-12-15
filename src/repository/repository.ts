@@ -17,7 +17,6 @@ export type ModelOrCallback<T extends DBModel> = T | ModelCallback<T>;
 
 /**
  * @interface Repository
- * @memberOf db-decorators.repository
  */
 export interface Repository<T extends DBModel> {
     /**
@@ -49,7 +48,6 @@ export interface Repository<T extends DBModel> {
 
 /**
  * @interface AsyncRepository
- * @memberOf db-decorators.repository
  */
 export interface AsyncRepository<T extends DBModel> {
     /**
@@ -162,18 +160,15 @@ export const trimLeftUndefined = function(...args: any[]){
  *
  * This means that extending classes, if they have optional arguments must override the prefixes to handle them
  *
+ * @param {{new: any}} clazz the class the repo is meant to instantiate
+ *
  * @class AsyncRepositoryImp
  * @implements AsyncRepository
  *
- * @memberOf db-decorators.repository
  */
 export abstract class AsyncRepositoryImp<T extends DBModel> implements AsyncRepository<T>{
     readonly clazz: {new(...args: any[]): T};
 
-    /**
-     * @constructor
-     * @param {{new: any}} clazz the class the repo is meant to instantiate
-     */
     constructor(clazz: {new(...args: any[]): T}) {
         this.clazz = clazz;
         wrapMethodAsync(this, this.createPrefix, this.create, this.createSuffix, "create");

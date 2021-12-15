@@ -2,7 +2,6 @@ import DBModel from "../model/DBModel";
 
 /**
  * @interface IGenerator
- * @memberOf db-decorators.repository
  */
 export interface IGenerator<T extends DBModel> {
     /**
@@ -15,7 +14,6 @@ export interface IGenerator<T extends DBModel> {
 
 /**
  * @interface IGeneratorAsync
- * @memberOf db-decorators.repository
  */
 export interface IGeneratorAsync<T extends DBModel> {
     /**

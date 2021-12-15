@@ -2,7 +2,7 @@ import {DBKeys} from "../model/constants";
 
 /**
  * @enum UpdateValidationKeys
- * @memberOf db-decorators.validation
+ * @category Constants
  */
 export const UpdateValidationKeys = {
     REFLECT: 'db.update.validation.',

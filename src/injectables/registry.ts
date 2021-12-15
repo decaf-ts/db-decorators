@@ -5,7 +5,6 @@ import {CriticalError} from "../errors";
  * @typedef T
  * @interface BuilderRegistry
  *
- * @memberOf db-decorators.injectables
  */
 export interface BuilderRegistry<T>{
     /**
@@ -41,7 +40,6 @@ export type Injectable<T> = {new: T} | T
 /**
  * @interface InjectableRegistry
  *
- * @memberOf db-decorators.injectables
  */
 export interface InjectablesRegistry {
     /**
@@ -76,7 +74,6 @@ export interface InjectablesRegistry {
  * @class InjectableRegistryImp
  * @implements InjectablesRegistry
  *
- * @memberOf db-decorators.injectables
  */
 export class InjectableRegistryImp implements InjectablesRegistry {
     private cache: {[indexer: string] : any} = {};

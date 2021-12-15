@@ -87,10 +87,14 @@ export interface Logger {
 /**
  * Default Logger Implementation
  *
+ * @param {number} defaultLevel defaults to {@link LOGGER_LEVELS.INFO}
+ * @param {boolean} useTimestamp defaults to true
+ * @param {boolean} logLevel
+ * @param {boolean} logStackTrace
+ * @param {string} timestampFormat
+ *
  * @class LoggerImp
  * @implements Logger
- *
- * @memberOf db-decorators.logging
  */
 export class LoggerImp implements Logger {
     private level: number;
@@ -100,14 +104,6 @@ export class LoggerImp implements Logger {
     private readonly timestampFormat: string;
     private readonly logStackTrace: boolean;
 
-    /**
-     * @constructor
-     * @param {number} defaultLevel defaults to {@link LOGGER_LEVELS.INFO}
-     * @param {boolean} useTimestamp defaults to true
-     * @param {boolean} logLevel
-     * @param {boolean} logStackTrace
-     * @param {string} timestampFormat
-     */
     constructor(defaultLevel: number = LOGGER_LEVELS.INFO, useTimestamp = true, logLevel: boolean = true, logStackTrace: boolean = false, timestampFormat = DEFAULT_TIMESTAMP_FORMAT){
         this.level = defaultLevel;
         this.useTimestamp = useTimestamp;

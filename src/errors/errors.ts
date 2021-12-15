@@ -103,10 +103,12 @@ export function criticalCallback(this: any, message: LoggerMessage, callback: Ca
 /**
  * Wrapper Class for Logged Errors
  *
+ * @param {LoggerMessage} error
+ * @param {number} level defaults to {@link LOGGER_LEVELS.ERROR}
+ *
  * @class LoggedError
  * @extends Error
  *
- * @memberOf db-decorators.errors
  */
 export class LoggedError extends Error {
     /**
@@ -114,11 +116,6 @@ export class LoggedError extends Error {
      */
     logged = false;
 
-    /**
-     * @constructor
-     * @param {LoggerMessage} error
-     * @param {number} level defaults to {@link LOGGER_LEVELS.ERROR}
-     */
     constructor(error: LoggerMessage, level: number = LOGGER_LEVELS.ERROR) {
         super(error instanceof Error ? error.message : error);
         this.logged = error instanceof LoggedError && error.logged;
@@ -133,7 +130,6 @@ export class LoggedError extends Error {
  * @class CriticalError
  * @extends LoggedError
  *
- * @memberOf db-decorators.errors
  */
 export class CriticalError extends LoggedError{
     constructor(error: LoggerMessage) {

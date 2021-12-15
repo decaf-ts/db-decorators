@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Database Decorator Engine utils</title>
+  <title>Database Decorator Engine AsyncRepositoryImp</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -97,8 +97,8 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Namespace</p>
-                    <h1>utils</h1>
+                    <p>Class</p>
+                    <h1>AsyncRepositoryImp</h1>
                 </header>
                 
 
@@ -109,7 +109,7 @@
 
 <header>
     
-        <h2>utils</h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>AsyncRepositoryImp<span class="signature">()</span><span class="type-signature"></span></h2>
         
     
 </header>
@@ -118,10 +118,49 @@
     <div class="container-overview">
     
         
-            <div class="description"><script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script></div>
-        
+            <div class='vertical-section'>
+                <div class="members">
+                    <div class="member">
+                        <div class=name>
+                            <span class="tag">Constructor</span>
+                        </div>
+                        
 
+
+    
+    <h4 class="name" id="AsyncRepositoryImp">
+        <a class="href-link" href="#AsyncRepositoryImp">#</a>
         
+        <span class="code-name">
+            
+                new AsyncRepositoryImp<span class="signature">()</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary"><p>Base Async Repository Implementation</p>
+<p>To wire the on and after events, all CRUD methods will be prefixed/suffixed with their counterpart methods on initialization.</p></p>
+    
+    
+    <div class="description">
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Base Async Repository Implementation</p>
+<p>To wire the on and after events, all CRUD methods will be prefixed/suffixed with their counterpart methods on initialization.</p>
+<p>This means that extending classes, if they have optional arguments must override the prefixes to handle them</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -136,6 +175,13 @@
 
     
 
+    
+    <dt class="implements">Implements:</dt>
+    <dd class="implements"><ul>
+        
+            <li><a href="AsyncRepository.html">AsyncRepository</a></li>
+        
+    </ul></dd>
     
 
     
@@ -157,15 +203,38 @@
 
     
         <p class="tag-source">
-            <a href="utils_index.ts.html" class="button">View Source</a>
+            <a href="repository_repository.ts.html" class="button">View Source</a>
             <span>
-                <a href="utils_index.ts.html">utils/index.ts</a>, <a href="utils_index.ts.html#line2">line 2</a>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line59">line 59</a>
             </span>
         </p>
     
 </dl>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
         
     
     </div>
@@ -174,6 +243,13 @@
 
     
 
+    
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="AsyncRepositoryImp_AsyncRepositoryImp.html">AsyncRepositoryImp</a></dt>
+            <dd></dd>
+        </dl>
     
 
     
@@ -193,229 +269,23 @@
 
 
     
-    <h4 class="name" id=".enforceDBPropertyDecorators">
-        <a class="href-link" href="#.enforceDBPropertyDecorators">#</a>
-        
-            
-                <span class='tag'>static</span>
-            
+    <h4 class="name" id="create">
+        <a class="href-link" href="#create">#</a>
         
         <span class="code-name">
             
-                enforceDBPropertyDecorators<span class="signature">(repo, model, decorators)</span><span class="type-signature"></span>
+                create<span class="signature">(key<span class="signature-attributes">opt</span>, model, &hellip;args)</span><span class="type-signature"></span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary"><p>Calls the handlers for each db decorator</p>.</p>
+    <p class="summary"><p>Creates an object</p>.</p>
     
     
     <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Calls the handlers for each db decorator</p>
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>repo</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type"><a href="Repository.html">Repository</a>.&lt;T></span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>model</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">T</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>decorators</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">Object</span>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
-            <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line195">line 195</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id=".enforceDBPropertyDecoratorsAsync">
-        <a class="href-link" href="#.enforceDBPropertyDecoratorsAsync">#</a>
-        
-            
-                <span class='tag'>static</span>
-            
-        
-        <span class="code-name">
-            
-                enforceDBPropertyDecoratorsAsync<span class="signature">(repo, model, decorators, keyPrefix<span class="signature-attributes">opt</span>, callback)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-    <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script>
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Creates an object</p>
     </div>
     
 
@@ -455,13 +325,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>repo</code></td>
+      <td class="name"><code>key</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type"><a href="Repository.html">Repository</a>.&lt;T></span>
+<span class="param-type">any</span>
 
 
   
@@ -469,6 +339,8 @@
 
   
       <td class="attributes">
+      
+          &lt;optional><br>
       
 
       
@@ -512,7 +384,7 @@
 
   
 
-  <td class="description last"></td>
+  <td class="description last"><p>Model object</p></td>
 </tr>
 
 
@@ -521,13 +393,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>decorators</code></td>
+      <td class="name"><code>args</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">Object</span>
+<span class="param-type">Array.&lt;any></span>
 
 
   
@@ -540,80 +412,15 @@
       
 
       
-      </td>
-  
-
-  
-
-  <td class="description last"></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>keyPrefix</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">string</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
+          &lt;repeatable><br>
       
       </td>
   
 
   
 
-  <td class="description last"><p>defaults to ''</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>callback</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">ModelCallback</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"></td>
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>ModelCallback</code> callback Popped from args</p></td>
 </tr>
 
 
@@ -639,6 +446,13 @@
     
 
     
+    <dt class="implements">Implements:</dt>
+    <dd class="implements"><ul>
+        
+            <li><a href="AsyncRepository.html#create">AsyncRepository#create</a></li>
+        
+    </ul></dd>
+    
 
     
 
@@ -659,9 +473,9 @@
 
     
         <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
+            <a href="repository_repository.ts.html" class="button">View Source</a>
             <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line217">line 217</a>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line89">line 89</a>
             </span>
         </p>
     
@@ -693,33 +507,27 @@
 
 
     
-    <h4 class="name" id=".getAllProperties">
-        <a class="href-link" href="#.getAllProperties">#</a>
+    <h4 class="name" id="createPrefix">
+        <a class="href-link" href="#createPrefix">#</a>
         
             
-                <span class='tag'>static</span>
+                <span class='tag'>protected</span>
             
         
         <span class="code-name">
             
-                getAllProperties<span class="signature">(obj, climbTree<span class="signature-attributes">opt</span>, stopAt<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+                createPrefix<span class="signature">(key<span class="signature-attributes">opt</span>, model, &hellip;args)</span><span class="type-signature"></span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary"><p>Retrieves all properties of an object:</p>
-<ul>
-<li>and of all its prototypes if {@param climbTree} until it reaches {@param stopAt} (or ends the prototype chain)</li>
-</ul>.</p>
+    <p class="summary"><p>Method that will prefix the actual create method to wire the 'on' event logic</p>.</p>
     
     
     <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Retrieves all properties of an object:</p>
-<ul>
-<li>and of all its prototypes if {@param climbTree} until it reaches {@param stopAt} (or ends the prototype chain)</li>
-</ul>
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Method that will prefix the actual create method to wire the 'on' event logic</p>
     </div>
     
 
@@ -759,15 +567,22 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>obj</code></td>
+      <td class="name"><code>key</code></td>
   
 
   <td class="type">
+  
+      
+<span class="param-type">any</span>
+
+
   
   </td>
 
   
       <td class="attributes">
+      
+          &lt;optional><br>
       
 
       
@@ -782,205 +597,6 @@
 </tr>
 
 
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>climbTree</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">boolean</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>default to true</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>stopAt</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">string</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>defaults to 'Object'</p></td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
-            <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line251">line 251</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id=".getAllPropertyDecorators">
-        <a class="href-link" href="#.getAllPropertyDecorators">#</a>
-        
-            
-                <span class='tag'>static</span>
-            
-        
-        <span class="code-name">
-            
-                getAllPropertyDecorators<span class="signature">(model, prefixes)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    <p class="summary"><p>Retrieves the decorators for an object's properties prefixed by {@param prefixes}</p>.</p>
-    
-    
-    <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Retrieves the decorators for an object's properties prefixed by {@param prefixes}</p>
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
         
 
             
@@ -999,10 +615,18 @@
   </td>
 
   
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
 
   
 
-  <td class="description last"></td>
+  <td class="description last"><p>Model object</p></td>
 </tr>
 
 
@@ -1011,23 +635,34 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>prefixes</code></td>
+      <td class="name"><code>args</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">Array.&lt;string></span>
+<span class="param-type">Array.&lt;any></span>
 
 
   
   </td>
 
   
+      <td class="attributes">
+      
+
+      
+
+      
+          &lt;repeatable><br>
+      
+      </td>
+  
 
   
 
-  <td class="description last"></td>
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>ModelCallback</code> callback Popped from args</p></td>
 </tr>
 
 
@@ -1073,9 +708,9 @@
 
     
         <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
+            <a href="repository_repository.ts.html" class="button">View Source</a>
             <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line141">line 141</a>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line103">line 103</a>
             </span>
         </p>
     
@@ -1107,27 +742,27 @@
 
 
     
-    <h4 class="name" id=".getDbPropertyDecorators">
-        <a class="href-link" href="#.getDbPropertyDecorators">#</a>
+    <h4 class="name" id="createSuffix">
+        <a class="href-link" href="#createSuffix">#</a>
         
             
-                <span class='tag'>static</span>
+                <span class='tag'>protected</span>
             
         
         <span class="code-name">
             
-                getDbPropertyDecorators<span class="signature">(model, operation, extraPrefix<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+                createSuffix<span class="signature">(model, &hellip;args)</span><span class="type-signature"></span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary"><p>Specific for DB Decorators</p>.</p>
+    <p class="summary"><p>Method that will suffix the actual create method to wire the 'after' event logic</p>.</p>
     
     
     <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Specific for DB Decorators</p>
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Method that will suffix the actual create method to wire the 'after' event logic</p>
     </div>
     
 
@@ -1191,7 +826,7 @@
 
   
 
-  <td class="description last"></td>
+  <td class="description last"><p>Model object</p></td>
 </tr>
 
 
@@ -1200,13 +835,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>operation</code></td>
+      <td class="name"><code>args</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">string</span>
+<span class="param-type">Array.&lt;any></span>
 
 
   
@@ -1219,47 +854,15 @@
       
 
       
-      </td>
-  
-
-  
-
-  <td class="description last"><p>CRUD <a href="global.html#OperationKeys"><code>OperationKeys</code></a></p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>extraPrefix</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">string</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
+          &lt;repeatable><br>
       
       </td>
   
 
   
 
-  <td class="description last"></td>
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>ModelCallback</code> callback Popped from args</p></td>
 </tr>
 
 
@@ -1305,9 +908,9 @@
 
     
         <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
+            <a href="repository_repository.ts.html" class="button">View Source</a>
             <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line171">line 171</a>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line127">line 127</a>
             </span>
         </p>
     
@@ -1339,25 +942,23 @@
 
 
     
-    <h4 class="name" id=".geTypeFromDecorators">
-        <a class="href-link" href="#.geTypeFromDecorators">#</a>
-        
-            
-                <span class='tag'>static</span>
-            
+    <h4 class="name" id="delete">
+        <a class="href-link" href="#delete">#</a>
         
         <span class="code-name">
             
-                geTypeFromDecorators<span class="signature">(model, propKey)</span><span class="type-signature"> &rarr; {string|undefined}</span>
+                delete<span class="signature">(key<span class="signature-attributes">opt</span>, &hellip;args)</span><span class="type-signature"></span>
             
         </span>
     </h4>
     
 
     
+    <p class="summary"><p>Deletes an object</p>.</p>
+    
     
     <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script>
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Deletes an object</p>
     </div>
     
 
@@ -1381,6 +982,419 @@
 
             <th>Type</th>
 
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>key</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">any</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>args</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array.&lt;any></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+          &lt;repeatable><br>
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>Callback</code> callback Popped from args</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="implements">Implements:</dt>
+    <dd class="implements"><ul>
+        
+            <li><a href="AsyncRepository.html#delete">AsyncRepository#delete</a></li>
+        
+    </ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="repository_repository.ts.html" class="button">View Source</a>
+            <span>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line149">line 149</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="deletePrefix">
+        <a class="href-link" href="#deletePrefix">#</a>
+        
+            
+                <span class='tag'>protected</span>
+            
+        
+        <span class="code-name">
+            
+                deletePrefix<span class="signature">(key<span class="signature-attributes">opt</span>, &hellip;args)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary"><p>Method that will prefix the actual delete method to wire the 'on' event logic</p>.</p>
+    
+    
+    <div class="description">
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Method that will prefix the actual delete method to wire the 'on' event logic</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>key</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">any</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>args</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array.&lt;any></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+          &lt;repeatable><br>
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>Callback</code> callback Popped from args</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="repository_repository.ts.html" class="button">View Source</a>
+            <span>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line162">line 162</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="deleteSuffix">
+        <a class="href-link" href="#deleteSuffix">#</a>
+        
+            
+                <span class='tag'>protected</span>
+            
+        
+        <span class="code-name">
+            
+                deleteSuffix<span class="signature">(model, &hellip;args)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary"><p>Method that will suffix the actual delete method to wire the 'after' event logic</p>.</p>
+    
+    
+    <div class="description">
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Method that will suffix the actual delete method to wire the 'after' event logic</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
             
 
             
@@ -1401,12 +1415,218 @@
   <td class="type">
   
       
+<span class="param-type">T</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Model object</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>args</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array.&lt;any></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+          &lt;repeatable><br>
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>ModelCallback</code> callback Popped from args</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="repository_repository.ts.html" class="button">View Source</a>
+            <span>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line192">line 192</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="read">
+        <a class="href-link" href="#read">#</a>
+        
+        <span class="code-name">
+            
+                read<span class="signature">(key<span class="signature-attributes">opt</span>, &hellip;args)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary"><p>Reads an object</p>.</p>
+    
+    
+    <div class="description">
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Reads an object</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>key</code></td>
+  
+
+  <td class="type">
+  
+      
 <span class="param-type">any</span>
 
 
   
   </td>
 
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
   
 
   
@@ -1420,21 +1640,202 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>propKey</code></td>
+      <td class="name"><code>args</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">string</span>
-|
-
-<span class="param-type">symbol</span>
+<span class="param-type">Array.&lt;any></span>
 
 
   
   </td>
 
+  
+      <td class="attributes">
+      
+
+      
+
+      
+          &lt;repeatable><br>
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>ModelCallback</code> callback Popped from args</p></td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="implements">Implements:</dt>
+    <dd class="implements"><ul>
+        
+            <li><a href="AsyncRepository.html#read">AsyncRepository#read</a></li>
+        
+    </ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="repository_repository.ts.html" class="button">View Source</a>
+            <span>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line206">line 206</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="readPrefix">
+        <a class="href-link" href="#readPrefix">#</a>
+        
+            
+                <span class='tag'>protected</span>
+            
+        
+        <span class="code-name">
+            
+                readPrefix<span class="signature">(key<span class="signature-attributes">opt</span>, &hellip;args)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    <p class="summary"><p>Method that will prefix the actual read method to wire the 'on' event logic</p>.</p>
+    
+    
+    <div class="description">
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Method that will prefix the actual read method to wire the 'on' event logic</p>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>key</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">any</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
   
 
   
@@ -1444,6 +1845,42 @@
 
 
         
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>args</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array.&lt;any></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+          &lt;repeatable><br>
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>Callback</code> callback Popped from args</p></td>
+</tr>
+
+
+        
         </tbody>
     </table>
 </div>
@@ -1485,9 +1922,9 @@
 
     
         <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
+            <a href="repository_repository.ts.html" class="button">View Source</a>
             <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line284">line 284</a>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line221">line 221</a>
             </span>
         </p>
     
@@ -1510,32 +1947,6 @@
 
 
 
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
-        
-<span class="param-type">string</span>
-|
-
-<span class="param-type">undefined</span>
-
-
-    </div>
-    
-</div>
-
-                
-        </div>
-    </div>
-
 
 
 
@@ -1545,27 +1956,27 @@
 
 
     
-    <h4 class="name" id=".prefixMethod">
-        <a class="href-link" href="#.prefixMethod">#</a>
+    <h4 class="name" id="readSuffix">
+        <a class="href-link" href="#readSuffix">#</a>
         
             
-                <span class='tag'>static</span>
+                <span class='tag'>protected</span>
             
         
         <span class="code-name">
             
-                prefixMethod<span class="signature">(obj, after, prefix, afterName<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+                readSuffix<span class="signature">(model, &hellip;args)</span><span class="type-signature"></span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary"><p>Util method to change a method of an object prefixing it with another</p>.</p>
+    <p class="summary"><p>Method that will suffix the actual read method to wire the 'after' event logic</p>.</p>
     
     
     <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Util method to change a method of an object prefixing it with another</p>
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Method that will suffix the actual read method to wire the 'after' event logic</p>
     </div>
     
 
@@ -1605,13 +2016,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>obj</code></td>
+      <td class="name"><code>model</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">any</span>
+<span class="param-type">T</span>
 
 
   
@@ -1629,7 +2040,7 @@
 
   
 
-  <td class="description last"><p>The Base Object</p></td>
+  <td class="description last"><p>Model object</p></td>
 </tr>
 
 
@@ -1638,13 +2049,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>after</code></td>
+      <td class="name"><code>args</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">function</span>
+<span class="param-type">Array.&lt;any></span>
 
 
   
@@ -1657,80 +2068,15 @@
       
 
       
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The original method</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>prefix</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
+          &lt;repeatable><br>
       
       </td>
   
 
   
 
-  <td class="description last"><p>The Prefix method. The output will be used as arguments in the original method</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>afterName</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">string</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>When the after function anme cannot be extracted, pass it here</p></td>
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>ModelCallback</code> callback Popped from args</p></td>
 </tr>
 
 
@@ -1776,9 +2122,9 @@
 
     
         <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
+            <a href="repository_repository.ts.html" class="button">View Source</a>
             <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line6">line 6</a>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line236">line 236</a>
             </span>
         </p>
     
@@ -1810,27 +2156,23 @@
 
 
     
-    <h4 class="name" id=".prefixMethodAsync">
-        <a class="href-link" href="#.prefixMethodAsync">#</a>
-        
-            
-                <span class='tag'>static</span>
-            
+    <h4 class="name" id="update">
+        <a class="href-link" href="#update">#</a>
         
         <span class="code-name">
             
-                prefixMethodAsync<span class="signature">(obj, after, prefix, afterName<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+                update<span class="signature">(key<span class="signature-attributes">opt</span>, model, &hellip;args)</span><span class="type-signature"></span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary"><p>The Async version of <code>prefixMethod</code></p>.</p>
+    <p class="summary"><p>Updates an object</p>.</p>
     
     
     <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>The Async version of <code>prefixMethod</code></p>
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Updates an object</p>
     </div>
     
 
@@ -1870,112 +2212,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>obj</code></td>
+      <td class="name"><code>key</code></td>
   
 
   <td class="type">
   
       
 <span class="param-type">any</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The Base Object</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>after</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The original method</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>prefix</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The Prefix method. The output will be used as arguments in the original method</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>afterName</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">string</span>
 
 
   
@@ -1995,7 +2238,76 @@
 
   
 
-  <td class="description last"><p>When the after function name cannot be extracted, pass it here</p></td>
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>model</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">T</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Model object</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>args</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array.&lt;any></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+          &lt;repeatable><br>
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>ModelCallback</code> callback Popped from args</p></td>
 </tr>
 
 
@@ -2021,6 +2333,13 @@
     
 
     
+    <dt class="implements">Implements:</dt>
+    <dd class="implements"><ul>
+        
+            <li><a href="AsyncRepository.html#update">AsyncRepository#update</a></li>
+        
+    </ul></dd>
+    
 
     
 
@@ -2041,9 +2360,9 @@
 
     
         <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
+            <a href="repository_repository.ts.html" class="button">View Source</a>
             <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line63">line 63</a>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line259">line 259</a>
             </span>
         </p>
     
@@ -2075,27 +2394,27 @@
 
 
     
-    <h4 class="name" id=".suffixMethod">
-        <a class="href-link" href="#.suffixMethod">#</a>
+    <h4 class="name" id="updatePrefix">
+        <a class="href-link" href="#updatePrefix">#</a>
         
             
-                <span class='tag'>static</span>
+                <span class='tag'>protected</span>
             
         
         <span class="code-name">
             
-                suffixMethod<span class="signature">(obj, before, suffix, beforeName<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+                updatePrefix<span class="signature">(key<span class="signature-attributes">opt</span>, model, &hellip;args)</span><span class="type-signature"></span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary"><p>Util method to change a method of an object suffixing it with another</p>.</p>
+    <p class="summary"><p>Method that will prefix the actual update method to wire the 'on' event logic</p>.</p>
     
     
     <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Util method to change a method of an object suffixing it with another</p>
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Method that will prefix the actual update method to wire the 'on' event logic</p>
     </div>
     
 
@@ -2135,112 +2454,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>obj</code></td>
+      <td class="name"><code>key</code></td>
   
 
   <td class="type">
   
       
 <span class="param-type">any</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The Base Object</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>before</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The original method</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>suffix</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The Prefix method. The output will be used as arguments in the original method</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>beforeName</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">string</span>
 
 
   
@@ -2260,7 +2480,76 @@
 
   
 
-  <td class="description last"><p>When the after function anme cannot be extracted, pass it here</p></td>
+  <td class="description last"></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>model</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">T</span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>Model object</p></td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>args</code></td>
+  
+
+  <td class="type">
+  
+      
+<span class="param-type">Array.&lt;any></span>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+          &lt;repeatable><br>
+      
+      </td>
+  
+
+  
+
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>ModelCallback</code> callback Popped from args</p></td>
 </tr>
 
 
@@ -2306,9 +2595,9 @@
 
     
         <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
+            <a href="repository_repository.ts.html" class="button">View Source</a>
             <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line24">line 24</a>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line275">line 275</a>
             </span>
         </p>
     
@@ -2340,27 +2629,27 @@
 
 
     
-    <h4 class="name" id=".suffixMethodAsync">
-        <a class="href-link" href="#.suffixMethodAsync">#</a>
+    <h4 class="name" id="updateSuffix">
+        <a class="href-link" href="#updateSuffix">#</a>
         
             
-                <span class='tag'>static</span>
+                <span class='tag'>protected</span>
             
         
         <span class="code-name">
             
-                suffixMethodAsync<span class="signature">(obj, before, suffix, beforeName<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+                updateSuffix<span class="signature">(model, &hellip;args)</span><span class="type-signature"></span>
             
         </span>
     </h4>
     
 
     
-    <p class="summary"><p>The Async version of <code>suffixMethod</code></p>.</p>
+    <p class="summary"><p>Method that will suffix the actual create method to wire the 'after' event logic</p>.</p>
     
     
     <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>The Async version of <code>suffixMethod</code></p>
+        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Method that will suffix the actual create method to wire the 'after' event logic</p>
     </div>
     
 
@@ -2400,13 +2689,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>obj</code></td>
+      <td class="name"><code>model</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">any</span>
+<span class="param-type">T</span>
 
 
   
@@ -2424,7 +2713,7 @@
 
   
 
-  <td class="description last"><p>The Base Object</p></td>
+  <td class="description last"><p>Model object</p></td>
 </tr>
 
 
@@ -2433,13 +2722,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>before</code></td>
+      <td class="name"><code>args</code></td>
   
 
   <td class="type">
   
       
-<span class="param-type">function</span>
+<span class="param-type">Array.&lt;any></span>
 
 
   
@@ -2452,80 +2741,15 @@
       
 
       
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The original method</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>suffix</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
+          &lt;repeatable><br>
       
       </td>
   
 
   
 
-  <td class="description last"><p>The Prefix method. The output will be used as arguments in the original method</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>beforeName</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">string</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>When the after function name cannot be extracted, pass it here</p></td>
+  <td class="description last"><p>optional Arguments. The last one must be the callback
+implicit @param <code>ModelCallback</code> callback Popped from args</p></td>
 </tr>
 
 
@@ -2571,605 +2795,9 @@
 
     
         <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
+            <a href="repository_repository.ts.html" class="button">View Source</a>
             <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line86">line 86</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id=".wrapMethod">
-        <a class="href-link" href="#.wrapMethod">#</a>
-        
-            
-                <span class='tag'>static</span>
-            
-        
-        <span class="code-name">
-            
-                wrapMethod<span class="signature">(obj, before, method, after, methodName<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    <p class="summary"><p>Util method to wrap a method of an object with additional logic</p>.</p>
-    
-    
-    <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>Util method to wrap a method of an object with additional logic</p>
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-            <th>Attributes</th>
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>obj</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">any</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The Base Object</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>before</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>the method to be prefixed</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>method</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>the method to be wrapped</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>after</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The method to be suffixed</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>methodName</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">string</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>When the after function anme cannot be extracted, pass it here</p></td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
-            <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line42">line 42</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id=".wrapMethodAsync">
-        <a class="href-link" href="#.wrapMethodAsync">#</a>
-        
-            
-                <span class='tag'>static</span>
-            
-        
-        <span class="code-name">
-            
-                wrapMethodAsync<span class="signature">(obj, before, method, after, methodName<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    <p class="summary"><p>The Async version of <code>wrapMethod</code></p>.</p>
-    
-    
-    <div class="description">
-        <script type="text/javascript" src="https://unpkg.com/mermaid@7.1.0/dist/mermaid.min.js"></script><p>The Async version of <code>wrapMethod</code></p>
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-            <th>Attributes</th>
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>obj</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">any</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The Base Object</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>before</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>the method to be prefixed</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>method</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>the method to be wrapped</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>after</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">function</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>The method to be suffixed</p></td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>methodName</code></td>
-  
-
-  <td class="type">
-  
-      
-<span class="param-type">string</span>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last"><p>When the after function name cannot be extracted, pass it here</p></td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="utils_utils.ts.html" class="button">View Source</a>
-            <span>
-                <a href="utils_utils.ts.html">utils/utils.ts</a>, <a href="utils_utils.ts.html#line109">line 109</a>
+                <a href="repository_repository.ts.html">repository/repository.ts</a>, <a href="repository_repository.ts.html#line299">line 299</a>
             </span>
         </p>
     
