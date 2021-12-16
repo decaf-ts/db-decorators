@@ -14,7 +14,7 @@ const tsOptions = {
 };
 
 function exportModules() {
-    const tsProject = ts.createProject('tsconfig.json', tsOptions);
+    const tsProject = ts.createProject('tsconfig.json', Object.assign({}, tsOptions, {module: "umd"}));
     return src('src/**/*.ts')
         .pipe(sourcemaps.init())
         .pipe(tsProject())
@@ -42,7 +42,7 @@ function exportDefault() {
 }
 
 function exportModulesBundles() {
-    const tsProject = ts.createProject('tsconfig.json', tsOptions);
+    const tsProject = ts.createProject('tsconfig.json', Object.assign({}, tsOptions, {module: "umd"}));
     return src('src/**/*.ts')
         .pipe(sourcemaps.init())
         .pipe(tsProject())
