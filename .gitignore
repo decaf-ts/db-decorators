@@ -1,9 +1,14 @@
-
-/lib
-/dist
-
+/tests/web/bundles/
+/env.json
+/privatesky
+/apihub-root
+/octopus-freeze.json
 # Created by https://www.toptal.com/developers/gitignore/api/webstorm+all,vim,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=webstorm+all,vim,node
+
+/dist
+/lib
+/docs
 
 ### Node ###
 # Logs

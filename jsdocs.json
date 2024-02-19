@@ -24,17 +24,21 @@
     },
     "templates": {
         "better-docs": {
-            "name": "Database Decorator Engine",
-            "title": "Database Decorator Engine",
+            "name": "Database Decorators",
+            "title": "Database Decorators",
             "hideGenerator": true,
             "navLinks": [
                 {
-                    "label": "Github Repository",
-                    "href": "https://github.com/TiagoVenceslau/db-decorators#readme"
+                    "label": "Test Results",
+                    "href": "coverage"
                 },
                 {
-                    "label": "Github Profile",
-                    "href": "https://github.com/TiagoVenceslau"
+                    "label": "Decorator Validaton",
+                    "href": "https://github.com/TiagoVenceslau/decorator-validation#readme"
+                },
+                {
+                    "label": "Gitlab Repository",
+                    "href": "https://github.com/TiagoVenceslau/db-deorators#readme"
                 }
             ]
         },
@@ -49,6 +53,6 @@
         "readme": "./README.md",
         "recurse": true,
         "verbose": true,
-        "tutorials": "./tests"
+        "tutorials": "./workdocs/tutorials"
     }
 }

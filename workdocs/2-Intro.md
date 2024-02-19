@@ -8,3 +8,4 @@ This is a development repository and as such:
 
 Everything else is tested and working
 
+#include "./workdocs/tutorials/00-Install.md"

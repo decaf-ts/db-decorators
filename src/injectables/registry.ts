@@ -1,79 +1,86 @@
-import {CriticalError} from "../errors";
+import {CriticalError} from "@glass-project1/logging";
+import {Constructor} from "@glass-project1/decorator-validation";
 
 /**
- * Basic Builder Registry Interface
- * @typedef T
+ * @summary Basic Builder Registry Interface
  * @interface BuilderRegistry
- *
+ * @category Model
  */
 export interface BuilderRegistry<T>{
     /**
-     *
+     * @summary retrieves a builder
      * @param {string} name
      * @param {args[]} args
+     * @method
      */
     get(name: string, ...args: any[]): {new(): T} | undefined;
 
     /**
-     *
+     * @summary register a constructor
      * @param {string} name
      * @param {any} constructor
      * @param {any[]} args
+     * @method
      */
     register(name: string, constructor: any, ...args: any[]): void;
 
     /**
-     *
-     * @param {{}} obj
+     * @summary builds an object using a registered constructor
+     * @param {Record<string, any>} obj
      * @param {any[]} args
+     * @method
      */
-    build(obj: {[indexer: string]: any}, ...args: any[]): T;
+    build(obj: Record<string, any>, ...args: any[]): T;
 }
 
 /**
- * @typedef Injectable
- *
- * @memberOf db-decorators.injectables
+ * @summary defines an Injectable type
+ * @memberOf module:db-decorators.Injectables
  */
-export type Injectable<T> = {new: T} | T
+export type Injectable<T> = Constructor<T> | T
 
 /**
+ * @summary Interface for an injectable registry
  * @interface InjectableRegistry
- *
+ * @category Injectables
  */
 export interface InjectablesRegistry {
     /**
-     *
+     * @summary retrieves an {@link Injectable}
      * @param {string} name
      * @param {any[]} args
      * @return {Injectable | undefined}
      *
-     * @memberOf InjectablesRegistry
+     * @method
      */
     get<T>(name: string, ...args: any[]): Injectable<T> | undefined;
 
     /**
-     *
+     * @summary registers an injectable constructor
      * @param {Injectable} constructor
      * @param {any[]} args
      *
-     * @memberOf InjectablesRegistry
+     * @method
      */
     register<T>(constructor: Injectable<T>, ...args: any[]): void;
 
     /**
-     *
-     * @param {{}} obj
+     * @summary Instantiates an Injectable
+     * @param {Record<string, any>} obj
      * @param {any[]} args
      * @return T
+     *
+     * @method
      */
-    build<T>(obj: {[indexer: string]: any}, ...args: any[]): T;
+    build<T>(obj: Record<string, any>, ...args: any[]): T;
 }
 
 /**
+ * @summary Holds the vairous {@link Injectable}s
  * @class InjectableRegistryImp
  * @implements InjectablesRegistry
  *
+ * @category Injectables
  */
 export class InjectableRegistryImp implements InjectablesRegistry {
     private cache: {[indexer: string] : any} = {};
@@ -95,14 +102,15 @@ export class InjectableRegistryImp implements InjectablesRegistry {
     /**
      * @inheritDoc
      */
-    register<T>(obj: Injectable<T>, isSingleton: boolean = true, force: boolean = false): void {
-        // @ts-ignore
-        const constructor = !obj.name && obj.constructor;
-        if ((typeof obj !== 'function' && !constructor))
+    register<T>(obj: Injectable<T>, category: string | undefined = undefined, isSingleton: boolean = true, force: boolean = false): void {
+
+        const castObj: Record<string, any> = obj as Record<string, any>;
+
+        const constructor = !castObj.name && castObj.constructor;
+        if ((typeof castObj !== 'function' && !constructor))
             throw new CriticalError(`Injectable registering failed. Missing Class name or constructor`);
 
-        // @ts-ignore
-        const name = constructor && constructor.name && constructor.name !== "Function" ? constructor.name : obj.name;
+        const name = category || (constructor && constructor.name && constructor.name !== "Function" ? (constructor as {[indexer: string]: any}).name : castObj.name);
 
         if (!this.cache[name] || force)
             this.cache[name] = {
@@ -124,7 +132,7 @@ export class InjectableRegistryImp implements InjectablesRegistry {
                 singleton: singleton
             }
             return instance;
-        } catch (e) {
+        } catch (e: any) {
             throw new CriticalError(e);
         }
     }
@@ -133,10 +141,10 @@ export class InjectableRegistryImp implements InjectablesRegistry {
 let actingInjectablesRegistry: InjectablesRegistry
 
 /**
- * Returns the current {@link InjectableRegistryImp}
+ * @summary Returns the current {@link InjectableRegistryImp}
  * @function getInjectablesRegistry
  * @return InjectablesRegistry, defaults to {@link InjectableRegistryImp}
- * @memberOf db-decorators.injectables
+ * @memberOf module:db-decorators.Injectables
  */
 export function getInjectablesRegistry(): InjectablesRegistry {
     if (!actingInjectablesRegistry)
@@ -145,10 +153,10 @@ export function getInjectablesRegistry(): InjectablesRegistry {
 }
 
 /**
- * Returns the current OperationsRegistry
+ * @summary Returns the current OperationsRegistry
+ * @param {InjectablesRegistry} operationsRegistry the new implementation of Registry
  * @function getOperationsRegistry
- * @prop {InjectablesRegistry} injectablesRegistry the new implementation of Registry
- * @memberOf db-decorators.injectables
+ * @memberOf module:db-decorators.Injectables
  */
 export function setInjectablesRegistry(operationsRegistry: InjectablesRegistry){
     actingInjectablesRegistry = operationsRegistry;

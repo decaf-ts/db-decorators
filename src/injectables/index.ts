@@ -1,7 +1,3 @@
-/**
- * @namespace db-decorators.injectables
- * @memberOf db-decorators
- */
-
+export * from './constants';
 export * from './decorators';
 export * from './registry';
