@@ -25,12 +25,12 @@ In order to use the db decorators package, we need to follow a list of steps pre
 
 To install as a dependency do:
 ```sh
-$ npm install @glass-project1/db-decorators
+$ npm install @decaf-ts/db-decorators
 ```
 
 To install as a dev dependency do:
 ```sh
-$ npm install @glass-project1/db-decorators --save-dev
+$ npm install @decaf-ts/db-decorators --save-dev
 ```
 instead.
 

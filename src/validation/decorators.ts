@@ -1,10 +1,18 @@
-import {UpdateValidationKeys} from "./constants";
-import {DBKeys, DEFAULT_ERROR_MESSAGES, DEFAULT_TIMESTAMP_FORMAT} from "../model";
-import {DBOperations, on, OperationKeys} from "../operations";
-import {ReadOnlyValidator, TimestampValidator, UpdateValidator} from "./validation";
-import {date, getValidatorRegistry, required} from "@tvenceslau/decorator-validation/lib";
-import {Callback, Repository} from "../repository";
-import DBModel from "../model/DBModel";
+import {
+  date,
+  required,
+  Validation,
+  ValidatorDefinition,
+} from "@decaf-ts/decorator-validation";
+import {
+  DEFAULT_ERROR_MESSAGES,
+  DEFAULT_TIMESTAMP_FORMAT,
+} from "../model/constants";
+import { TimestampValidator } from "./validators/TimestampValidator";
+import { ReadOnlyValidator } from "./validators/ReadOnlyValidator";
+import { UpdateValidator } from "./validators/UpdateValidator";
+import { DBModel } from "../model/DBModel";
+import { DBKeys, UpdateValidationKeys } from "./constants";
 
 const getDBUpdateKey = (str: string) => UpdateValidationKeys.REFLECT + str;
 
@@ -18,18 +26,25 @@ const getDBUpdateKey = (str: string) => UpdateValidationKeys.REFLECT + str;
  *
  * @category Decorators
  */
-export function readonly(message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID, validator: {new(): UpdateValidator} = ReadOnlyValidator) {
-    return (target: any, propertyKey: string) => {
-        Reflect.defineMetadata(
-            getDBUpdateKey(DBKeys.READONLY),
-            {
-                message: message
-            },
-            target,
-            propertyKey
-        );
-        getValidatorRegistry().register({validator: validator, validationKey: UpdateValidationKeys.READONLY})
-    }
+export function readonly(
+  message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID,
+  validator: { new (): UpdateValidator } = ReadOnlyValidator,
+) {
+  return (target: any, propertyKey: string) => {
+    Reflect.defineMetadata(
+      getDBUpdateKey(DBKeys.READONLY),
+      {
+        message: message,
+      },
+      target,
+      propertyKey,
+    );
+    Validation.register({
+      validator: validator,
+      validationKey: UpdateValidationKeys.READONLY,
+      force: true,
+    } as ValidatorDefinition);
+  };
 }
 
 /**
@@ -63,25 +78,41 @@ export function readonly(message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVAL
  *
  * @category Decorators
  */
-export const timestamp = (operation: string[] = DBOperations.CREATE_UPDATE, format: string = DEFAULT_TIMESTAMP_FORMAT, validator: {new(): UpdateValidator} = TimestampValidator) => (target: any, propertyKey: string) => {
+export const timestamp =
+  (
+    operation: string[] = DBOperations.CREATE_UPDATE,
+    format: string = DEFAULT_TIMESTAMP_FORMAT,
+    validator: { new (): UpdateValidator } = TimestampValidator,
+  ) =>
+  (target: any, propertyKey: string) => {
     date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE)(target, propertyKey);
     required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED)(target, propertyKey);
-    on(operation, function(this: Repository<DBModel>, model: DBModel, callback?: Callback){
+    on(
+      operation,
+      function (
+        this: Repository<DBModel>,
+        model: DBModel,
+        callback?: Callback,
+      ) {
         model[propertyKey] = new Date();
-        if (callback)
-            return callback(undefined, model);
-    })(target,propertyKey);
+        if (callback) return callback(undefined, model);
+      },
+    )(target, propertyKey);
 
-    if (operation.indexOf(OperationKeys.UPDATE) !== -1){
-        Reflect.defineMetadata(
-            getDBUpdateKey(DBKeys.TIMESTAMP),
-            {
-                message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID
-            },
-            target,
-            propertyKey
-        );
+    if (operation.indexOf(OperationKeys.UPDATE) !== -1) {
+      Reflect.defineMetadata(
+        getDBUpdateKey(DBKeys.TIMESTAMP),
+        {
+          message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
+        },
+        target,
+        propertyKey,
+      );
 
-        getValidatorRegistry().register({validator: validator, validationKey: UpdateValidationKeys.TIMESTAMP})
+      Validation.register({
+        validator: validator,
+        validationKey: UpdateValidationKeys.TIMESTAMP,
+        force: true,
+      } as ValidatorDefinition);
     }
-}
+  };

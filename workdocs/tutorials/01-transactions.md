@@ -96,7 +96,7 @@ Also notice how only the concrete class has the `@repository` class decorator, t
 Now consider the following scenario:
 
 ```typescript
-import {Callback} from "@glass-project1/logging";
+import {Callback} from "@decaf-ts/logging";
 import {transactional} from "./transactions";
 import {Transactional} from "./decorators";
 
@@ -130,7 +130,7 @@ in this scenario, when the `execute` method is called, a new transaction will be
 Finally, for the last scenario:
 
 ```typescript
-import {Callback} from "@glass-project1/logging";
+import {Callback} from "@decaf-ts/logging";
 import {Transaction, transactional} from "./transactions";
 import {Transactional} from "./decorators";
 

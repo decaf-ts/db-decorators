@@ -1,23 +1,31 @@
-const path = require('path');
-const gulp = require('gulp');
-const {src, dest, parallel, series} = gulp;
-const ts = require('gulp-typescript');
-const sourcemaps = require('gulp-sourcemaps');
-const uglify = require('gulp-uglify');
-const gulpIf = require('gulp-if')
-const merge = require('merge-stream');
-const named = require('vinyl-named');
-const replace = require('gulp-replace');
-const webpack = require('webpack-stream');
-const run = require("gulp-run-command").default
+import path from "path";
+import gulp from "gulp";
+import rename from "gulp-rename";
 
-let {name, version} = require('./package.json');
+const {src, dest, parallel, series} = gulp;
+import ts from "gulp-typescript";
+
+const {createProject} = ts;
+import sourcemaps from "gulp-sourcemaps";
+import uglify from "gulp-uglify";
+import gulpIf from "gulp-if";
+import merge from "merge-stream";
+import named from "vinyl-named";
+import replace from "gulp-replace";
+import webpack from "webpack-stream";
+import run from "gulp-run-command";
+
+import pkg from './package.json' assert {type: "json"}
+import fs from "fs";
+
+let {name, version, type} = pkg
+
 if (name.includes("/"))
-    name = name.split("/")[1] // for scopes packages
+    name = name.split("/")[1] // for scoped packages
 const VERSION_STRING = "##VERSION##"
 
-function patchFiles (isDev){
-    return function patchFile(){
+function patchFiles(isDev) {
+    return function patchFile() {
 
         const doPatch = (basePath) => {
             const jsFiles = [`${basePath}/**/*.js`]
@@ -26,14 +34,14 @@ function patchFiles (isDev){
                 .pipe(dest(`${basePath}/`))
         }
 
-        if(!isDev)
+        if (!isDev)
             return doPatch("dist")
         return doPatch("lib");
     }
 }
 
-function getWebpackConfig(isESM, isDev){
-    const webPackConfig =  {
+function getWebpackConfig(isESM, isDev) {
+    const webPackConfig = {
         mode: isDev ? "development" : "production", // can be changed to production to produce minified bundle
 
         module: {
@@ -46,8 +54,8 @@ function getWebpackConfig(isESM, isDev){
                             configFile: 'tsconfig.json'
                         }
                     }],
-                    include:[
-                        path.resolve(__dirname, "src")
+                    include: [
+                        path.join(process.cwd(), "./src")
                     ],
                     exclude: /node_modules/,
                 }
@@ -55,22 +63,35 @@ function getWebpackConfig(isESM, isDev){
         },
 
         resolve: {
-            extensions: ['.ts', '.js']
+            extensions: ['.ts', '.js'],
+            fallback: {
+                "path": false,
+                "fs": false,
+                "stream": false,
+                "os": false,
+                "assert": false,
+                "util": false
+            }
         },
 
         output: {
             filename: `${name}.bundle.${!isDev ? 'min.' : ''}${isESM ? 'esm.' : ''}js`,
-            path: path.resolve(__dirname, "dist/"),
-            library: {
-                type: "module",
-            },
+            path: path.join(process.cwd(), "./dist/")
         }
     }
 
-    if(isESM)
+    if (isESM)
         webPackConfig.experiments = {outputModule: true}
     else
-        webPackConfig.output = Object.assign({}, webPackConfig.output, {globalObject: 'this', library: name, libraryTarget: "umd", umdNamedDefine: true,});
+        webPackConfig.output = Object.assign(
+            {},
+            webPackConfig.output,
+            {
+                globalObject: 'this',
+                library: name,
+                libraryTarget: "umd",
+                umdNamedDefine: true,
+            });
 
     if (isDev)
         webPackConfig.devtool = 'eval-source-map';
@@ -78,30 +99,66 @@ function getWebpackConfig(isESM, isDev){
     return webPackConfig;
 }
 
-function exportDefault(isDev){
-    return function exportDefault(){
-        const tsProject = ts.createProject('tsconfig.json', {
-            target: "es5",
-            module: "commonjs",
-            declaration: true,
-            declarationMap: true,
-            emitDeclarationOnly: false,
-            isolatedModules: false
-        });
+function exportDefault(isDev, mode) {
+    const func = () => {
+        function createLib() {
+            const tsProject = createProject('tsconfig.json', {
+                module: mode,
+                declaration: true,
+                declarationMap: true,
+                emitDeclarationOnly: false,
+                isolatedModules: false
+            });
 
-        const stream =  src('./src/**/*.ts')
-            .pipe(gulpIf(isDev, sourcemaps.init()))
-            .pipe(tsProject())
+            const stream = src('./src/**/*.ts')
+                .pipe(replace(VERSION_STRING, `${version}`))
+                .pipe(gulpIf(isDev, sourcemaps.init()))
+                .pipe(tsProject())
 
-        return merge([
-            stream.dts.pipe(dest("lib")),
-            stream.js.pipe(gulpIf(!isDev, uglify())).pipe(gulpIf(isDev, sourcemaps.write())).pipe(dest("lib"))
-        ])
+            const destPath = `lib${mode === "commonjs" ? "" : "/esm"}`;
+
+            const fixCjsImports = function (match, ...groups) {
+                const renamedFile = groups[1] + ".cjs"
+
+                try {
+                    const fileName = groups[1] + ".ts"
+
+                    const filePath = path.join(
+                        path.join(this.file.path.split(name)[0], name, "src"),
+                        this.file.path.split(name)[1].split("/").slice(1, this.file.path.split(name)[1].split("/").length - 1).join("/"),
+                        fileName
+                    )
+
+                    if (!fs.existsSync(filePath))
+                        throw new Error()
+                } catch (e) {
+                    return groups[0] + groups[1] + "/index.cjs" + groups[2]
+                }
+
+                return groups[0] + renamedFile + groups[2]
+            }
+
+            return merge([
+                stream.dts.pipe(dest(destPath)),
+                stream.js.pipe(gulpIf(!isDev, uglify()))
+                    .pipe(gulpIf(isDev, sourcemaps.write()))
+                    .pipe(gulpIf(mode === "commonjs", rename(function changeName(file) {
+                        return Object.assign(file, {extname: ".cjs"})
+                    })))
+                    .pipe(gulpIf(mode === "commonjs", replace(/(require\(["'])(\..*?)(["']\)[;,])/g, fixCjsImports)))
+                    .pipe(dest(destPath))
+            ])
+        }
+
+        return createLib()
     }
-
+    Object.defineProperty(func, "name", {
+        value: `exportDefault-${isDev ? "dev" : "prod"}-${mode}`
+    })
+    return func;
 }
 
-function exportBundles(isEsm, isDev){
+function exportBundles(isEsm, isDev) {
     const entryFile = "src/index.ts"
     return src(entryFile)
         .pipe(named())
@@ -109,60 +166,80 @@ function exportBundles(isEsm, isDev){
         .pipe(dest(`./dist${isEsm ? '/esm' : ""}`));
 }
 
-function exportESMDist(){
-    return exportBundles(true, false);
+function exportESMDist(isDev) {
+    const func = () => exportBundles(true, isDev);
+    Object.defineProperty(func, "name", {
+        value: `exportESMDist-${isDev ? "dev" : "prod"}`
+    })
+    return func;
 }
 
-function exportJSDist(){
-    return exportBundles(false, false);
+function exportJSDist(isDev) {
+    const func = () => exportBundles(false, isDev);
+    Object.defineProperty(func, "name", {
+        value: `exportJSDist-${isDev ? "dev" : "prod"}`
+    })
+    return func;
 }
 
-exports.dev = series(
-    exportDefault(true),
-    patchFiles(true)
-)
-exports.prod = series(
-    parallel(
-        exportDefault(true),
-        exportESMDist, exportJSDist)
-    ,
-    parallel(
-        patchFiles(false),
-        patchFiles(true)
-    )
-);
-
-function docs(){
+function makeDocs() {
     const copyFiles = (source, destination) => {
-        return function copyFiles(){
-            return src(source + "/**/*" , { base: source }).pipe(dest(destination));
+        return function copyFiles() {
+            try {
+                return src(source + "/**/*", {base: source}).pipe(dest(destination));
+            } catch (e) {
+                throw e
+            }
         }
     }
 
-    function compileReadme ()  {
-        return run("npx markdown-include ./mdCompile.json")()
+    function compileReadme() {
+        return run.default("npx markdown-include ./mdCompile.json")()
     }
 
     function compileDocs() {
-        return run("npx jsdoc -c jsdocs.json -t ./node_modules/better-docs")()
+        return run.default("npx jsdoc -c jsdocs.json -t ./node_modules/better-docs")()
     }
 
-
-    return series(compileReadme, compileDocs, parallel(...[
+    return series(
+        compileReadme,
+        compileDocs,
+        parallel(...[
             {
                 src: "workdocs/assets",
-                dest:  "./docs/assets"
+                dest: "./docs/workdocs/assets"
             },
             {
                 src: "workdocs/coverage",
-                dest:  "./docs/coverage"
+                dest: "./docs/workdocs/coverage"
             },
             {
                 src: "workdocs/badges",
-                dest:  "./docs/badges"
+                dest: "./docs/workdocs/badges"
+            },
+            {
+                src: "workdocs/resources",
+                dest: "./docs/workdocs/resources"
             }
         ].map(e => copyFiles(e.src, e.dest)))
     )
 }
 
-exports.docs = docs()
+export const dev = series(
+    parallel(
+        series(
+            exportDefault(true, "commonjs"),
+            exportDefault(true, "es2022")
+        ), exportESMDist(true), exportJSDist(false))
+)
+
+export const prod = series(
+    parallel(
+        series(
+            exportDefault(false, "commonjs"),
+            exportDefault(false, "es2022")
+        ), exportESMDist(false), exportJSDist(false)),
+    patchFiles(true)
+)
+
+export const docs = makeDocs()

@@ -1,8 +1,7 @@
-import "reflect-metadata";
-import {OperationKeys, DBOperations} from "./constants";
-import {hashCode} from "@tvenceslau/decorator-validation/lib";
-import {getOperationsRegistry} from "./registry";
-import {AfterOperationHandler, OnOperationHandler} from "./types";
+import { Model } from "@decaf-ts/decorator-validation";
+import { AfterOperationHandler, OnOperationHandler } from "./types";
+import { DBOperations, OperationKeys } from "./constants";
+import { getOperationsRegistry } from "./registry";
 
 /**
  * @namespace db-decorators.operations.decorators
@@ -30,9 +29,16 @@ const getOperationKey = (str: string) => OperationKeys.REFLECT + str;
  *
  * @category Decorators
  */
-export const onCreateUpdate = (handler: OnOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
-    on(DBOperations.CREATE_UPDATE, handler, args, ...props)(target, propertyKey);
-}
+export const onCreateUpdate =
+  (handler: OnOperationHandler<any>, args: any[], ...props: string[]) =>
+  (target: any, propertyKey: string) => {
+    on(
+      DBOperations.CREATE_UPDATE,
+      handler,
+      args,
+      ...props,
+    )(target, propertyKey);
+  };
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations.UPDATE}
@@ -47,9 +53,11 @@ export const onCreateUpdate = (handler: OnOperationHandler<any>, args: any[], ..
  *
  * @category Decorators
  */
-export const onUpdate = (handler: OnOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const onUpdate =
+  (handler: OnOperationHandler<any>, args: any[], ...props: string[]) =>
+  (target: any, propertyKey: string) => {
     on(DBOperations.UPDATE, handler, args, ...props)(target, propertyKey);
-}
+  };
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations.CREATE}
@@ -64,9 +72,11 @@ export const onUpdate = (handler: OnOperationHandler<any>, args: any[], ...props
  *
  * @category Decorators
  */
-export const onCreate = (handler: OnOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const onCreate =
+  (handler: OnOperationHandler<any>, args: any[], ...props: string[]) =>
+  (target: any, propertyKey: string) => {
     on(DBOperations.CREATE, handler, args, ...props)(target, propertyKey);
-}
+  };
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations.READ}
@@ -81,9 +91,11 @@ export const onCreate = (handler: OnOperationHandler<any>, args: any[], ...props
  *
  * @category Decorators
  */
-export const onRead = (handler: OnOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const onRead =
+  (handler: OnOperationHandler<any>, args: any[], ...props: string[]) =>
+  (target: any, propertyKey: string) => {
     on(DBOperations.READ, handler, args, ...props)(target, propertyKey);
-}
+  };
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations.DELETE}
@@ -98,9 +110,11 @@ export const onRead = (handler: OnOperationHandler<any>, args: any[], ...props: 
  *
  * @category Decorators
  */
-export const onDelete = (handler: OnOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const onDelete =
+  (handler: OnOperationHandler<any>, args: any[], ...props: string[]) =>
+  (target: any, propertyKey: string) => {
     on(DBOperations.DELETE, handler, args, ...props)(target, propertyKey);
-}
+  };
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations}
@@ -116,23 +130,30 @@ export const onDelete = (handler: OnOperationHandler<any>, args: any[], ...props
  *
  * @category Decorators
  */
-export const on = (operation: string[] = DBOperations.ALL, handler: OnOperationHandler<any>, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
-    operation.forEach(op => {
-        op = OperationKeys.ON + op;
-        Reflect.defineMetadata(
-            getOperationKey(op),
-            {
-                operation: op,
-                handler: hashCode(handler.toString()),
-                args: args,
-                props: props
-            },
-            target,
-            propertyKey
-        );
-        getOperationsRegistry().register(handler, op, target, propertyKey)
+export const on =
+  (
+    operation: string[] = DBOperations.ALL,
+    handler: OnOperationHandler<any>,
+    args: any[] = [],
+    ...props: string[]
+  ) =>
+  (target: any, propertyKey: string) => {
+    operation.forEach((op) => {
+      op = OperationKeys.ON + op;
+      Reflect.defineMetadata(
+        getOperationKey(op),
+        {
+          operation: op,
+          handler: Model.hash(handler.toString()),
+          args: args,
+          props: props,
+        },
+        target,
+        propertyKey,
+      );
+      getOperationsRegistry().register(handler, op, target, propertyKey);
     });
-}
+  };
 
 /**
  * Defines a behaviour to set after the defined {@link DBOperations.CREATE_UPDATE}
@@ -147,9 +168,16 @@ export const on = (operation: string[] = DBOperations.ALL, handler: OnOperationH
  *
  * @category Decorators
  */
-export const afterCreateUpdate = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
-    after(DBOperations.CREATE_UPDATE, handler, args, ...props)(target, propertyKey);
-}
+export const afterCreateUpdate =
+  (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) =>
+  (target: any, propertyKey: string) => {
+    after(
+      DBOperations.CREATE_UPDATE,
+      handler,
+      args,
+      ...props,
+    )(target, propertyKey);
+  };
 
 /**
  * Defines a behaviour to set after the defined {@link DBOperations.UPDATE}
@@ -164,9 +192,11 @@ export const afterCreateUpdate = (handler: AfterOperationHandler<any>, args: any
  *
  * @category Decorators
  */
-export const afterUpdate = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const afterUpdate =
+  (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) =>
+  (target: any, propertyKey: string) => {
     after(DBOperations.UPDATE, handler, args, ...props)(target, propertyKey);
-}
+  };
 
 /**
  * Defines a behaviour to set after the defined {@link DBOperations.CREATE}
@@ -181,9 +211,11 @@ export const afterUpdate = (handler: AfterOperationHandler<any>, args: any[], ..
  *
  * @category Decorators
  */
-export const afterCreate = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const afterCreate =
+  (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) =>
+  (target: any, propertyKey: string) => {
     after(DBOperations.CREATE, handler, args, ...props)(target, propertyKey);
-}
+  };
 
 /**
  * Defines a behaviour to set after the defined {@link DBOperations.READ}
@@ -198,9 +230,11 @@ export const afterCreate = (handler: AfterOperationHandler<any>, args: any[], ..
  *
  * @category Decorators
  */
-export const afterRead = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const afterRead =
+  (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) =>
+  (target: any, propertyKey: string) => {
     after(DBOperations.READ, handler, args, ...props)(target, propertyKey);
-}
+  };
 
 /**
  * Defines a behaviour to set after the defined {@link DBOperations.DELETE}
@@ -215,9 +249,11 @@ export const afterRead = (handler: AfterOperationHandler<any>, args: any[], ...p
  *
  * @category Decorators
  */
-export const afterDelete = (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) => (target: any, propertyKey: string) => {
+export const afterDelete =
+  (handler: AfterOperationHandler<any>, args: any[], ...props: string[]) =>
+  (target: any, propertyKey: string) => {
     after(DBOperations.DELETE, handler, args, ...props)(target, propertyKey);
-}
+  };
 
 /**
  * Defines a behaviour to set on the defined {@link DBOperations}
@@ -233,20 +269,27 @@ export const afterDelete = (handler: AfterOperationHandler<any>, args: any[], ..
  *
  * @category Decorators
  */
-export const after = (operation: string[] = DBOperations.ALL, handler: AfterOperationHandler<any>, args: any[] = [], ...props: string[]) => (target: any, propertyKey: string) => {
-    operation.forEach(op => {
-        op = OperationKeys.AFTER + op;
-        Reflect.defineMetadata(
-            getOperationKey(op),
-            {
-                operation: op,
-                handler: hashCode(handler.toString()),
-                args: args,
-                props: props
-            },
-            target,
-            propertyKey
-        );
-        getOperationsRegistry().register(handler, op, target, propertyKey);
+export const after =
+  (
+    operation: string[] = DBOperations.ALL,
+    handler: AfterOperationHandler<any>,
+    args: any[] = [],
+    ...props: string[]
+  ) =>
+  (target: any, propertyKey: string) => {
+    operation.forEach((op) => {
+      op = OperationKeys.AFTER + op;
+      Reflect.defineMetadata(
+        getOperationKey(op),
+        {
+          operation: op,
+          handler: Model.hash(handler.toString()),
+          args: args,
+          props: props,
+        },
+        target,
+        propertyKey,
+      );
+      getOperationsRegistry().register(handler, op, target, propertyKey);
     });
-}
+  };

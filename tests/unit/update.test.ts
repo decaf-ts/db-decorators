@@ -3,7 +3,7 @@ import {TestModelAsync} from "./TestModel";
 import {AsyncRepository} from "../../src";
 // @ts-ignore
 import {TestRamRepository} from "./TestRepository";
-import type {Err} from "@glass-project1/logging";
+import type {Err} from "@decaf-ts/logging";
 
 describe("Update Validation", () => {
 

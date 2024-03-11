@@ -33,12 +33,8 @@
                     "href": "coverage"
                 },
                 {
-                    "label": "Decorator Validaton",
-                    "href": "https://github.com/TiagoVenceslau/decorator-validation#readme"
-                },
-                {
                     "label": "Gitlab Repository",
-                    "href": "https://github.com/TiagoVenceslau/db-deorators#readme"
+                    "href": "https://github.com/decaf-ts/db-decorators#readme"
                 }
             ]
         },
