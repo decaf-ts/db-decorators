@@ -1,7 +1,7 @@
 import { Model } from "@decaf-ts/decorator-validation";
 import { AfterOperationHandler, OnOperationHandler } from "./types";
 import { DBOperations, OperationKeys } from "./constants";
-import { getOperationsRegistry } from "./registry";
+import { Operations } from "./Operations";
 
 /**
  * @namespace db-decorators.operations.decorators
@@ -144,14 +144,14 @@ export const on =
         getOperationKey(op),
         {
           operation: op,
-          handler: Model.hash(handler.toString()),
+          handler: handler.name || Model.hash(handler.toString()),
           args: args,
           props: props,
         },
         target,
         propertyKey,
       );
-      getOperationsRegistry().register(handler, op, target, propertyKey);
+      Operations.register(handler, op, target, propertyKey);
     });
   };
 
@@ -283,13 +283,13 @@ export const after =
         getOperationKey(op),
         {
           operation: op,
-          handler: Model.hash(handler.toString()),
+          handler: handler.name || Model.hash(handler.toString()),
           args: args,
           props: props,
         },
         target,
         propertyKey,
       );
-      getOperationsRegistry().register(handler, op, target, propertyKey);
+      Operations.register(handler, op, target, propertyKey);
     });
   };
