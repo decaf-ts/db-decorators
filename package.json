@@ -24,7 +24,7 @@
     "release": "./bin/tag-release.sh",
     "clean-publish": "npx clean-publish",
     "coverage": "npm run test:all && jest-coverage-badges --input \"./workdocs/coverage/coverage-summary.json\" --output \"./workdocs/badges\"",
-    "docs": "npx rimraf ./docs && mkdir docs && npm run do-install -- install better-docs taffydb && gulp docs; npm remove better-docs taffydb"
+    "docs": "npx rimraf ./docs && mkdir docs && npm run do-install -- better-docs taffydb && gulp docs; npm remove better-docs taffydb"
   },
   "repository": {
     "type": "git",
