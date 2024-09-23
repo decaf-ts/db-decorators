@@ -65,7 +65,8 @@
   },
   "homepage": "https://github.com/decaf-ts/db-decorators#readme",
   "devDependencies": {
-    "@decaf-ts/decorator-validation": "^1.0.7",
+    "@decaf-ts/decorator-validation": "latest",
+    "@decaf-ts/injectable-decorators": "latest",
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "clean-publish": "^4.3.0",
