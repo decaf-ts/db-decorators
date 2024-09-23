@@ -1,8 +1,8 @@
 /**
- * Set of constants to define db CRUD operations and their equivalent 'on' and 'after' phases
- * @enum OperationKeys
+ * @summary Set of constants to define db CRUD operations and their equivalent 'on' and 'after' phases
+ * @const OperationKeys
  *
- * @category Constants
+ * @memberOf module:db-decorators.Operations
  */
 export enum OperationKeys {
   REFLECT = "operations.db.",
@@ -15,11 +15,11 @@ export enum OperationKeys {
 }
 
 /**
- * Maps out groups of CRUD operations for easier mapping of decorators
+ * @summary Maps out groups of CRUD operations for easier mapping of decorators
  *
  * @constant DBOperations
  *
- * @memberOf db-decorators.operations
+ * @memberOf module:db-decorators.Operations
  */
 export enum DBOperations {
   CREATE = [OperationKeys.CREATE],
@@ -35,13 +35,3 @@ export enum DBOperations {
     OperationKeys.DELETE,
   ],
 }
-
-/**
- * @enum DBErrors
- *
- * @memberOf db-decorators.operations
- */
-export const DBErrors = {
-  EXISTS: "Already Exists",
-  MISSING: "Missing or Deleted",
-};

@@ -11,7 +11,7 @@ export class Repository<T extends DBModel> implements IRepository<T> {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   create(model: T, ...args: any[]): Promise<T> {
-    throw new Error("Child classes must implement this");
+    throw new Error("Child classes must implement this.");
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,6 +1,6 @@
 // @ts-ignore
 import {TestModelAsync} from "./TestModel";
-import {AsyncRepository, DBModel} from "../../lib";
+import {Repository, DBModel} from "../../src";
 import {
   constructFromModel,
   list,

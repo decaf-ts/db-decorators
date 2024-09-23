@@ -18,11 +18,11 @@ import { IRepository } from "../interfaces/IRepository";
 export function enforceDBDecorators<T extends DBModel>(
   repo: IRepository<T>,
   model: T,
-  decorators: { [indexer: string]: { [indexer: string]: any[] } },
+  decorators: Record<string, any[]>,
   keyPrefix: string = "",
 ) {
   const propIterator = async function (props: string[]) {
-    const prop = props.shift();
+    const prop: string | undefined = props.shift();
     if (!prop) return model;
 
     const decs: any[] = decorators[prop];
@@ -32,11 +32,11 @@ export function enforceDBDecorators<T extends DBModel>(
       keyPrefix + decs[0].key,
     );
     if (!handler)
-      throw new Operatio(
+      throw new Error(
         `Could not find registered handler for the operation ${prop}`,
       );
 
-    handler.call(
+    const result = await handler.call(
       repo,
       model,
       ...decs[0].props.args,

@@ -1,5 +1,13 @@
 import { DBModel } from "../model/DBModel";
 import { Repository } from "../repository/Repository";
+import { OperationKeys } from "./constants";
+
+export type OperationMetadata = {
+  operation: OperationKeys;
+  handler: string;
+  args: any[];
+  props: string[];
+};
 
 /**
  * @typedef OperationHandler

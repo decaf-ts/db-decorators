@@ -4,11 +4,14 @@ import { DBModel } from "../model/DBModel";
 import { OperationKeys } from "./constants";
 
 /**
+ * @summary Holds the registered operation handlers
+ *
  * @class OperationsRegistry
  * @implements IRegistry<OperationHandler<any>>
  *
  * @see OperationHandler
  *
+ * @category Operations
  */
 export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
   private cache: Record<
@@ -17,7 +20,7 @@ export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
   > = {};
 
   /**
-   *
+   * @summary retrieves an {@link OperationHandler} if it exists
    * @param {string} targetName
    * @param {string} propKey
    * @param {string} operation
@@ -36,7 +39,7 @@ export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
   }
 
   /**
-   *
+   * @summary Registers an {@link OperationHandler}
    * @param {OperationHandler} handler
    * @param {string} operation
    * @param {{}} target

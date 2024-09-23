@@ -99,9 +99,9 @@ function getWebpackConfig(isESM, isDev) {
     return webPackConfig;
 }
 
-function exportDefault(isDev, mode) {
-    const func = () => {
-        function createLib() {
+function exportDefault(isDev, mode){
+    return function exportDefault(){
+        function createLib(){
             const tsProject = createProject('tsconfig.json', {
                 module: mode,
                 declaration: true,
@@ -110,30 +110,35 @@ function exportDefault(isDev, mode) {
                 isolatedModules: false
             });
 
-            const stream = src('./src/**/*.ts')
+            const stream =  src('./src/**/*.ts')
                 .pipe(replace(VERSION_STRING, `${version}`))
                 .pipe(gulpIf(isDev, sourcemaps.init()))
                 .pipe(tsProject())
 
             const destPath = `lib${mode === "commonjs" ? "" : "/esm"}`;
 
-            const fixCjsImports = function (match, ...groups) {
+            const fixCjsImports = function  (match, ...groups){
                 const renamedFile = groups[1] + ".cjs"
+                const fileName = groups[1] + ".ts"
 
-                try {
-                    const fileName = groups[1] + ".ts"
+                const resolvePath = function (path){
+                    const splits = path.split(name).slice(1).map(element => {
+                        return element === '/' ? element + name : element
+                    }).join("").split("/");
 
-                    const filePath = path.join(
-                        path.join(this.file.path.split(name)[0], name, "src"),
-                        this.file.path.split(name)[1].split("/").slice(1, this.file.path.split(name)[1].split("/").length - 1).join("/"),
-                        fileName
-                    )
-
-                    if (!fs.existsSync(filePath))
-                        throw new Error()
-                } catch (e) {
-                    return groups[0] + groups[1] + "/index.cjs" + groups[2]
+                    return splits.slice(0, splits.length - 1).join('/')
                 }
+
+                const filePath = path.join(
+                    this.file.path.split(name)[0],
+                    name ,
+                    "src",
+                    resolvePath(this.file.path),
+                    fileName
+                )
+
+                if(!fs.existsSync(filePath))
+                    return groups[0] + groups[1] + "/index.cjs" + groups[2]
 
                 return groups[0] + renamedFile + groups[2]
             }
@@ -145,17 +150,14 @@ function exportDefault(isDev, mode) {
                     .pipe(gulpIf(mode === "commonjs", rename(function changeName(file) {
                         return Object.assign(file, {extname: ".cjs"})
                     })))
-                    .pipe(gulpIf(mode === "commonjs", replace(/(require\(["'])(\..*?)(["']\)[;,])/g, fixCjsImports)))
+                    .pipe(gulpIf(mode === "commonjs", replace( /(require\(["'])(\..*?)(["']\)[;,])/g,  fixCjsImports)))
                     .pipe(dest(destPath))
             ])
         }
 
         return createLib()
     }
-    Object.defineProperty(func, "name", {
-        value: `exportDefault-${isDev ? "dev" : "prod"}-${mode}`
-    })
-    return func;
+
 }
 
 function exportBundles(isEsm, isDev) {

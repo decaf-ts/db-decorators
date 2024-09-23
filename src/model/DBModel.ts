@@ -9,12 +9,13 @@ import {
   ModelKeys,
   ReservedModels,
   stringFormat,
+  Validation,
   ValidationKeys,
   ValidationPropertyDecoratorDefinition,
 } from "@decaf-ts/decorator-validation";
-import { UpdateValidationKeys } from "../utils";
-import { UpdateValidator } from "../validators";
-import { DEFAULT_ERROR_MESSAGES as DEM } from "../utils/constants";
+import { UpdateValidationKeys } from "../validation/constants";
+import { UpdateValidator } from "../validation/validators/UpdateValidator";
+import { DEFAULT_ERROR_MESSAGES as DEM } from "../validation/constants";
 
 /**
  * @summary Validates the update of a model
@@ -60,7 +61,7 @@ export function validateCompare<T extends DBModel>(
           acc: undefined | { [indexer: string]: Errors },
           decorator: { key: string; props: {} },
         ) => {
-          const validator: UpdateValidator = getValidatorRegistry().get(
+          const validator: UpdateValidator = Validation.get(
             decorator.key,
           ) as UpdateValidator;
           if (!validator) {
@@ -139,11 +140,7 @@ export function validateCompare<T extends DBModel>(
                             prop
                           ].values();
                         } else {
-                          throw new LoggedError(
-                            "Invalid attribute type {0}",
-                            undefined,
-                            c,
-                          );
+                          throw new Error(`Invalid attribute type ${c}`);
                         }
 
                         const e: string[] = [];
@@ -151,9 +148,8 @@ export function validateCompare<T extends DBModel>(
                         for (let i = 0; i < currentList.length; i++) {
                           if (i >= oldList.length) break;
 
-                          let cur, old;
-                          cur = currentList[i];
-                          old = oldList[i];
+                          const cur = currentList[i];
+                          const old = oldList[i];
 
                           if (
                             typeof cur === "undefined" ||

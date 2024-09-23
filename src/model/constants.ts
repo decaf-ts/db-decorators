@@ -1,6 +1,8 @@
 /**
- * @enum DBKeys
- * @category Constants
+ * @summary Holds the DBModel reflection keys
+ * @const DBKeys
+ *
+ * @memberOf module:db-decorators.Model
  */
 export const DBKeys = {
   REFLECT: "model.db.",
@@ -11,26 +13,9 @@ export const DBKeys = {
 };
 
 /**
- * @enum DEFAULT_ERROR_MESSAGES
- * @category Constants
- */
-export const DEFAULT_ERROR_MESSAGES = {
-  ID: {
-    INVALID: "This Id is invalid",
-    REQUIRED: "The Id is mandatory",
-  },
-  READONLY: {
-    INVALID: "This cannot be updated",
-  },
-  TIMESTAMP: {
-    REQUIRED: "Timestamp is Mandatory",
-    DATE: "The Timestamp must the a valid date",
-    INVALID: "This value must always increase",
-  },
-};
-
-/**
+ * @summary Holds the default timestamp date format
  * @constant DEFAULT_TIMESTAMP_FORMAT
- * @category Constants
+ *
+ * @memberOf module:db-decorators.Model
  */
 export const DEFAULT_TIMESTAMP_FORMAT = "dd/MM/yyyy HH:mm:ss:S";

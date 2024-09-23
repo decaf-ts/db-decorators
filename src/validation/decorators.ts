@@ -4,17 +4,19 @@ import {
   Validation,
   ValidatorDefinition,
 } from "@decaf-ts/decorator-validation";
-import {
-  DEFAULT_ERROR_MESSAGES,
-  DEFAULT_TIMESTAMP_FORMAT,
-} from "../model/constants";
+import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
 import { TimestampValidator } from "./validators/TimestampValidator";
 import { ReadOnlyValidator } from "./validators/ReadOnlyValidator";
 import { UpdateValidator } from "./validators/UpdateValidator";
 import { DBModel } from "../model/DBModel";
-import { DBKeys, UpdateValidationKeys } from "./constants";
+import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
+import { DBOperations, OperationKeys } from "../operations/constants";
+import { on } from "../operations/decorators";
+import { Repository } from "../repository/Repository";
 
-const getDBUpdateKey = (str: string) => UpdateValidationKeys.REFLECT + str;
+export function getDBUpdateKey(str: string) {
+  return UpdateValidationKeys.REFLECT + str;
+}
 
 /**
  * Marks the property as readonly.
@@ -80,7 +82,7 @@ export function readonly(
  */
 export const timestamp =
   (
-    operation: string[] = DBOperations.CREATE_UPDATE,
+    operation: string[] = DBOperations.CREATE_UPDATE as string[],
     format: string = DEFAULT_TIMESTAMP_FORMAT,
     validator: { new (): UpdateValidator } = TimestampValidator,
   ) =>

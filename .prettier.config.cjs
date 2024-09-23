@@ -10,6 +10,7 @@ module.exports = {
      * prints spaces between brackets in object literals
      */
     bracketSpacing: true,
+    printWidth: 150,
     endOfLine: "lf",
     tabWidth: 4,
     /**
