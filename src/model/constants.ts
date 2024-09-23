@@ -7,6 +7,8 @@
 export const DBKeys = {
   REFLECT: "model.db.",
   ID: "id",
+  INDEX: "index",
+  UNIQUE: "index",
   READONLY: "readonly",
   TIMESTAMP: "timestamp",
   ORIGINAL: "__originalObj",

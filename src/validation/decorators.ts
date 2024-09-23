@@ -1,16 +1,38 @@
 import {
   apply,
+  Constructor,
   CustomDecorator,
   date,
+  list,
   metadata,
+  Model,
   required,
+  sf,
+  stringFormat,
+  type,
 } from "@decaf-ts/decorator-validation";
 import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
-import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
+import {
+  DEFAULT_ERROR_MESSAGES,
+  OrderDirection,
+  UpdateValidationKeys,
+} from "./constants";
 import { DBOperations, OperationKeys } from "../operations/constants";
-import { on } from "../operations/decorators";
-import { Repository } from "../repository/Repository";
+import {
+  after,
+  afterCreate,
+  afterDelete,
+  afterRead,
+  afterUpdate,
+  on,
+  onCreate,
+  onCreateUpdate,
+  onDelete,
+  onUpdate,
+} from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
+import { DBModel } from "../model/DBModel";
+import { SerializationError } from "../repository/errors";
 
 export function getDBUpdateKey(str: string) {
   return UpdateValidationKeys.REFLECT + str;
@@ -92,3 +114,209 @@ export function timestamp(
 
   return apply(...decorators);
 }
+
+/**
+ * @summary Unique Decorator
+ * @description Tags a property as unique.
+ *  No other elements in that table can have the same property value
+ *
+ * @function unique
+ *
+ * @memberOf module:wallet-db.Decorators
+ */
+export function unique() {
+  return (target: any, propertyKey: string) => {
+    Reflect.defineMetadata(
+      getWalletDBKey(WalletDbKeys.UNIQUE),
+      {},
+      target,
+      propertyKey,
+    );
+  };
+}
+
+export function serializeOnCreateUpdate<T extends DBModel>(
+  this: IRepository<T>,
+  key: string,
+  model: T,
+  callback: ModelCallback<T>,
+) {
+  if (!(model as any)[key]) return model;
+  try {
+    (model as any)[key] = JSON.stringify((model as any)[key]);
+  } catch (e: any) {
+    throw new SerializationError(
+      sf(
+        "Failed to serialize {0} property on {0} model",
+        key,
+        model.constructor.name,
+      ),
+    );
+  }
+  return model;
+}
+
+export function serializeAfterAll<T extends DBModel>(
+  this: IRepository<T>,
+  key: string,
+  model: T,
+) {
+  if (!(model as any)[key]) return callback(undefined, model);
+  if (typeof (model as any)[key] !== "string")
+    return callback(undefined, model);
+
+  try {
+    (model as any)[key] = JSON.parse((model as any)[key]);
+  } catch (e: any) {
+    return callback(
+      new Error(
+        stringFormat(
+          "Failed to deserialize {0} property on {0} model",
+          key,
+          model.constructor.name,
+        ),
+      ),
+    );
+  }
+  callback(undefined, model);
+}
+
+/**
+ * @summary Serialize Decorator
+ * @description properties decorated will the serialized before stored in the db
+ *
+ * @function serialize
+ *
+ * @memberOf module:wallet-db.Decorators
+ */
+export function serialize() {
+  return (target: any, propertyKey: string) => {
+    onCreateUpdate(serializeOnCreateUpdate)(target, propertyKey);
+    after(DBOperations.ALL, serializeAfterAll)(target, propertyKey);
+    type([String.name, Object.name])(target, propertyKey);
+    Reflect.defineMetadata(
+      getDBKey(WalletDbKeys.SERIALIZE),
+      {},
+      target,
+      propertyKey,
+    );
+  };
+}
+
+//
+// /**
+//  * @summary One To One relation Decorators
+//  *
+//  * @param {Constructor<any>} clazz the {@link Sequence} to use. Defaults to {@link NoneSequence}
+//  * @param {CascadeMetadata} [cascadeOptions]
+//  * @param {boolean} _populate If true, replaces the specified key in the document with the corresponding record from the database
+//  *
+//  * @function onToOne
+//  *
+//  * @memberOf module:wallet-db.Decorators
+//  *
+//  * @see oneToMany
+//  * @see manyToOne
+//  */
+// export function oneToOne(
+//   clazz: Constructor<any>,
+//   cascadeOptions: CascadeMetadata = DefaultCascade,
+//   _populate: boolean = true,
+// ) {
+//   Model.register(clazz);
+//   return (target: any, propertyKey: string) => {
+//     type([clazz.name, String.name])(target, propertyKey);
+//     onCreate(oneToOneOnCreate)(target, propertyKey);
+//     onUpdate(oneToOneOnUpdate, cascadeOptions as any)(target, propertyKey);
+//     onDelete(oneToOneOnDelete, cascadeOptions)(target, propertyKey);
+//
+//     afterCreate(populate, _populate)(target, propertyKey);
+//     afterUpdate(populate, _populate)(target, propertyKey);
+//     afterRead(populate, _populate)(target, propertyKey);
+//     afterDelete(populate, _populate)(target, propertyKey);
+//
+//     Reflect.defineMetadata(
+//       getDBKey(WalletDbKeys.ONE_TO_ONE),
+//       {
+//         constructor: clazz.name,
+//         cascade: cascadeOptions,
+//         populate: _populate,
+//       },
+//       target,
+//       propertyKey,
+//     );
+//   };
+// }
+//
+// /**
+//  * @summary One To Many relation Decorators
+//  *
+//  * @param {Constructor<any>} clazz the {@link Sequence} to use. Defaults to {@link NoneSequence}
+//  * @param {CascadeMetadata} [cascadeOptions]
+//  *
+//  * @function onToMany
+//  *
+//  * @memberOf module:wallet-db.Decorators
+//  *
+//  * @see oneToOne
+//  * @see manyToOne
+//  */
+// export function oneToMany(
+//   clazz: Constructor<any>,
+//   cascadeOptions: CascadeMetadata = DefaultCascade,
+//   _populate: boolean = true,
+// ) {
+//   Model.register(clazz);
+//   return (target: any, propertyKey: string) => {
+//     list([clazz, String])(target, propertyKey);
+//     onCreate(oneToManyOnCreate)(target, propertyKey);
+//     onUpdate(oneToManyOnUpdate, cascadeOptions)(target, propertyKey);
+//     onDelete(oneToManyOnDelete, cascadeOptions)(target, propertyKey);
+//
+//     afterCreate(populate, _populate)(target, propertyKey);
+//     afterUpdate(populate, _populate)(target, propertyKey);
+//     afterRead(populate, _populate)(target, propertyKey);
+//     afterDelete(populate, _populate)(target, propertyKey);
+//
+//     Reflect.defineMetadata(
+//       getDBKey(WalletDbKeys.ONE_TO_MANY),
+//       {
+//         constructor: clazz.name,
+//         cascade: cascadeOptions,
+//       },
+//       target,
+//       propertyKey,
+//     );
+//   };
+// }
+//
+// /**
+//  * @summary Many To One relation Decorators
+//  *
+//  * @param {Constructor<any>} clazz the {@link Sequence} to use. Defaults to {@link NoneSequence}
+//  * @param {CascadeMetadata} [cascadeOptions]
+//  *
+//  * @function manyToOne
+//  *
+//  * @memberOf module:wallet-db.Decorators
+//  *
+//  * @see oneToMany
+//  * @see oneToOne
+//  */
+// export function manyToOne(
+//   clazz: Constructor<any>,
+//   cascadeOptions: CascadeMetadata = DefaultCascade,
+// ) {
+//   Model.register(clazz);
+//   return (target: any, propertyKey: string) => {
+//     Reflect.defineMetadata(
+//       getDBKey(WalletDbKeys.MANY_TO_ONE),
+//       {
+//         constructor: clazz.name,
+//         cascade: cascadeOptions,
+//       },
+//       target,
+//       propertyKey,
+//     );
+//   };
+// }

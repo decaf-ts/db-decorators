@@ -13,27 +13,24 @@ export type OperationMetadata = {
  * @typedef OperationHandler
  * @memberOf db-decorators.operations
  */
-export type OperationHandler<T extends DBModel> =
-  | OnOperationHandler<T>
-  | AfterOperationHandler<T>;
+export type OperationHandler<T extends DBModel, Y extends IRepository<T>> =
+  | StandardOperationHandler<T, Y>
+  | UpdateOperationHandler<T, Y>;
 
 /**
  * @typedef OnOperationHandler
  * @memberOf db-decorators.operations
  */
-export type OnOperationHandler<T extends DBModel> = (
-  this: IRepository<T>,
-  key?: any,
-  model?: T,
-  ...args: any[]
-) => Promise<T> | T;
+export type StandardOperationHandler<
+  T extends DBModel,
+  Y extends IRepository<T>,
+> = (this: Y, key: any, model: T, ...args: any[]) => Promise<T>;
+
 /**
  * @typedef AfterOperationHandler
  * @memberOf db-decorators.operations
  */
-export type AfterOperationHandler<T extends DBModel> = (
-  this: IRepository<T>,
-  key?: any,
-  model?: T,
-  ...args: any[]
-) => Promise<T> | T;
+export type UpdateOperationHandler<
+  T extends DBModel,
+  Y extends IRepository<T>,
+> = (this: Y, key: any, model: T, oldModel: T, ...args: any[]) => Promise<T>;

@@ -137,7 +137,7 @@ export function onDelete(
  */
 export function on(
   op: OperationKeys[] = DBOperations.ALL,
-  handler: OnOperationHandler<any>,
+  handler: OnOperationHandler<any, any>,
   args: any[] = [],
   ...props: string[]
 ) {
@@ -250,7 +250,7 @@ export function afterDelete(
 export function operation(
   baseOp: OperationKeys.ON | OperationKeys.AFTER,
   operation: OperationKeys[] = DBOperations.ALL,
-  handler: AfterOperationHandler<any>,
+  handler: OperationHandler<any, any>,
   args: any[] = [],
   ...props: string[]
 ) {
