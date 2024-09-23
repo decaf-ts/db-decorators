@@ -1,7 +1,5 @@
 import {
-  DecoratorMetadata,
   Errors,
-  getPropertyDecorators,
   Model,
   ModelArg,
   ModelErrorDefinition,
@@ -16,6 +14,7 @@ import {
 import { UpdateValidationKeys } from "../validation/constants";
 import { UpdateValidator } from "../validation/validators/UpdateValidator";
 import { DEFAULT_ERROR_MESSAGES as DEM } from "@decaf-ts/decorator-validation";
+import { DecoratorMetadata, getPropertyDecorators } from "@decaf-ts/reflection";
 
 /**
  * @summary Validates the update of a model

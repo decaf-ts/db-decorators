@@ -1,18 +1,14 @@
 import {
-  AfterOperationHandler,
-  OnOperationHandler,
   OperationHandler,
   OperationMetadata,
+  StandardOperationHandler,
+  UpdateOperationHandler,
 } from "./types";
 import { DBOperations, OperationKeys } from "./constants";
 import { Operations } from "./Operations";
-import {
-  apply,
-  CustomDecorator,
-  metadata,
-} from "@decaf-ts/decorator-validation";
+import { apply, CustomDecorator, metadata } from "@decaf-ts/reflection";
 
-function handle(op: OperationKeys, handler: OperationHandler<any>) {
+function handle(op: OperationKeys, handler: OperationHandler<any, any>) {
   return (target: any, propertyKey: string) => {
     Operations.register(handler, op, target, propertyKey);
   };
@@ -32,8 +28,8 @@ function handle(op: OperationKeys, handler: OperationHandler<any>) {
  * @category Decorators
  */
 export function onCreateUpdate(
-  handler: OnOperationHandler<any>,
-  args: any[],
+  handler: OperationHandler<any, any>,
+  args: any[] = [],
   ...props: string[]
 ) {
   return on(DBOperations.CREATE_UPDATE, handler, args, ...props);
@@ -52,7 +48,7 @@ export function onCreateUpdate(
  * @category Decorators
  */
 export function onUpdate(
-  handler: OnOperationHandler<any>,
+  handler: UpdateOperationHandler<any, any>,
   args: any[],
   ...props: string[]
 ) {
@@ -72,7 +68,7 @@ export function onUpdate(
  * @category Decorators
  */
 export function onCreate(
-  handler: OnOperationHandler<any>,
+  handler: StandardOperationHandler<any, any>,
   args: any[],
   ...props: string[]
 ) {
@@ -93,7 +89,7 @@ export function onCreate(
  * @category Decorators
  */
 export function onRead(
-  handler: OnOperationHandler<any>,
+  handler: StandardOperationHandler<any, any>,
   args: any[],
   ...props: string[]
 ) {
@@ -114,7 +110,7 @@ export function onRead(
  * @category Decorators
  */
 export function onDelete(
-  handler: OnOperationHandler<any>,
+  handler: StandardOperationHandler<any, any>,
   args: any[],
   ...props: string[]
 ) {
@@ -137,7 +133,7 @@ export function onDelete(
  */
 export function on(
   op: OperationKeys[] = DBOperations.ALL,
-  handler: OnOperationHandler<any, any>,
+  handler: OperationHandler<any, any>,
   args: any[] = [],
   ...props: string[]
 ) {
@@ -157,7 +153,7 @@ export function on(
  * @category Decorators
  */
 export function afterCreateUpdate(
-  handler: AfterOperationHandler<any>,
+  handler: OperationHandler<any, any>,
   args: any[],
   ...props: string[]
 ) {
@@ -178,7 +174,7 @@ export function afterCreateUpdate(
  * @category Decorators
  */
 export function afterUpdate(
-  handler: AfterOperationHandler<any>,
+  handler: UpdateOperationHandler<any, any>,
   args: any[],
   ...props: string[]
 ) {
@@ -199,7 +195,7 @@ export function afterUpdate(
  * @category Decorators
  */
 export function afterCreate(
-  handler: AfterOperationHandler<any>,
+  handler: StandardOperationHandler<any, any>,
   args: any[],
   ...props: string[]
 ) {
@@ -220,7 +216,7 @@ export function afterCreate(
  * @category Decorators
  */
 export function afterRead(
-  handler: AfterOperationHandler<any>,
+  handler: StandardOperationHandler<any, any>,
   args: any[],
   ...props: string[]
 ) {
@@ -240,7 +236,7 @@ export function afterRead(
  * @category Decorators
  */
 export function afterDelete(
-  handler: AfterOperationHandler<any>,
+  handler: StandardOperationHandler<any, any>,
   args: any[],
   ...props: string[]
 ) {
@@ -294,7 +290,7 @@ export function operation(
  */
 export function after(
   op: OperationKeys[] = DBOperations.ALL,
-  handler: AfterOperationHandler<any>,
+  handler: OperationHandler<any, any>,
   args: any[] = [],
   ...props: string[]
 ) {

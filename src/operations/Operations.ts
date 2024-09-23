@@ -1,10 +1,5 @@
-import {
-  apply,
-  IRegistry,
-  metadata,
-  Model,
-} from "@decaf-ts/decorator-validation";
-import { OperationHandler, OperationMetadata } from "./types";
+import { IRegistry, Model } from "@decaf-ts/decorator-validation";
+import { OperationHandler } from "./types";
 import { OperationsRegistry } from "./OperationsRegistry";
 import { DBModel } from "../model/DBModel";
 import { OperationKeys } from "./constants";
@@ -17,11 +12,11 @@ import { OperationKeys } from "./constants";
  * @category Operations
  */
 export class Operations {
-  private static registry: IRegistry<OperationHandler<any>>;
+  private static registry: IRegistry<OperationHandler<any, any>>;
 
   private constructor() {}
 
-  static getHandlerName(handler: OperationHandler<any>) {
+  static getHandlerName(handler: OperationHandler<any, any>) {
     if (handler.name) return handler.name;
 
     console.warn(
@@ -43,12 +38,12 @@ export class Operations {
     return Operations.registry;
   }
 
-  static setOpRegistry(registry: IRegistry<OperationHandler<any>>) {
+  static setOpRegistry(registry: IRegistry<OperationHandler<any, any>>) {
     Operations.registry = registry;
   }
 
   static register<V extends DBModel>(
-    handler: OperationHandler<V>,
+    handler: OperationHandler<V, any>,
     operation: OperationKeys,
     target: V,
     propKey: string | symbol,

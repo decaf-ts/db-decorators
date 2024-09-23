@@ -2,9 +2,11 @@ import { DBModel } from "../model/DBModel";
 import { Operations } from "../operations/Operations";
 import { OperationHandler } from "../operations/types";
 import { IRepository } from "../interfaces/IRepository";
-import { getAllPropertyDecorators } from "@decaf-ts/decorator-validation";
 import { OperationKeys } from "../operations/constants";
-import { DecoratorMetadata } from "@decaf-ts/decorator-validation";
+import {
+  DecoratorMetadata,
+  getAllPropertyDecorators,
+} from "@decaf-ts/reflection";
 import { InternalError } from "./errors";
 
 /**
@@ -23,11 +25,10 @@ export function enforceDBDecorators<
   T extends DBModel,
   Y extends IRepository<T>,
 >(repo: Y, model: T, operation: string, prefix: string, oldModel?: T) {
-  const decorators: Record<string, DecoratorMetadata[]> = getDbDecorators(
-    model,
-    operation,
-    prefix,
-  );
+  const decorators: Record<string, DecoratorMetadata[]> | undefined =
+    getDbDecorators(model, operation, prefix);
+
+  if (!decorators) return;
 
   const propIterator = async function (props: string[]) {
     const prop: string | undefined = props.shift();
@@ -44,7 +45,7 @@ export function enforceDBDecorators<
         `Could not find registered handler for the operation ${prop}`,
       );
 
-    const args: any[] = [repo, model];
+    const args: any[] = [model];
 
     if (operation === OperationKeys.UPDATE) {
       if (!oldModel) throw new InternalError("Missing old model argument");
@@ -53,7 +54,7 @@ export function enforceDBDecorators<
 
     args.push(...decs[0].props.args, ...decs[0].props.props);
 
-    await handler.call(...args);
+    await handler.apply(repo, args as [string, T, T]);
     await propIterator(props);
   };
 
@@ -74,7 +75,7 @@ export function getDbDecorators<T extends DBModel>(
   operation: string,
   extraPrefix?: string,
 ): Record<string, DecoratorMetadata[]> | undefined {
-  const decorators: Record<string, DecoratorMetadata[]> =
+  const decorators: Record<string, DecoratorMetadata[]> | undefined =
     getAllPropertyDecorators(
       model,
       OperationKeys.REFLECT + (extraPrefix ? extraPrefix : ""),

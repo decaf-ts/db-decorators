@@ -11,9 +11,9 @@ export abstract class Repository<T extends DBModel> implements IRepository<T> {
 
   private _cache?: DataCache;
 
-  private get class() {
+  get class() {
     if (!this._class)
-      throw new InternalError(`No class definition found for this reposito`);
+      throw new InternalError(`No class definition found for this repository`);
     return this._class;
   }
 
@@ -22,9 +22,7 @@ export abstract class Repository<T extends DBModel> implements IRepository<T> {
     return this._cache;
   }
 
-  protected constructor(clazz: Constructor<T>) {
-    this.clazz = clazz;
-  }
+  protected constructor() {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async create(model: T, ...args: any[]): Promise<T> {

@@ -1,10 +1,6 @@
-import {
-  Errors,
-  isEqual,
-  validator,
-  Validator,
-} from "@decaf-ts/decorator-validation";
+import { Errors, validator, Validator } from "@decaf-ts/decorator-validation";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "../constants";
+import { isEqual } from "@decaf-ts/reflection";
 
 /**
  * @summary Validator for the {@link readonly} decorator

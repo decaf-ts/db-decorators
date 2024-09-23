@@ -1,38 +1,24 @@
 import {
-  apply,
-  Constructor,
-  CustomDecorator,
   date,
-  list,
-  metadata,
-  Model,
   required,
   sf,
   stringFormat,
   type,
 } from "@decaf-ts/decorator-validation";
 import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
-import {
-  DEFAULT_ERROR_MESSAGES,
-  OrderDirection,
-  UpdateValidationKeys,
-} from "./constants";
+import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
 import { DBOperations, OperationKeys } from "../operations/constants";
-import {
-  after,
-  afterCreate,
-  afterDelete,
-  afterRead,
-  afterUpdate,
-  on,
-  onCreate,
-  onCreateUpdate,
-  onDelete,
-  onUpdate,
-} from "../operations/decorators";
+import { after, on, onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { DBModel } from "../model/DBModel";
 import { SerializationError } from "../repository/errors";
+import { apply, CustomDecorator, metadata } from "@decaf-ts/reflection";
+import { getDBKey } from "../model/decorators";
+import { meta } from "eslint-plugin-prettier";
+import {
+  StandardOperationHandler,
+  UpdateOperationHandler,
+} from "../operations/types";
 
 export function getDBUpdateKey(str: string) {
   return UpdateValidationKeys.REFLECT + str;
@@ -125,23 +111,14 @@ export function timestamp(
  * @memberOf module:wallet-db.Decorators
  */
 export function unique() {
-  return (target: any, propertyKey: string) => {
-    Reflect.defineMetadata(
-      getWalletDBKey(WalletDbKeys.UNIQUE),
-      {},
-      target,
-      propertyKey,
-    );
-  };
+  return metadata(getDBKey(DBKeys.UNIQUE), {});
 }
 
-export function serializeOnCreateUpdate<T extends DBModel>(
-  this: IRepository<T>,
-  key: string,
-  model: T,
-  callback: ModelCallback<T>,
-) {
-  if (!(model as any)[key]) return model;
+export async function serializeOnCreateUpdate<
+  T extends DBModel,
+  V extends IRepository<T>,
+>(this: V, key: string, model: T): Promise<void> {
+  if (!(model as any)[key]) return;
   try {
     (model as any)[key] = JSON.stringify((model as any)[key]);
   } catch (e: any) {
@@ -153,32 +130,26 @@ export function serializeOnCreateUpdate<T extends DBModel>(
       ),
     );
   }
-  return model;
 }
 
-export function serializeAfterAll<T extends DBModel>(
-  this: IRepository<T>,
-  key: string,
-  model: T,
-) {
-  if (!(model as any)[key]) return callback(undefined, model);
-  if (typeof (model as any)[key] !== "string")
-    return callback(undefined, model);
+export async function serializeAfterAll<
+  T extends DBModel,
+  V extends IRepository<T>,
+>(this: V, key: string, model: T): Promise<void> {
+  if (!(model as any)[key]) return;
+  if (typeof (model as any)[key] !== "string") return;
 
   try {
     (model as any)[key] = JSON.parse((model as any)[key]);
   } catch (e: any) {
-    return callback(
-      new Error(
-        stringFormat(
-          "Failed to deserialize {0} property on {0} model",
-          key,
-          model.constructor.name,
-        ),
+    throw new SerializationError(
+      sf(
+        "Failed to deserialize {0} property on {0} model",
+        key,
+        model.constructor.name,
       ),
     );
   }
-  callback(undefined, model);
 }
 
 /**
@@ -190,17 +161,12 @@ export function serializeAfterAll<T extends DBModel>(
  * @memberOf module:wallet-db.Decorators
  */
 export function serialize() {
-  return (target: any, propertyKey: string) => {
-    onCreateUpdate(serializeOnCreateUpdate)(target, propertyKey);
-    after(DBOperations.ALL, serializeAfterAll)(target, propertyKey);
-    type([String.name, Object.name])(target, propertyKey);
-    Reflect.defineMetadata(
-      getDBKey(WalletDbKeys.SERIALIZE),
-      {},
-      target,
-      propertyKey,
-    );
-  };
+  return apply(
+    onCreateUpdate(serializeOnCreateUpdate),
+    after(DBOperations.ALL, serializeAfterAll),
+    type([String.name, Object.name]),
+    metadata(getDBKey(DBKeys.SERIALIZE), {}),
+  );
 }
 
 //

@@ -9,6 +9,7 @@ export const DBKeys = {
   ID: "id",
   INDEX: "index",
   UNIQUE: "unique",
+  SERIALIZE: "serialize",
   READONLY: "readonly",
   TIMESTAMP: "timestamp",
   ORIGINAL: "__originalObj",

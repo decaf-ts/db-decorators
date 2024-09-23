@@ -1,7 +1,7 @@
 import { DBKeys } from "./constants";
 import { OrderDirection } from "../validation/constants";
-import { metadata } from "@decaf-ts/decorator-validation";
-import { IndexMetadata } from "./types";
+import { metadata } from "@decaf-ts/reflection";
+import { IndexMetadata } from "../repository/types";
 
 /**
  *

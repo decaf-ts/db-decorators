@@ -24,7 +24,7 @@ export type OperationHandler<T extends DBModel, Y extends IRepository<T>> =
 export type StandardOperationHandler<
   T extends DBModel,
   Y extends IRepository<T>,
-> = (this: Y, key: any, model: T, ...args: any[]) => Promise<T>;
+> = (this: Y, key: any, model: T, ...args: any[]) => Promise<void>;
 
 /**
  * @typedef AfterOperationHandler
@@ -33,4 +33,4 @@ export type StandardOperationHandler<
 export type UpdateOperationHandler<
   T extends DBModel,
   Y extends IRepository<T>,
-> = (this: Y, key: any, model: T, oldModel: T, ...args: any[]) => Promise<T>;
+> = (this: Y, key: any, model: T, oldModel: T, ...args: any[]) => Promise<void>;

@@ -2,6 +2,7 @@ import { IRegistry } from "@decaf-ts/decorator-validation";
 import { OperationHandler } from "./types";
 import { DBModel } from "../model/DBModel";
 import { OperationKeys } from "./constants";
+import { IRepository } from "../interfaces/IRepository";
 
 /**
  * @summary Holds the registered operation handlers
@@ -13,10 +14,12 @@ import { OperationKeys } from "./constants";
  *
  * @category Operations
  */
-export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
-  private cache: Record<
+export class OperationsRegistry
+  implements IRegistry<OperationHandler<any, any>>
+{
+  private readonly cache: Record<
     string,
-    Record<string, Record<string, OperationHandler<any>>>
+    Record<string, Record<string, OperationHandler<any, any>>>
   > = {};
 
   /**
@@ -26,11 +29,11 @@ export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
    * @param {string} operation
    * @return {OperationHandler | undefined}
    */
-  get<T extends DBModel>(
+  get<T extends DBModel, V extends IRepository<T>>(
     targetName: string,
     propKey: string,
     operation: string,
-  ): OperationHandler<T> | undefined {
+  ): OperationHandler<T, V> | undefined {
     try {
       return this.cache[targetName][propKey][operation];
     } catch (e) {
@@ -45,8 +48,8 @@ export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
    * @param {{}} target
    * @param {string | symbol} propKey
    */
-  register<T extends DBModel>(
-    handler: OperationHandler<T>,
+  register<T extends DBModel, V extends IRepository<T>>(
+    handler: OperationHandler<T, V>,
     operation: OperationKeys,
     target: T,
     propKey: string | symbol,
