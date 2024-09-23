@@ -2,6 +2,9 @@ import { DBModel } from "../model/DBModel";
 import { Operations } from "../operations/Operations";
 import { OperationHandler } from "../operations/types";
 import { IRepository } from "../interfaces/IRepository";
+import { getAllPropertyDecorators } from "@decaf-ts/decorator-validation";
+import { OperationKeys } from "../operations/constants";
+import { DecoratorMetadata } from "@decaf-ts/decorator-validation";
 
 /**
  *
@@ -46,4 +49,37 @@ export function enforceDBDecorators<T extends DBModel>(
   };
 
   return propIterator(Object.keys(decorators));
+}
+/**
+ * Specific for DB Decorators
+ * @param {T} model
+ * @param {string} operation CRUD {@link OperationKeys}
+ * @param {string} [extraPrefix]
+ *
+ * @function getDbPropertyDecorators
+ *
+ * @memberOf db-decorators.utils
+ */
+export function getDbDecorators<T extends DBModel>(
+  model: T,
+  operation: string,
+  extraPrefix?: string,
+): { [indexer: string]: { [indexer: string]: any[] } } | undefined {
+  const decorators: Record<string, DecoratorMetadata[]> =
+    getAllPropertyDecorators(
+      model,
+      OperationKeys.REFLECT + (extraPrefix ? extraPrefix : ""),
+    );
+  if (!decorators) return;
+  return Object.keys(decorators).reduce(
+    (accum: Record<string, any> | undefined, decorator) => {
+      const dec = decorators[decorator].filter((d) => d.key === operation);
+      if (dec && dec.length) {
+        if (!accum) accum = {};
+        accum[decorator] = dec;
+      }
+      return accum;
+    },
+    undefined,
+  );
 }

@@ -10,22 +10,24 @@ export abstract class Repository<T extends DBModel> implements IRepository<T> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  create(model: T, ...args: any[]): Promise<T> {
+  async create(model: T, ...args: any[]): Promise<T> {
     throw new Error("Child classes must implement this.");
   }
 
+  protected async createPrefix(model: T, ...args: any[]) {}
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  delete(key: string, ...args: any[]): Promise<T> {
+  async delete(key: string, ...args: any[]): Promise<T> {
     throw new Error("Child classes must implement this");
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  read(key?: string, ...args: any[]): Promise<T> {
+  async read(key?: string, ...args: any[]): Promise<T> {
     throw new Error("Child classes must implement this");
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  update(model: T, ...args: any[]): Promise<T> {
+  async update(model: T, ...args: any[]): Promise<T> {
     throw new Error("Child classes must implement this");
   }
 }
