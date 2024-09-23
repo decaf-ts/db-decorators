@@ -8,14 +8,14 @@ import {
   ModelErrors,
   ModelKeys,
   ReservedModels,
-  stringFormat,
+  sf,
   Validation,
   ValidationKeys,
   ValidationPropertyDecoratorDefinition,
 } from "@decaf-ts/decorator-validation";
 import { UpdateValidationKeys } from "../validation/constants";
 import { UpdateValidator } from "../validation/validators/UpdateValidator";
-import { DEFAULT_ERROR_MESSAGES as DEM } from "../validation/constants";
+import { DEFAULT_ERROR_MESSAGES as DEM } from "@decaf-ts/decorator-validation";
 
 /**
  * @summary Validates the update of a model
@@ -160,8 +160,8 @@ export function validateCompare<T extends DBModel>(
                           const err = cur.hasErrors(old);
                           if (err)
                             e.push(
-                              stringFormat(
-                                DEM.LIST.ITEM as string,
+                              sf(
+                                DEM.LIST_INSIDE as string,
                                 (i + 1).toString(),
                                 err.toString(),
                               ),
@@ -183,7 +183,7 @@ export function validateCompare<T extends DBModel>(
                         );
                     } catch (e: any) {
                       console.warn(
-                        stringFormat("Model should be validatable but its not"),
+                        sf("Model should be validatable but its not"),
                       );
                     }
                 }
@@ -246,7 +246,6 @@ export abstract class DBModel extends Model {
     const errs = super.hasErrors(...exclusions);
     if (errs || !previousVersion) return errs;
 
-    all(`Now comparing ${previousVersion.toString()} with ${this.toString()}`);
     return validateCompare(previousVersion, this, ...exclusions);
   }
 }

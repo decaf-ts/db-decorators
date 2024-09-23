@@ -1,4 +1,9 @@
-import { IRegistry, Model } from "@decaf-ts/decorator-validation";
+import {
+  apply,
+  IRegistry,
+  metadata,
+  Model,
+} from "@decaf-ts/decorator-validation";
 import { OperationHandler, OperationMetadata } from "./types";
 import { OperationsRegistry } from "./OperationsRegistry";
 import { DBModel } from "../model/DBModel";
@@ -15,35 +20,6 @@ export class Operations {
   private static registry: IRegistry<OperationHandler<any>>;
 
   private constructor() {}
-
-  static genDecorator(
-    baseOp: OperationKeys.ON | OperationKeys.AFTER,
-    ops: OperationKeys[],
-    handler: OperationHandler<any>,
-    args: any,
-    ...props: string[]
-  ) {
-    return (target: any, propertyKey: string) => {
-      ops.forEach((op) => {
-        op = baseOp + op;
-
-        const metadata: OperationMetadata = {
-          operation: op,
-          handler: Operations.getHandlerName(handler),
-          args: args,
-          props: props,
-        };
-
-        Reflect.defineMetadata(
-          Operations.genKey(op),
-          metadata,
-          target,
-          propertyKey,
-        );
-        Operations.register(handler, op, target, propertyKey);
-      });
-    };
-  }
 
   static getHandlerName(handler: OperationHandler<any>) {
     if (handler.name) return handler.name;

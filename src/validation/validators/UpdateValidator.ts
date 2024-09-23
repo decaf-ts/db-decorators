@@ -7,7 +7,6 @@ import {
 /**
  * @summary Base class for an Update validator
  *
- * @param {string} validationKey
  * @param {string} [message] error message. defaults to {@link DecoratorMessages#DEFAULT}
  * @param {string[]} [acceptedTypes] the accepted value types by the decorator
  *
@@ -19,11 +18,10 @@ import {
  */
 export abstract class UpdateValidator extends Validator {
   protected constructor(
-    validationKey: string,
     message: string = DecoratorMessages.DEFAULT,
     ...acceptedTypes: string[]
   ) {
-    super(validationKey, message, ...acceptedTypes);
+    super(message, ...acceptedTypes);
   }
 
   /**

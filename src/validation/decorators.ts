@@ -1,18 +1,16 @@
 import {
+  apply,
+  CustomDecorator,
   date,
+  metadata,
   required,
-  Validation,
-  ValidatorDefinition,
 } from "@decaf-ts/decorator-validation";
 import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
-import { TimestampValidator } from "./validators/TimestampValidator";
-import { ReadOnlyValidator } from "./validators/ReadOnlyValidator";
-import { UpdateValidator } from "./validators/UpdateValidator";
-import { DBModel } from "../model/DBModel";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
 import { DBOperations, OperationKeys } from "../operations/constants";
 import { on } from "../operations/decorators";
 import { Repository } from "../repository/Repository";
+import { IRepository } from "../interfaces/IRepository";
 
 export function getDBUpdateKey(str: string) {
   return UpdateValidationKeys.REFLECT + str;
@@ -22,7 +20,6 @@ export function getDBUpdateKey(str: string) {
  * Marks the property as readonly.
  *
  * @param {string} [message] the error message. Defaults to {@link DEFAULT_ERROR_MESSAGES.READONLY.INVALID}
- * @param {{new: UpdateValidator}} [validator] defaults to {@link ReadOnlyValidator}
  *
  * @decorator readonly
  *
@@ -30,23 +27,19 @@ export function getDBUpdateKey(str: string) {
  */
 export function readonly(
   message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID,
-  validator: { new (): UpdateValidator } = ReadOnlyValidator,
 ) {
-  return (target: any, propertyKey: string) => {
-    Reflect.defineMetadata(
-      getDBUpdateKey(DBKeys.READONLY),
-      {
-        message: message,
-      },
-      target,
-      propertyKey,
-    );
-    Validation.register({
-      validator: validator,
-      validationKey: UpdateValidationKeys.READONLY,
-      force: true,
-    } as ValidatorDefinition);
-  };
+  return metadata(getDBUpdateKey(DBKeys.READONLY), {
+    message: message,
+  });
+}
+
+export function timestampHandler(
+  this: IRepository<any>,
+  key: string,
+  model: any,
+) {
+  model[key] = new Date();
+  return model;
 }
 
 /**
@@ -80,41 +73,22 @@ export function readonly(
  *
  * @category Decorators
  */
-export const timestamp =
-  (
-    operation: string[] = DBOperations.CREATE_UPDATE as string[],
-    format: string = DEFAULT_TIMESTAMP_FORMAT,
-    validator: { new (): UpdateValidator } = TimestampValidator,
-  ) =>
-  (target: any, propertyKey: string) => {
-    date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE)(target, propertyKey);
-    required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED)(target, propertyKey);
-    on(
-      operation,
-      function (
-        this: Repository<DBModel>,
-        model: DBModel,
-        callback?: Callback,
-      ) {
-        model[propertyKey] = new Date();
-        if (callback) return callback(undefined, model);
-      },
-    )(target, propertyKey);
+export function timestamp(
+  operation: OperationKeys[] = DBOperations.CREATE_UPDATE as unknown as OperationKeys[],
+  format: string = DEFAULT_TIMESTAMP_FORMAT,
+) {
+  const decorators: CustomDecorator<any>[] = [
+    date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE) as CustomDecorator<any>,
+    required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED) as CustomDecorator<any>,
+    on(operation, timestampHandler) as CustomDecorator<any>,
+  ];
 
-    if (operation.indexOf(OperationKeys.UPDATE) !== -1) {
-      Reflect.defineMetadata(
-        getDBUpdateKey(DBKeys.TIMESTAMP),
-        {
-          message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
-        },
-        target,
-        propertyKey,
-      );
+  if (operation.indexOf(OperationKeys.UPDATE) !== -1)
+    decorators.push(
+      metadata(getDBUpdateKey(DBKeys.TIMESTAMP), {
+        message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
+      }),
+    );
 
-      Validation.register({
-        validator: validator,
-        validationKey: UpdateValidationKeys.TIMESTAMP,
-        force: true,
-      } as ValidatorDefinition);
-    }
-  };
+  return apply(...decorators);
+}

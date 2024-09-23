@@ -1,4 +1,9 @@
-import { Errors, isEqual, Validator } from "@decaf-ts/decorator-validation";
+import {
+  Errors,
+  isEqual,
+  validator,
+  Validator,
+} from "@decaf-ts/decorator-validation";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "../constants";
 
 /**
@@ -9,12 +14,10 @@ import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "../constants";
  *
  * @category Validators
  */
+@validator(UpdateValidationKeys.READONLY)
 export class ReadOnlyValidator extends Validator {
   constructor() {
-    super(
-      UpdateValidationKeys.READONLY,
-      DEFAULT_ERROR_MESSAGES.READONLY.INVALID,
-    );
+    super(DEFAULT_ERROR_MESSAGES.READONLY.INVALID);
   }
 
   /**

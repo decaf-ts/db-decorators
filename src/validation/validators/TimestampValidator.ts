@@ -1,4 +1,4 @@
-import { Errors, Validator } from "@decaf-ts/decorator-validation";
+import { Errors, validator, Validator } from "@decaf-ts/decorator-validation";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "../constants";
 
 /**
@@ -9,12 +9,10 @@ import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "../constants";
  *
  * @category Validators
  */
+@validator(UpdateValidationKeys.TIMESTAMP)
 export class TimestampValidator extends Validator {
   constructor() {
-    super(
-      UpdateValidationKeys.TIMESTAMP,
-      DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
-    );
+    super(DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID);
   }
 
   hasErrors(): Errors {

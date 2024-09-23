@@ -2,10 +2,10 @@ import { IRepository } from "../interfaces/IRepository";
 import { DBModel } from "../model/DBModel";
 import { Constructor } from "@decaf-ts/decorator-validation";
 
-export class Repository<T extends DBModel> implements IRepository<T> {
+export abstract class Repository<T extends DBModel> implements IRepository<T> {
   readonly clazz: Constructor<T>;
 
-  constructor(clazz: Constructor<T>) {
+  protected constructor(clazz: Constructor<T>) {
     this.clazz = clazz;
   }
 

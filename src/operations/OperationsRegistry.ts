@@ -53,8 +53,9 @@ export class OperationsRegistry implements IRegistry<OperationHandler<any>> {
   ): void {
     const name = target.constructor.name;
     if (!this.cache[name]) this.cache[name] = {};
-    if (!this.cache[name][propKey]) this.cache[name][propKey] = {};
-    if (this.cache[name][propKey][operation]) return;
-    this.cache[name][propKey][operation] = handler;
+    if (!this.cache[name][propKey as string])
+      this.cache[name][propKey as string] = {};
+    if (this.cache[name][propKey as string][operation]) return;
+    this.cache[name][propKey as string][operation] = handler;
   }
 }

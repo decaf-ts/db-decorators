@@ -21,17 +21,17 @@ export enum OperationKeys {
  *
  * @memberOf module:db-decorators.Operations
  */
-export enum DBOperations {
-  CREATE = [OperationKeys.CREATE],
-  READ = [OperationKeys.READ],
-  UPDATE = [OperationKeys.UPDATE],
-  DELETE = [OperationKeys.DELETE],
-  CREATE_UPDATE = [OperationKeys.CREATE, OperationKeys.UPDATE],
-  READ_CREATE = [OperationKeys.READ, OperationKeys.CREATE],
-  ALL = [
+export const DBOperations: Record<string, OperationKeys[]> = {
+  CREATE: [OperationKeys.CREATE],
+  READ: [OperationKeys.READ],
+  UPDATE: [OperationKeys.UPDATE],
+  DELETE: [OperationKeys.DELETE],
+  CREATE_UPDATE: [OperationKeys.CREATE, OperationKeys.UPDATE],
+  READ_CREATE: [OperationKeys.READ, OperationKeys.CREATE],
+  ALL: [
     OperationKeys.CREATE,
     OperationKeys.READ,
     OperationKeys.UPDATE,
     OperationKeys.DELETE,
   ],
-}
+};

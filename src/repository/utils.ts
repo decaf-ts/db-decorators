@@ -36,20 +36,14 @@ export function enforceDBDecorators<T extends DBModel>(
         `Could not find registered handler for the operation ${prop}`,
       );
 
-    const result = await handler.call(
+    await handler.call(
       repo,
       model,
       ...decs[0].props.args,
       ...decs[0].props.props,
-      (err: Err) => {
-        if (err) return callback(err);
-        propIterator(props, callback);
-      },
     );
+    await propIterator(props);
   };
 
-  propIterator(Object.keys(decorators), (err: Err, model?: T) => {
-    if (err) return callback(err);
-    callback(undefined, model);
-  });
+  return propIterator(Object.keys(decorators));
 }

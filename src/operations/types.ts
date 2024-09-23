@@ -1,6 +1,6 @@
 import { DBModel } from "../model/DBModel";
-import { Repository } from "../repository/Repository";
 import { OperationKeys } from "./constants";
+import { IRepository } from "../interfaces/IRepository";
 
 export type OperationMetadata = {
   operation: OperationKeys;
@@ -22,7 +22,7 @@ export type OperationHandler<T extends DBModel> =
  * @memberOf db-decorators.operations
  */
 export type OnOperationHandler<T extends DBModel> = (
-  this: Repository<T>,
+  this: IRepository<T>,
   key?: any,
   model?: T,
   ...args: any[]
@@ -32,7 +32,7 @@ export type OnOperationHandler<T extends DBModel> = (
  * @memberOf db-decorators.operations
  */
 export type AfterOperationHandler<T extends DBModel> = (
-  this: Repository<T>,
+  this: IRepository<T>,
   key?: any,
   model?: T,
   ...args: any[]
