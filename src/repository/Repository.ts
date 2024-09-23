@@ -3,18 +3,25 @@ import { DBModel } from "../model/DBModel";
 import { Constructor } from "@decaf-ts/decorator-validation";
 import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
-import { ValidationError } from "./errors";
+import { InternalError, ValidationError } from "./errors";
 import { DataCache } from "./DataCache";
 
 export abstract class Repository<T extends DBModel> implements IRepository<T> {
-  readonly clazz: Constructor<T>;
+  private readonly _class!: Constructor<T>;
 
   private _cache?: DataCache;
+
+  private get class() {
+    if (!this._class)
+      throw new InternalError(`No class definition found for this reposito`);
+    return this._class;
+  }
 
   get cache(): DataCache {
     if (!this._cache) this._cache = new DataCache();
     return this._cache;
   }
+
   protected constructor(clazz: Constructor<T>) {
     this.clazz = clazz;
   }
@@ -64,7 +71,7 @@ export abstract class Repository<T extends DBModel> implements IRepository<T> {
   }
 
   protected async readPrefix(key: string, ...args: any[]) {
-    const model: T = new this.clazz();
+    const model: T = new this.class();
     await enforceDBDecorators(
       this,
       model,
@@ -136,5 +143,9 @@ export abstract class Repository<T extends DBModel> implements IRepository<T> {
       OperationKeys.ON,
     );
     return [key, ...args];
+  }
+
+  toString() {
+    return this.constructor.name;
   }
 }
