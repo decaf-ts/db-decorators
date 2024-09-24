@@ -1,24 +1,38 @@
-import { injectable } from "@decaf-ts/injectable-decorators";
-/**
- * @summary Defines a class as a repository (makes it injectable)
- * and forces an instantiation over any other possible with that key
- *
- * @param {string} [category] category name to be passed to injectables {@link injectable}
- * @param {any[]} [props] optional props to be passed to {@link injectable}
- *
- * @see injectable
- * with args:
- *  - singleton: true;
- *  - force: true;
- *  - args: {@param props}
- *
- * @function repository
- *
- * @memberOf module:db-decorators.Decorators.model
- */
+import { inject, injectable } from "@decaf-ts/injectable-decorators";
+import { metadata } from "@decaf-ts/reflection";
+import { getDBKey } from "../model/decorators";
+import { DBKeys } from "../model/constants";
+import { Constructor } from "@decaf-ts/decorator-validation";
+import { DBModel } from "../model/DBModel";
+import { IRepository } from "../interfaces/IRepository";
+import { InternalError } from "./errors";
 
-export function repository(category?: string, ...props: any[]) {
-  return (original: Function) => {
-    return injectable(category, true, ...props)(original);
+export function repository<T extends DBModel>(
+  model: Constructor<T>,
+  nameOverride?: string,
+) {
+  return (original: object, propertyKey?: string) => {
+    if (propertyKey) {
+      const injectableName: string | undefined = Reflect.getMetadata(
+        getDBKey(DBKeys.REPOSITORY),
+        model,
+      );
+      if (!injectableName)
+        throw new InternalError(`Could not find repository for ${model.name}`);
+      return inject(injectableName)(original, propertyKey);
+    }
+
+    metadata(
+      getDBKey(DBKeys.REPOSITORY),
+      nameOverride || original.constructor.name,
+    )(model);
+    injectable(nameOverride, true, (instance: IRepository<T>) => {
+      Object.defineProperty(instance, DBKeys.CLASS, {
+        enumerable: false,
+        configurable: false,
+        writable: false,
+        value: model,
+      });
+    });
   };
 }

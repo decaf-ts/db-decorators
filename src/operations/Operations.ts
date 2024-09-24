@@ -12,15 +12,15 @@ import { OperationKeys } from "./constants";
  * @category Operations
  */
 export class Operations {
-  private static registry: IRegistry<OperationHandler<any, any>>;
+  private static registry: IRegistry<OperationHandler<any, any, any>>;
 
   private constructor() {}
 
-  static getHandlerName(handler: OperationHandler<any, any>) {
+  static getHandlerName(handler: OperationHandler<any, any, any>) {
     if (handler.name) return handler.name;
 
     console.warn(
-      "Handler name not defined. A name will be generated, but this is not desirable",
+      "Handler name not defined. A name will be generated, but this is not desirable. please avoid using anonymous functions",
     );
     return Model.hash(handler.toString());
   }
@@ -38,12 +38,12 @@ export class Operations {
     return Operations.registry;
   }
 
-  static setOpRegistry(registry: IRegistry<OperationHandler<any, any>>) {
+  static setOpRegistry(registry: IRegistry<OperationHandler<any, any, any>>) {
     Operations.registry = registry;
   }
 
   static register<V extends DBModel>(
-    handler: OperationHandler<V, any>,
+    handler: OperationHandler<V, any, any>,
     operation: OperationKeys,
     target: V,
     propKey: string | symbol,

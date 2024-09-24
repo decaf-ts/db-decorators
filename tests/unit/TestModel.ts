@@ -1,18 +1,11 @@
-import {AsyncRepository, DBModel, DBOperations, id, IGeneratorAsync, readonly, timestamp} from "../../src";
 import {constructFromObject, minlength} from "@decaf-ts/decorator-validation";
-import {Callback} from "@decaf-ts/logging";
-
-export class TimeStampGeneratorAsync<T extends DBModel> implements IGeneratorAsync<T> {
-  generate(repo: AsyncRepository<T>, model: T, ...args: any[]): void {
-    const callback: Callback = args.pop();
-    const result = Date.now();
-    callback(undefined, result);
-  }
-}
+import {DBModel} from "../../src/model/DBModel";
+import {readonly, timestamp} from "../../src/validation/decorators";
+import {DBOperations} from "../../src/operations/constants";
 
 export class TestModelAsync extends DBModel {
 
-  @id<TestModelAsync>(TimeStampGeneratorAsync)
+  @pk()
   id?: string | number = undefined;
 
   @readonly()

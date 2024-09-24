@@ -15,11 +15,11 @@ import { IRepository } from "../interfaces/IRepository";
  * @category Operations
  */
 export class OperationsRegistry
-  implements IRegistry<OperationHandler<any, any>>
+  implements IRegistry<OperationHandler<any, any, any>>
 {
   private readonly cache: Record<
     string,
-    Record<string, Record<string, OperationHandler<any, any>>>
+    Record<string, Record<string, OperationHandler<any, any, any>>>
   > = {};
 
   /**
@@ -29,11 +29,11 @@ export class OperationsRegistry
    * @param {string} operation
    * @return {OperationHandler | undefined}
    */
-  get<T extends DBModel, V extends IRepository<T>>(
+  get<T extends DBModel, V extends IRepository<T>, Y>(
     targetName: string,
     propKey: string,
     operation: string,
-  ): OperationHandler<T, V> | undefined {
+  ): OperationHandler<T, V, Y> | undefined {
     try {
       return this.cache[targetName][propKey][operation];
     } catch (e) {
@@ -48,8 +48,8 @@ export class OperationsRegistry
    * @param {{}} target
    * @param {string | symbol} propKey
    */
-  register<T extends DBModel, V extends IRepository<T>>(
-    handler: OperationHandler<T, V>,
+  register<T extends DBModel, V extends IRepository<T>, Y>(
+    handler: OperationHandler<T, V, Y>,
     operation: OperationKeys,
     target: T,
     propKey: string | symbol,

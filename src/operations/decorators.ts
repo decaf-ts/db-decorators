@@ -1,4 +1,5 @@
 import {
+  IdOperationHandler,
   OperationHandler,
   OperationMetadata,
   StandardOperationHandler,
@@ -8,7 +9,7 @@ import { DBOperations, OperationKeys } from "./constants";
 import { Operations } from "./Operations";
 import { apply, CustomDecorator, metadata } from "@decaf-ts/reflection";
 
-function handle(op: OperationKeys, handler: OperationHandler<any, any>) {
+function handle(op: OperationKeys, handler: OperationHandler<any, any, any>) {
   return (target: any, propertyKey: string) => {
     Operations.register(handler, op, target, propertyKey);
   };
@@ -18,8 +19,8 @@ function handle(op: OperationKeys, handler: OperationHandler<any, any>) {
  * @summary Defines a behaviour to set on the defined {@link DBOperations.CREATE_UPDATE}
  *
  * @param {OnOperationHandler<any>} handler The method called upon the operation
+ * @param data
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
  *
  * @see on
  *
@@ -27,19 +28,20 @@ function handle(op: OperationKeys, handler: OperationHandler<any, any>) {
  *
  * @category Decorators
  */
-export function onCreateUpdate(
-  handler: OperationHandler<any, any>,
-  args: any[] = [],
-  ...props: string[]
+export function onCreateUpdate<T>(
+  handler:
+    | StandardOperationHandler<any, any, T>
+    | UpdateOperationHandler<any, any, T>,
+  data?: T,
 ) {
-  return on(DBOperations.CREATE_UPDATE, handler, args, ...props);
+  return on(DBOperations.CREATE_UPDATE, handler, data);
 }
 /**
  * @summary Defines a behaviour to set on the defined {@link DBOperations.UPDATE}
  *
  * @param {OnOperationHandler<any>} handler The method called upon the operation
+ * @param data
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
  *
  * @see on
  *
@@ -47,19 +49,17 @@ export function onCreateUpdate(
  *
  * @category Decorators
  */
-export function onUpdate(
-  handler: UpdateOperationHandler<any, any>,
-  args: any[],
-  ...props: string[]
+export function onUpdate<T>(
+  handler: UpdateOperationHandler<any, any, T>,
+  data?: T,
 ) {
-  return on(DBOperations.UPDATE, handler, args, ...props);
+  return on(DBOperations.UPDATE, handler, data);
 }
 /**
  * @summary Defines a behaviour to set on the defined {@link DBOperations.CREATE}
  *
  * @param {OnOperationHandler<any>} handler The method called upon the operation
- * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
+ * @param data?
  *
  * @see on
  *
@@ -67,20 +67,18 @@ export function onUpdate(
  *
  * @category Decorators
  */
-export function onCreate(
-  handler: StandardOperationHandler<any, any>,
-  args: any[],
-  ...props: string[]
+export function onCreate<T>(
+  handler: StandardOperationHandler<any, any, T>,
+  data?: T,
 ) {
-  return on(DBOperations.CREATE, handler, args, ...props);
+  return on(DBOperations.CREATE, handler, data);
 }
 
 /**
  * @summary Defines a behaviour to set on the defined {@link DBOperations.READ}
  *
  * @param {OnOperationHandler<any>} handler The method called upon the operation
- * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
+ * @param data
  *
  * @see on
  *
@@ -88,20 +86,15 @@ export function onCreate(
  *
  * @category Decorators
  */
-export function onRead(
-  handler: StandardOperationHandler<any, any>,
-  args: any[],
-  ...props: string[]
-) {
-  return on(DBOperations.READ, handler, args, ...props);
+export function onRead<T>(handler: IdOperationHandler<any, any, T>, data: T) {
+  return on(DBOperations.READ, handler, data);
 }
 
 /**
  * @summary Defines a behaviour to set on the defined {@link DBOperations.DELETE}
  *
  * @param {OnOperationHandler<any>} handler The method called upon the operation
- * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
+ * @param data
  *
  * @see on
  *
@@ -109,12 +102,8 @@ export function onRead(
  *
  * @category Decorators
  */
-export function onDelete(
-  handler: StandardOperationHandler<any, any>,
-  args: any[],
-  ...props: string[]
-) {
-  return on(DBOperations.DELETE, handler, args, ...props);
+export function onDelete<T>(handler: IdOperationHandler<any, any, T>, data: T) {
+  return on(DBOperations.DELETE, handler, data);
 }
 
 /**
@@ -122,8 +111,7 @@ export function onDelete(
  *
  * @param {OperationKeys[] | DBOperations} op One of {@link DBOperations}
  * @param {OnOperationHandler<any>} handler The method called upon the operation
- * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
+ * @param data
  *
  * ex: handler(...args, ...props.map(p => target[p]))
  *
@@ -131,20 +119,18 @@ export function onDelete(
  *
  * @category Decorators
  */
-export function on(
+export function on<T>(
   op: OperationKeys[] = DBOperations.ALL,
-  handler: OperationHandler<any, any>,
-  args: any[] = [],
-  ...props: string[]
+  handler: OperationHandler<any, any, T>,
+  data?: T,
 ) {
-  return operation(OperationKeys.ON, op, handler, args, ...props);
+  return operation(OperationKeys.ON, op, handler, data);
 }
 /**
  * @summary Defines a behaviour to set after the defined {@link DBOperations.CREATE_UPDATE}
  *
  * @param {AfterOperationHandler<any>} handler The method called upon the operation
- * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
+ * @param data
  *
  * @see after
  *
@@ -152,20 +138,20 @@ export function on(
  *
  * @category Decorators
  */
-export function afterCreateUpdate(
-  handler: OperationHandler<any, any>,
-  args: any[],
-  ...props: string[]
+export function afterCreateUpdate<T>(
+  handler:
+    | StandardOperationHandler<any, any, T>
+    | UpdateOperationHandler<any, any, T>,
+  data: T,
 ) {
-  return after(DBOperations.CREATE_UPDATE, handler, args, ...props);
+  return after(DBOperations.CREATE_UPDATE, handler, data);
 }
 
 /**
  * @summary Defines a behaviour to set after the defined {@link DBOperations.UPDATE}
  *
  * @param {AfterOperationHandler<any>} handler The method called upon the operation
- * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
+ * @param data
  *
  * @see after
  *
@@ -173,20 +159,18 @@ export function afterCreateUpdate(
  *
  * @category Decorators
  */
-export function afterUpdate(
-  handler: UpdateOperationHandler<any, any>,
-  args: any[],
-  ...props: string[]
+export function afterUpdate<T>(
+  handler: UpdateOperationHandler<any, any, T>,
+  data: T,
 ) {
-  return after(DBOperations.UPDATE, handler, args, ...props);
+  return after(DBOperations.UPDATE, handler, data);
 }
 
 /**
  * @summary Defines a behaviour to set after the defined {@link DBOperations.CREATE}
  *
  * @param {AfterOperationHandler<any>} handler The method called upon the operation
- * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
+ * @param data
  *
  * @see after
  *
@@ -194,20 +178,19 @@ export function afterUpdate(
  *
  * @category Decorators
  */
-export function afterCreate(
-  handler: StandardOperationHandler<any, any>,
-  args: any[],
-  ...props: string[]
+export function afterCreate<T>(
+  handler: StandardOperationHandler<any, any, T>,
+  data: T,
 ) {
-  return after(DBOperations.CREATE, handler, args, ...props);
+  return after(DBOperations.CREATE, handler, data);
 }
 
 /**
  * @summary Defines a behaviour to set after the defined {@link DBOperations.READ}
  *
  * @param {AfterOperationHandler<any>} handler The method called upon the operation
+ * @param data
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
  *
  * @see after
  *
@@ -215,19 +198,18 @@ export function afterCreate(
  *
  * @category Decorators
  */
-export function afterRead(
-  handler: StandardOperationHandler<any, any>,
-  args: any[],
-  ...props: string[]
+export function afterRead<T>(
+  handler: StandardOperationHandler<any, any, T>,
+  data?: T,
 ) {
-  return after(DBOperations.READ, handler, args, ...props);
+  return after(DBOperations.READ, handler, data);
 }
 /**
  * @summary Defines a behaviour to set after the defined {@link DBOperations.DELETE}
  *
  * @param {AfterOperationHandler<any>} handler The method called upon the operation
+ * @param data
  * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
  *
  * @see after
  *
@@ -235,43 +217,11 @@ export function afterRead(
  *
  * @category Decorators
  */
-export function afterDelete(
-  handler: StandardOperationHandler<any, any>,
-  args: any[],
-  ...props: string[]
+export function afterDelete<T>(
+  handler: StandardOperationHandler<any, any, T>,
+  data?: T,
 ) {
-  return after(DBOperations.DELETE, handler, args, ...props);
-}
-
-export function operation(
-  baseOp: OperationKeys.ON | OperationKeys.AFTER,
-  operation: OperationKeys[] = DBOperations.ALL,
-  handler: OperationHandler<any, any>,
-  args: any[] = [],
-  ...props: string[]
-) {
-  function reduceFunc(
-    op: OperationKeys,
-    accum: CustomDecorator<any>[],
-  ): CustomDecorator<any>[] {
-    const operat = `${baseOp.toString()}${op.toString()}`;
-
-    const data: OperationMetadata = {
-      operation: operat as OperationKeys,
-      handler: Operations.getHandlerName(handler),
-      args: args,
-      props: props,
-    };
-    accum.push(
-      metadata(Operations.genKey(operat), data) as CustomDecorator<any>,
-      handle(operat as OperationKeys, handler) as CustomDecorator<any>,
-    );
-    return accum;
-  }
-  // @ts-expect-error its not recognizing the right api for reduce
-  const ops = operation.reduce(reduceFunc, []) as CustomDecorator<any>[];
-
-  return apply(...ops);
+  return after(DBOperations.DELETE, handler, data);
 }
 
 /**
@@ -279,20 +229,46 @@ export function operation(
  *
  * @param {OperationKeys[] | DBOperations} op One of {@link DBOperations}
  * @param {AfterOperationHandler<any>} handler The method called upon the operation
- * @param {any[]} [args] Arguments that will be passed in order to the handler method
- * @param {string[]} [props] property keys that will be passed in order after the args
  *
  * ex: handler(...args, ...props.map(p => target[p]))
  *
+ * @param data
+ * @param args
  * @function after
  *
  * @category Decorators
  */
-export function after(
+export function after<T>(
   op: OperationKeys[] = DBOperations.ALL,
-  handler: OperationHandler<any, any>,
-  args: any[] = [],
-  ...props: string[]
+  handler: OperationHandler<any, any, T>,
+  data?: T,
 ) {
-  return operation(OperationKeys.AFTER, op, handler, args, ...props);
+  return operation(OperationKeys.AFTER, op, handler, data);
+}
+
+export function operation<T>(
+  baseOp: OperationKeys.ON | OperationKeys.AFTER,
+  operation: OperationKeys[] = DBOperations.ALL,
+  handler: OperationHandler<any, any, T>,
+  data?: T,
+) {
+  const ops = operation.reduce(
+    (accum: CustomDecorator<any>[], op: OperationKeys) => {
+      const operat = `${baseOp.toString()}${op.toString()}`;
+
+      const m_data: OperationMetadata<T> = {
+        operation: operat as OperationKeys,
+        handler: Operations.getHandlerName(handler),
+        metadata: data,
+      };
+      accum.push(
+        metadata(Operations.genKey(operat), m_data) as CustomDecorator<any>,
+        handle(operat as OperationKeys, handler) as CustomDecorator<any>,
+      );
+      return accum;
+    },
+    [],
+  );
+
+  return apply(...ops);
 }

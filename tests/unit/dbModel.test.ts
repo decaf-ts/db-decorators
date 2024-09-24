@@ -1,6 +1,4 @@
-// @ts-ignore
 import {TestModelAsync} from "./TestModel";
-import {Repository, DBModel} from "../../src";
 import {
   constructFromModel,
   list,
@@ -8,11 +6,10 @@ import {
   model,
   ModelArg, ModelErrorDefinition,
   required,
-  setModelBuilderFunction
 } from "@decaf-ts/decorator-validation";
 import {AsyncRamRepository} from "./TestRepository";
-import {Err} from "@decaf-ts/logging";
-import {readonly} from "../../src";
+import {DBModel} from "../../src/model/DBModel";
+import {readonly} from "../../src/validation/decorators";
 
 @model()
 class InnerTestModel extends DBModel {

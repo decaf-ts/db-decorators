@@ -2,20 +2,20 @@ import { DBModel } from "../model/DBModel";
 import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 
-export type OperationMetadata = {
+export type OperationMetadata<T> = {
   operation: OperationKeys;
   handler: string;
-  args: any[];
-  props: string[];
+  metadata?: T;
 };
 
 /**
  * @typedef OperationHandler
  * @memberOf db-decorators.operations
  */
-export type OperationHandler<T extends DBModel, Y extends IRepository<T>> =
-  | StandardOperationHandler<T, Y>
-  | UpdateOperationHandler<T, Y>;
+export type OperationHandler<T extends DBModel, Y extends IRepository<T>, V> =
+  | StandardOperationHandler<T, Y, V>
+  | UpdateOperationHandler<T, Y, V>
+  | IdOperationHandler<T, Y, V>;
 
 /**
  * @typedef OnOperationHandler
@@ -24,7 +24,18 @@ export type OperationHandler<T extends DBModel, Y extends IRepository<T>> =
 export type StandardOperationHandler<
   T extends DBModel,
   Y extends IRepository<T>,
-> = (this: Y, key: any, model: T, ...args: any[]) => Promise<void>;
+  V,
+> = (this: Y, metadata: V, key: any, model: T) => Promise<void> | void;
+
+/**
+ * @typedef IdOperationHandler
+ * @memberOf db-decorators.operations
+ */
+export type IdOperationHandler<
+  T extends DBModel,
+  Y extends IRepository<T>,
+  V,
+> = (this: Y, decorator: V, key: any, id: string) => Promise<void> | void;
 
 /**
  * @typedef AfterOperationHandler
@@ -33,4 +44,11 @@ export type StandardOperationHandler<
 export type UpdateOperationHandler<
   T extends DBModel,
   Y extends IRepository<T>,
-> = (this: Y, key: any, model: T, oldModel: T, ...args: any[]) => Promise<void>;
+  V,
+> = (
+  this: Y,
+  decorator: V,
+  key: any,
+  model: T,
+  oldModel: T,
+) => Promise<void> | void;

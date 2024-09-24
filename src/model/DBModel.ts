@@ -1,4 +1,5 @@
 import {
+  Constructor,
   Errors,
   Model,
   ModelArg,
@@ -15,6 +16,11 @@ import { UpdateValidationKeys } from "../validation/constants";
 import { UpdateValidator } from "../validation/validators/UpdateValidator";
 import { DEFAULT_ERROR_MESSAGES as DEM } from "@decaf-ts/decorator-validation";
 import { DecoratorMetadata, getPropertyDecorators } from "@decaf-ts/reflection";
+import { IRepository } from "../interfaces/IRepository";
+import { getDBKey } from "./decorators";
+import { DBKeys } from "./constants";
+import { InternalError, NotFoundError } from "../repository/errors";
+import { Injectables } from "@decaf-ts/injectable-decorators/lib/Injectables";
 
 /**
  * @summary Validates the update of a model
@@ -222,8 +228,6 @@ export function validateCompare<T extends DBModel>(
  * @category Model
  */
 export abstract class DBModel extends Model {
-  [indexer: string]: any;
-
   protected constructor(arg?: ModelArg<DBModel>) {
     super(arg);
   }
@@ -246,5 +250,22 @@ export abstract class DBModel extends Model {
     if (errs || !previousVersion) return errs;
 
     return validateCompare(previousVersion, this, ...exclusions);
+  }
+
+  static findRepository<V extends DBModel>(
+    model: Constructor<V>,
+  ): IRepository<V> {
+    const injectableName: string | undefined = Reflect.getMetadata(
+      getDBKey(DBKeys.REPOSITORY),
+      model,
+    );
+    if (!injectableName)
+      throw new InternalError(
+        `Could not find any registered repositories for ${model.name}`,
+      );
+    const repo = Injectables.get(injectableName) as IRepository<V> | undefined;
+    if (!repo)
+      throw new NotFoundError(`Could not find repository for ${model.name}`);
+    return repo;
   }
 }
