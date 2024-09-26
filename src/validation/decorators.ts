@@ -1,24 +1,17 @@
-import {
-  date,
-  required,
-  sf,
-  stringFormat,
-  type,
-} from "@decaf-ts/decorator-validation";
+import { date, required, sf, type } from "@decaf-ts/decorator-validation";
 import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
 import { DBOperations, OperationKeys } from "../operations/constants";
 import { after, on, onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { DBModel } from "../model/DBModel";
-import { SerializationError } from "../repository/errors";
+import {
+  ConflictError,
+  NotFoundError,
+  SerializationError,
+} from "../repository/errors";
 import { apply, CustomDecorator, metadata } from "@decaf-ts/reflection";
 import { getDBKey } from "../model/decorators";
-import { meta } from "eslint-plugin-prettier";
-import {
-  StandardOperationHandler,
-  UpdateOperationHandler,
-} from "../operations/types";
 
 export function getDBUpdateKey(str: string) {
   return UpdateValidationKeys.REFLECT + str;
@@ -101,6 +94,22 @@ export function timestamp(
   return apply(...decorators);
 }
 
+export async function uniqueOnCreateUpdate<
+  T extends DBModel,
+  V extends IRepository<T>,
+  Y = any,
+>(this: V, data: Y, key: string, model: T): Promise<void> {
+  if (!(model as any)[key]) return;
+  try {
+    await this.read(model[key]);
+  } catch (e: any) {
+    if (e instanceof NotFoundError) return;
+  }
+  throw new ConflictError(
+    `model already exists with ${key} equal to ${JSON.stringify(model[key], undefined, 2)}`,
+  );
+}
+
 /**
  * @summary Unique Decorator
  * @description Tags a property as unique.
@@ -111,7 +120,10 @@ export function timestamp(
  * @memberOf module:wallet-db.Decorators
  */
 export function unique() {
-  return metadata(getDBKey(DBKeys.UNIQUE), {});
+  return apply(
+    onCreateUpdate(uniqueOnCreateUpdate),
+    metadata(getDBKey(DBKeys.UNIQUE), {}),
+  );
 }
 
 export async function serializeOnCreateUpdate<

@@ -1,4 +1,4 @@
-import { Errors, validator, Validator } from "@decaf-ts/decorator-validation";
+import { validator, Validator } from "@decaf-ts/decorator-validation";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "../constants";
 import { isEqual } from "@decaf-ts/reflection";
 
@@ -19,7 +19,7 @@ export class ReadOnlyValidator extends Validator {
   /**
    * @inheritDoc
    */
-  hasErrors(): Errors {
+  hasErrors(value: any, ...args: any[]): string | undefined {
     return undefined;
   }
 
@@ -29,7 +29,11 @@ export class ReadOnlyValidator extends Validator {
    * @param {any} oldValue
    * @param {string} [message] the error message override
    */
-  public updateHasErrors(value: any, oldValue: any, message?: string): Errors {
+  public updateHasErrors(
+    value: any,
+    oldValue: any,
+    message?: string,
+  ): string | undefined {
     if (value === undefined) return;
 
     return isEqual(value, oldValue)

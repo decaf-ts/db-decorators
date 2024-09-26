@@ -1,14 +1,11 @@
-// @ts-ignore
-import {TestModelAsync} from "./TestModel";
-import {AsyncRepository} from "../../src";
-// @ts-ignore
-import {TestRamRepository} from "./TestRepository";
-import type {Err} from "@decaf-ts/logging";
+import {TestRamRepository} from "./testRepositories";
+import {TestModel} from "./TestModel";
+import {IRepository} from "../../src/interfaces/IRepository";
 
 describe("Update Validation", () => {
 
     it('Validates Properly when provided with the previous version', () => {
-        const tm1 = new TestModelAsync({
+        const tm1 = new TestModel({
             name: "test",
             address: "testtttt"
         });
@@ -16,7 +13,7 @@ describe("Update Validation", () => {
         let errs = tm1.hasErrors("id", "createdOn", "updatedOn");
         expect(errs).toBeUndefined();
 
-        const tm2 = new TestModelAsync({
+        const tm2 = new TestModel({
             name: "test",
             address: "tttttttesst"
         });
@@ -24,7 +21,7 @@ describe("Update Validation", () => {
         errs = tm2.hasErrors(tm1, "id", "createdOn", "updatedOn");
         expect(errs).toBeUndefined();
 
-        const tm3 = new TestModelAsync({
+        const tm3 = new TestModel({
             name: "testasdasd",
             address: "tttttttesst"
         });
@@ -34,43 +31,32 @@ describe("Update Validation", () => {
 
     });
 
-    it('denies validation when required', (callback) => {
-        let tm = new TestModelAsync({
+    it('denies validation when required', async () => {
+        let tm = new TestModel({
             name: "test",
             address: "testtttt"
         });
 
-        const repo: AsyncRepository<TestModelAsync> = new TestRamRepository();
+        const repo: IRepository<TestModel> = new TestRamRepository();
 
-        repo.create(1, new TestModelAsync(tm), (err: Err, newTm: TestModelAsync) => {
-            expect(err).toBeUndefined();
+        const newTm = await repo.create(new TestModel(tm));
 
-            expect(newTm).toBeDefined();
+        let errs = newTm.hasErrors();
+        expect(errs).toBeUndefined();
 
-            let errs = newTm.hasErrors();
-            expect(errs).toBeUndefined();
+        newTm.address = "tttttttesst";
 
-            newTm.address = "tttttttesst";
+        errs = newTm.hasErrors(tm, "id", "createdOn", "updatedOn");
+        expect(errs).toBeUndefined();
 
-            errs = newTm.hasErrors(tm, "id", "createdOn", "updatedOn");
-            expect(errs).toBeUndefined();
+        const otherNewTm = await repo.update(new TestModel(newTm));
+        errs = otherNewTm.hasErrors(newTm);
+        expect(errs).toBeUndefined();
 
-            repo.update(1, new TestModelAsync(newTm), (err: Err, otherNewTm: TestModelAsync) => {
-                expect(err).toBeUndefined();
-                expect(otherNewTm).toBeDefined();
-                errs = otherNewTm.hasErrors(newTm);
-                expect(errs).toBeUndefined();
+        otherNewTm.name = "ttttt";
+        errs = newTm.hasErrors(newTm);
+        expect(errs).toBeDefined();
 
-                otherNewTm.name = "ttttt";
-                errs = newTm.hasErrors(newTm);
-                expect(errs).toBeDefined();
-
-                repo.update(1, new TestModelAsync(otherNewTm), (err: Err, otherNewTm: TestModelAsync) => {
-                    expect(err).toBeDefined();
-
-                    callback();
-                });
-            });
-        });
+        await repo.update(new TestModel(otherNewTm));
     });
 });

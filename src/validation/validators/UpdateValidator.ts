@@ -1,6 +1,5 @@
 import {
   DEFAULT_ERROR_MESSAGES as DecoratorMessages,
-  Errors,
   Validator,
 } from "@decaf-ts/decorator-validation";
 
@@ -34,5 +33,5 @@ export abstract class UpdateValidator extends Validator {
     value: any,
     oldValue: any,
     ...args: any[]
-  ): Errors;
+  ): string | undefined;
 }

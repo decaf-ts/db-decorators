@@ -1,24 +1,24 @@
+import { DBModel } from "../model/DBModel";
+import { getDBKey } from "../model/decorators";
+import { DBKeys } from "../model/constants";
+import { getAllPropertyDecoratorsRecursive } from "../repository/utils";
+import { Constructor, ModelKeys, sf } from "@decaf-ts/decorator-validation";
+import { InternalError, NotFoundError } from "../repository/errors";
+import { IRepository } from "../interfaces/IRepository";
+
 /**
  * @summary Returns the primary key attribute for a {@link DBModel}
- * @description searches in all the properties in the object for an {@link pk} decorated property
+ * @description searches in all the properties in the object for an {@link id} decorated property
  *
  * @param {DBModel} model
  *
- * @throws {PrimaryKeyError} if no property or more than one properties are {@link pk} decorated
+ * @throws {InternalError} if no property or more than one properties are {@link id} decorated
  * or no value is set in that property
  *
  * @function findPrimaryKey
  *
  * @category managers
  */
-import { DBModel } from "../model/DBModel";
-import { getDBKey } from "../model/decorators";
-import { DBKeys } from "../model/constants";
-import { getAllPropertyDecoratorsRecursive } from "../repository/utils";
-import { Constructor, ModelKeys, sf } from "@decaf-ts/decorator-validation";
-import { InternalError } from "../repository/errors";
-import { IRepository } from "../interfaces/IRepository";
-
 export function findPrimaryKey<T extends DBModel>(model: T) {
   const decorators = getAllPropertyDecoratorsRecursive(
     model,
@@ -56,20 +56,21 @@ export function findPrimaryKey<T extends DBModel>(model: T) {
  * @description searches in all the properties in the object for an {@link pk} decorated property
  *
  * @param {DBModel} model
+ * @param {boolean} [returnEmpty]
  * @return {string} primary key
  *
- * @throws {PrimaryKeyError} if no property or more than one properties are {@link pk} decorated
- * @throws {DatabaseError} if no value is set on the {@link pk} decorated property
+ * @throws {InternalError} if no property or more than one properties are {@link pk} decorated
+ * @throws {NotFoundError} returnEmpty is false and no value is set on the {@link pk} decorated property
  *
  * @function findModelID
  *
  * @category managers
  */
-export function findModelId(model: DBModel) {
+export function findModelId(model: DBModel, returnEmpty = false) {
   const idProp = findPrimaryKey(model).id;
   const modelId = model[idProp];
-  if (!modelId)
-    throw new InternalError(
+  if (!modelId && !returnEmpty)
+    throw new NotFoundError(
       sf("No value for the Id is defined under the property {0}", idProp),
     );
   return modelId;

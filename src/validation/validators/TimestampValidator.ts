@@ -1,4 +1,4 @@
-import { Errors, validator, Validator } from "@decaf-ts/decorator-validation";
+import { validator, Validator } from "@decaf-ts/decorator-validation";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "../constants";
 
 /**
@@ -15,7 +15,7 @@ export class TimestampValidator extends Validator {
     super(DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID);
   }
 
-  hasErrors(): Errors {
+  hasErrors(value: any, ...args: any[]): string | undefined {
     return undefined;
   }
 
@@ -23,7 +23,7 @@ export class TimestampValidator extends Validator {
     value: Date | string | number,
     oldValue: Date | string | number,
     message?: string,
-  ): Errors {
+  ): string | undefined {
     if (value === undefined) return;
 
     message = message || this.getMessage(message || this.message);

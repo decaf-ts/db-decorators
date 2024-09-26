@@ -1,0 +1,243 @@
+import {TestModel} from "./TestModel";
+import {
+  constructFromModel,
+  list,
+  minlength, Model,
+  model,
+  ModelArg, ModelErrorDefinition,
+  required,
+} from "@decaf-ts/decorator-validation";
+import {DBModel} from "../../src/model/DBModel";
+import {readonly} from "../../src/validation/decorators";
+import {RamRepository} from "./RamRepository";
+import {repository} from "../../src/repository/decorators";
+import {ValidationError} from "../../src/repository/errors";
+import {IRepository} from "../../src/interfaces/IRepository";
+import {Injectables} from "@decaf-ts/injectable-decorators";
+import {id} from "../../src";
+
+@model()
+class InnerTestModel extends DBModel {
+
+  @id()
+  id?: string = undefined;
+
+  @readonly()
+  @required()
+  value?: string = undefined;
+
+  constructor(arg: ModelArg<InnerTestModel>) {
+    super(arg);
+  }
+
+
+  hasErrors(previousVersion?: any, ...exclusions: any[]): ModelErrorDefinition | undefined {
+    return super.hasErrors(previousVersion, ...exclusions);
+  }
+}
+
+@model()
+class OuterTestModel extends DBModel {
+
+  @id()
+  id?: string = undefined;
+
+  @required()
+  child?: InnerTestModel = undefined;
+
+  constructor(arg: ModelArg<OuterTestModel>) {
+    super(arg);
+  }
+
+
+  hasErrors(previousVersion?: any, ...exclusions: any[]): ModelErrorDefinition | undefined {
+    return super.hasErrors(previousVersion, ...exclusions);
+  }
+}
+
+@model()
+class OuterListTestModel extends DBModel {
+
+  @id()
+  id?: string = undefined;
+
+  @list(InnerTestModel)
+  @minlength(1)
+  @required()
+  children?: InnerTestModel[] = undefined;
+
+  constructor(arg: ModelArg<OuterTestModel>) {
+    super(arg);
+  }
+}
+
+describe(`DBModel`, function () {
+  it(`Instantiates`, function () {
+    const testModel = new TestModel();
+    expect(testModel).not.toBeNull();
+  });
+
+  it(`Fails Empty Validation`, function () {
+    const testModel = new TestModel();
+    expect(testModel).not.toBeNull();
+    const errors = testModel.hasErrors();
+    expect(errors).not.toBeNull();
+    if (errors) {
+      expect(new Set(Object.keys(errors)).size).toBe(3); // how many properties have errors
+      expect(Object.values(errors).length).toBe(3); // how many total errors
+    }
+  });
+
+  it(`Fails timestamp date validation`, function () {
+    const testModel = new TestModel({
+      id: 1
+    });
+
+    expect(testModel).not.toBeNull();
+
+    // @ts-ignore
+    testModel.updatedOn = "test";
+    // @ts-ignore
+    testModel.createdOn = "test";
+
+    const errors = testModel.hasErrors();
+    expect(errors).not.toBeNull();
+    if (errors) {
+      expect(new Set(Object.keys(errors)).size).toBe(2); // how many properties have errors
+      expect(Object.values(errors).length).toBe(2); // how many total errors
+    }
+  });
+
+  describe("Nested Update Validation", () => {
+
+    beforeAll(() => {
+      Model.setBuilder(constructFromModel)
+    })
+
+    afterAll(() => {
+      Model.setBuilder()
+    })
+
+    beforeEach(() => {
+      jest.resetAllMocks()
+      jest.clearAllMocks()
+      Injectables.reset()
+    })
+
+    @repository(OuterTestModel)
+    class OuterTestModelRepo extends RamRepository<OuterTestModel>{
+      constructor() {
+        super();
+      }
+    }
+
+    it("Fails the nested validation", async () => {
+      const manager = new OuterTestModelRepo();
+
+      let model = new OuterTestModel({
+        id: Date.now().toString(),
+        child: {
+          id: Date.now().toString(),
+          value: undefined
+        }
+      })
+
+      await expect(() => manager.create(model)).rejects.toThrowError(ValidationError)
+    })
+
+    let manager: IRepository<OuterTestModel>
+
+    it("Passes nested validation", async () => {
+      manager = new OuterTestModelRepo();
+      const model: OuterTestModel = new OuterTestModel({
+        id: Date.now().toString(),
+        child: {
+          id: Date.now().toString(),
+          value: "value"
+        }
+      })
+
+      const created = await manager.create(model);
+      expect(created).toBeDefined()
+
+      const validateMock = jest.spyOn((created?.child as InnerTestModel), "hasErrors");
+      expect(created.hasErrors()).toBeUndefined();
+      expect(validateMock).toHaveBeenCalledTimes(1)
+  })
+
+    it("fails update due to validation", async () => {
+
+      let toUpdate = new OuterTestModel(Object.assign({}, model, {
+        child: {
+          value: "updated"
+        }
+      }))
+
+      toUpdate = await manager.update(toUpdate);
+
+      const validateMock = jest.spyOn(toUpdate?.child as InnerTestModel, "hasErrors");
+
+      expect(toUpdate?.hasErrors()).toBeUndefined();
+      expect(toUpdate?.hasErrors(model)).toBeDefined();
+      expect(validateMock).toHaveBeenCalledTimes(3) // because the update call it one for non update properties, and another for update
+
+    })
+
+    @repository(OuterListTestModel)
+    class OuterListTestRepository extends RamRepository<OuterListTestModel>{
+      constructor() {
+        super();
+      }
+    }
+
+    it("also handles lists", async () => {
+
+      const manager = new OuterListTestRepository()
+
+      const model = new OuterListTestModel({
+        children: [
+          {
+            value: "1"
+          },
+          {
+            value: "2"
+          }
+        ]
+      })
+
+      const created = await manager.create(model);
+
+      expect(created).toBeDefined()
+      expect(created?.children).toBeDefined()
+      expect(created?.children?.length).toEqual(2)
+
+      let validateMock1 = jest.spyOn((created?.children as InnerTestModel[])[0] as InnerTestModel, "hasErrors");
+      let validateMock2 = jest.spyOn((created?.children as InnerTestModel[])[1] as InnerTestModel, "hasErrors");
+
+      expect(created?.hasErrors()).toBeUndefined();
+      expect(validateMock1).toHaveBeenCalledTimes(1)
+      expect(validateMock2).toHaveBeenCalledTimes(1)
+
+
+      let toUpdate = new OuterListTestModel({
+        children: [
+          {
+            value: "2"
+          },
+          {
+            value: "3"
+          }
+        ]
+      })
+      toUpdate = await manager.update(toUpdate)
+
+      validateMock1 = jest.spyOn((toUpdate?.children as InnerTestModel[])[0] as InnerTestModel, "hasErrors");
+      validateMock2 = jest.spyOn((toUpdate?.children as InnerTestModel[])[1] as InnerTestModel, "hasErrors");
+
+      expect(toUpdate?.hasErrors()).toBeUndefined();
+      expect(toUpdate?.hasErrors(created)).toBeDefined();
+      expect(validateMock1).toHaveBeenCalledTimes(3) // because the update call it one for non update properties, and another for update
+      expect(validateMock2).toHaveBeenCalledTimes(3) // because the update call it one for non update properties, and another for update
+    })
+  })
+});

@@ -1,18 +1,13 @@
-import {
-  after,
-  AsyncRepository,
-  DBModel,
-  DBOperations,
-  ModelCallback,
-  on, onCreate,
-  OperationHandlerAsync,
-  OperationKeys, readonly, timestamp
-} from "../../src";
 import {constructFromObject, model} from "@decaf-ts/decorator-validation";
-// @ts-ignore
-import {AsyncRamRepository} from "./TestRepository";
-import type {Err} from "@decaf-ts/logging";
-import {CriticalError, errorCallback} from "@decaf-ts/logging";
+import {after, on, onCreate} from "../../src/operations/decorators";
+import {DBOperations, OperationKeys} from "../../src/operations/constants";
+import {DBModel} from "../../src/model/DBModel";
+import {timestamp} from "../../src/validation/decorators";
+import {IRepository} from "../../src/interfaces/IRepository";
+import {RamRepository} from "./RamRepository";
+import {repository} from "../../src/repository/decorators";
+import {InternalError} from "../../src/repository/errors";
+import {Injectables} from "@decaf-ts/injectable-decorators";
 
 describe("Operations decorators", () => {
   describe("on", () => {
@@ -23,32 +18,27 @@ describe("Operations decorators", () => {
 
     class Handler {
 
-      static handler: OperationHandlerAsync<DBModel> = function (this: AsyncRepository<DBModel>, key: string, model: DBModel, callback: ModelCallback<DBModel>) {
+      static async handler(this: IRepository<DBModel>, data: any, key: string, model: DBModel) {
         (model as { [indexer: string]: any })[key as string] = "test";
-        callback(undefined, model as DBModel);
       }
 
-      static otherHandler: OperationHandlerAsync<any> = function (this: AsyncRepository<DBModel>, key: string, model: DBModel, callback: ModelCallback<DBModel>) {
+      static async otherHandler(this: IRepository<DBModel>, data: any, key: string, model: DBModel) {
         (model as { [indexer: string]: any })[key as string] = "test2";
-        callback(undefined, model as any);
       }
 
-      static yetAnotherHandler: OperationHandlerAsync<any> = function (this: AsyncRepository<DBModel>, key: string, model: DBModel, callback: ModelCallback<DBModel>) {
+      static async yetAnotherHandler(this: IRepository<DBModel>, data: any, key: string, model: DBModel) {
         (model as { [indexer: string]: any })[key as string] = new Date();
-        callback(undefined, model as any);
       }
 
-      static argHandler: OperationHandlerAsync<any> = function (this: AsyncRepository<DBModel>, key: string, model: DBModel, arg1: string, arg2: string, callback: ModelCallback<DBModel>) {
-        (model as { [indexer: string]: any })[key as string] = arg1 + arg2;
-        callback(undefined, model as any);
+      static async argHandler(this: IRepository<DBModel>, data: { arg1: string, arg2: string }, key: string, model: DBModel) {
+        (model as { [indexer: string]: any })[key as string] = data.arg1 + data.arg2;
       }
 
-      static anotherArgHandler: OperationHandlerAsync<any> = function (this: AsyncRepository<DBModel>, key: string, model: DBModel, arg1: number, callback: ModelCallback<DBModel>) {
+      static async anotherArgHandler(this: IRepository<DBModel>, data: number, key: string, model: DBModel) {
         const currentDate: Date | undefined = (model as { [indexer: string]: any })[key as string];
         if (!currentDate)
-          return errorCallback.call(this, "date not provided", callback);
-        (model as { [indexer: string]: any })[key as string] = currentDate.setFullYear(currentDate.getFullYear() + arg1);
-        callback(undefined, model as any);
+          throw new InternalError("date not provided");
+        (model as { [indexer: string]: any })[key as string] = currentDate.setFullYear(currentDate.getFullYear() + data);
       }
     }
 
@@ -72,26 +62,22 @@ describe("Operations decorators", () => {
       }
     }
 
-    class TestModelOnRepo extends AsyncRamRepository<TestModelOn> {
+    @repository(TestModelOn)
+    class TestModelOnRepo extends RamRepository<TestModelOn> {
       constructor() {
-        super(TestModelOn);
+        super();
       }
     }
 
-    it("calls handler on create", (callback) => {
+    it("calls handler on create", async () => {
       const tm = new TestModelOn();
-
       const repo = new TestModelOnRepo();
-
-      repo.create("key", tm, (err: Err, model?: TestModelOn) => {
-        expect(err).toBeUndefined();
-        expect(model).toBeDefined();
-        expect(model?.create).toEqual("test");
-        callback()
-      })
+      const model = await repo.create(tm);
+      expect(model).toBeDefined();
+      expect(model?.create).toEqual("test");
     })
 
-    it("calls handler on read", (callback) => {
+    it("calls handler on read", async () => {
 
       const mock = jest.spyOn(Handler, "handler")
 
@@ -105,9 +91,10 @@ describe("Operations decorators", () => {
         }
       }
 
-      class TestModelOnReadRepo extends AsyncRamRepository<TestModelOnRead> {
+      @repository(TestModelOnRead)
+      class TestModelOnReadRepo extends RamRepository<TestModelOnRead> {
         constructor() {
-          super(TestModelOnRead);
+          super();
         }
       }
 
@@ -115,43 +102,33 @@ describe("Operations decorators", () => {
 
       const repo = new TestModelOnReadRepo();
 
-      repo.create("key", tm, (err: Err, model?: TestModelOn) => {
-        expect(err).toBeUndefined();
-        expect(model).toBeDefined();
+      const model = repo.create(tm);
+      expect(model).toBeDefined();
 
-        repo.read("key", (err: Err, newModel?: TestModelOn) => {
-          expect(err).toBeUndefined();
-          expect(newModel).toBeDefined();
+      const newModel = await repo.read("key");
+      expect(newModel).toBeDefined();
 
-          expect(mock).toHaveBeenCalledTimes(2);
-          expect(mock).toHaveBeenCalledWith("read", expect.objectContaining({"read": "test"}), expect.any(Function));
-          callback()
-        })
-      })
+      expect(mock).toHaveBeenCalledTimes(2);
+      expect(mock).toHaveBeenCalledWith("read", expect.objectContaining({"read": "test"}), expect.any(Function));
     })
 
-    it("calls handler on update", (callback) => {
+    it("calls handler on update", async () => {
       const tm = new TestModelOn();
 
       const repo = new TestModelOnRepo();
 
-      repo.create("key", tm, (err: Err, model?: TestModelOn) => {
-        expect(err).toBeUndefined();
-        expect(model).toBeDefined();
-        expect(model?.create).toEqual("test");
+      const model = await repo.create(tm)
+      expect(model).toBeDefined();
+      expect(model?.create).toEqual("test");
 
-        repo.update("key", model as TestModelOn, (err: Err, newModel?: TestModelOn) => {
-          expect(err).toBeUndefined();
-          expect(newModel).toBeDefined();
-          expect(model?.create).toEqual("test");
-          expect(model?.read).toEqual("test");
-          expect(model?.update).toEqual("test");
-          callback()
-        })
-      })
+      const newModel = await repo.update(model);
+      expect(newModel).toBeDefined();
+      expect(model?.create).toEqual("test");
+      expect(model?.read).toEqual("test");
+      expect(model?.update).toEqual("test");
     })
 
-    it("calls multiple handlers", (callback) => {
+    it("calls multiple handlers", async () => {
 
       const mock: any = jest.spyOn(Handler, "handler")
       Object.defineProperty(mock, "name", {value: "mock"});                          // making sure the function names are different since the hash will be the same
@@ -173,9 +150,10 @@ describe("Operations decorators", () => {
         }
       }
 
-      class TestModelMultipleRepo extends AsyncRamRepository<TestModelMultiple> {
+      @repository(TestModelMultiple)
+      class TestModelMultipleRepo extends RamRepository<TestModelMultiple> {
         constructor() {
-          super(TestModelMultiple);
+          super();
         }
       }
 
@@ -183,20 +161,16 @@ describe("Operations decorators", () => {
 
       const repo = new TestModelMultipleRepo();
 
-      repo.create("key", tm, (err: Err, model?: TestModelMultiple) => {
-        expect(err).toBeUndefined();
-        expect(model).toBeDefined();
+      const model = await repo.create(tm)
+      expect(model).toBeDefined();
 
-        expect(otherMock).toHaveBeenCalledTimes(1);
-        expect(mock).toHaveBeenCalledTimes(1);
-        expect(model?.create).toEqual("test2")
-        expect(model?.timestamp).toBeDefined()
-        callback()
-      })
-
+      expect(otherMock).toHaveBeenCalledTimes(1);
+      expect(mock).toHaveBeenCalledTimes(1);
+      expect(model?.create).toEqual("test2")
+      expect(model?.timestamp).toBeDefined()
     })
 
-    it("Handles property overrides", (callback) => {
+    it("Handles property overrides", async () => {
 
       const mock: any = jest.spyOn(Handler, "yetAnotherHandler")
 
@@ -229,21 +203,24 @@ describe("Operations decorators", () => {
         }
       }
 
-      class BaseModelRepo extends AsyncRamRepository<BaseModel> {
+      @repository(BaseModel)
+      class BaseModelRepo extends RamRepository<BaseModel> {
         constructor() {
-          super(BaseModel);
+          super();
         }
       }
 
-      class OverriddenBaseModelRepo extends AsyncRamRepository<OverriddenBaseModel> {
+      @repository(OverriddenBaseModel)
+      class OverriddenBaseModelRepo extends RamRepository<OverriddenBaseModel> {
         constructor() {
-          super(OverriddenBaseModel);
+          super();
         }
       }
 
-      class OtherBaseModelRepo extends AsyncRamRepository<OtherBaseModel> {
+      @repository(OtherBaseModel)
+      class OtherBaseModelRepo extends RamRepository<OtherBaseModel> {
         constructor() {
-          super(OtherBaseModel);
+          super();
         }
       }
 
@@ -251,48 +228,24 @@ describe("Operations decorators", () => {
 
       const repo = new BaseModelRepo();
 
-      repo.create("key", tm, (err: Err, baseModel?: BaseModel) => {
-        try {
-          expect(err).toBeUndefined();
-          expect(baseModel).toBeDefined();
-          expect(mock).toHaveBeenCalledTimes(0);
-          expect(baseModel?.updatedOn).toBeDefined()
-        } catch (e: any) {
-          return callback(e)
-        }
+      const baseModel = await repo.create(tm)
 
-        const tm2 = new OverriddenBaseModel();
+      expect(baseModel).toBeDefined();
+      expect(mock).toHaveBeenCalledTimes(0);
+      expect(baseModel?.updatedOn).toBeDefined()
 
-        const repo2 = new OverriddenBaseModelRepo();
+      const tm2 = new OverriddenBaseModel();
+      const repo2 = new OverriddenBaseModelRepo();
+      await repo2.create(tm2)
+      expect(mock).toHaveBeenCalledTimes(1);
 
-        repo2.create("key", tm2, (err: Err) => {
-
-          try {
-            expect(err).toBeUndefined()
-            expect(mock).toHaveBeenCalledTimes(1);
-          } catch (e: any) {
-            return callback(e)
-          }
-
-          const tm3 = new OtherBaseModel();
-
-          const repo3 = new OtherBaseModelRepo();
-
-          repo3.create("key", tm3, (err: Err) => {
-            try {
-              expect(err).toBeUndefined();
-              expect(mock).toHaveBeenCalledTimes(2);
-            } catch (e: any) {
-              return callback(e)
-            }
-
-            callback()
-          });
-        })
-      })
+      const tm3 = new OtherBaseModel();
+      const repo3 = new OtherBaseModelRepo();
+      await repo3.create(tm3)
+      expect(mock).toHaveBeenCalledTimes(2);
     })
 
-    it("Handles property overrides in the correct order", (callback) => {
+    it("Handles property overrides in the correct order", async () => {
 
       const mock = jest.spyOn(Handler, "anotherArgHandler");
       const yearDiff = 1;
@@ -319,15 +272,17 @@ describe("Operations decorators", () => {
 
       }
 
-      class BaseModelRepo extends AsyncRamRepository<OrderBaseModel> {
+      @repository(OrderBaseModel)
+      class BaseModelRepo extends RamRepository<OrderBaseModel> {
         constructor() {
-          super(OrderBaseModel);
+          super();
         }
       }
 
-      class OverriddenBaseModelRepo extends AsyncRamRepository<OverriddenOrderBaseModel> {
+      @repository(OverriddenOrderBaseModel)
+      class OverriddenBaseModelRepo extends RamRepository<OverriddenOrderBaseModel> {
         constructor() {
-          super(OverriddenOrderBaseModel);
+          super();
         }
       }
 
@@ -335,41 +290,37 @@ describe("Operations decorators", () => {
 
       const repo = new BaseModelRepo();
 
-      repo.create("key", tm, (err: Err, baseModel?: OrderBaseModel) => {
-        expect(err).toBeUndefined();
-        expect(baseModel).toBeDefined();
-        expect(mock).toHaveBeenCalledTimes(0);
-        expect(baseModel?.updatedOn).toBeDefined()
+      const baseModel = await repo.create(tm)
+      expect(baseModel).toBeDefined();
+      expect(mock).toHaveBeenCalledTimes(0);
+      expect(baseModel?.updatedOn).toBeDefined()
 
-        let compareYear: number = (new Date()).getFullYear();
+      let compareYear: number = (new Date()).getFullYear();
 
-        expect((baseModel?.updatedOn as Date).getFullYear()).toEqual(compareYear)
+      expect((baseModel?.updatedOn as Date).getFullYear()).toEqual(compareYear)
 
-        const tm2 = new OverriddenOrderBaseModel();
+      const tm2 = new OverriddenOrderBaseModel();
 
-        const repo2 = new OverriddenBaseModelRepo();
+      const repo2 = new OverriddenBaseModelRepo();
 
-        repo2.create("key", tm2, (err: Err, overModel?: OverriddenOrderBaseModel) => {
-          expect(err).toBeUndefined()
-          expect(overModel).toBeDefined();
-          expect(mock).toHaveBeenCalledTimes(1);
-          expect(overModel?.updatedOn).toBeDefined()
+      const overModel = await repo2.create(tm2)
+      expect(overModel).toBeDefined();
+      expect(mock).toHaveBeenCalledTimes(1);
+      expect(overModel?.updatedOn).toBeDefined()
 
-          compareYear = (new Date()).getFullYear() + yearDiff;
+      compareYear = (new Date()).getFullYear() + yearDiff;
 
-          expect((overModel?.updatedOn as Date).getFullYear()).toEqual(compareYear)
-          callback()
-        })
-      })
+      expect((overModel?.updatedOn as Date).getFullYear()).toEqual(compareYear)
     })
 
     describe("Properly passes arguments to handler function", () => {
 
       beforeEach(() => {
+        Injectables.reset();
         jest.clearAllMocks();
       })
 
-      it("Properly fills the key as the propertyKey", (callback) => {
+      it("Properly fills the key as the propertyKey", async () => {
         const mock: any = jest.spyOn(Handler, "handler")
 
         class TestModelKey extends DBModel {
@@ -382,32 +333,31 @@ describe("Operations decorators", () => {
           }
         }
 
-        class TestModelKeyRepo extends AsyncRamRepository<TestModelKey> {
+        @repository(TestModelKey)
+        class TestModelKeyRepo extends RamRepository<TestModelKey> {
           constructor() {
-            super(TestModelKey);
+            super();
           }
         }
 
         const tm = new TestModelKey();
         const repo = new TestModelKeyRepo();
 
-        repo.create("anyKey", tm, (err: Err, model?: TestModelKey) => {
-          expect(err).toBeUndefined();
-          expect(model).toBeDefined();
-          expect(mock).toHaveBeenCalledTimes(1);
-          expect(mock).toHaveBeenCalledWith("onCreate", tm, expect.any(Function));
-          expect(model?.onCreate).toEqual("test")
-          callback()
-        })
+        const model = await repo.create(tm)
+        expect(model).toBeDefined();
+        expect(mock).toHaveBeenCalledTimes(1);
+        expect(mock).toHaveBeenCalledWith("onCreate", tm, expect.any(Function));
+        expect(model?.onCreate).toEqual("test")
+
       })
 
-      it("Properly passes arguments", (callback) => {
+      it("Properly passes arguments", async () => {
         const mock: any = jest.spyOn(Handler, "argHandler")
         const arg1 = "this is an arg";
         const arg2 = "this is an arg too";
 
         class TestModelArguments extends DBModel {
-          @on(DBOperations.CREATE, Handler.argHandler, arg1, arg2)
+          @on(DBOperations.CREATE, Handler.argHandler, {arg1: arg1, arg2: arg2})
           onCreate?: string = undefined;
 
           constructor(tm?: TestModelArguments | {}) {
@@ -416,26 +366,23 @@ describe("Operations decorators", () => {
           }
         }
 
-        class TestModelKeyRepo extends AsyncRamRepository<TestModelArguments> {
+        @repository(TestModelArguments)
+        class TestModelKeyRepo extends RamRepository<TestModelArguments> {
           constructor() {
-            super(TestModelArguments);
+            super();
           }
         }
 
         const tm = new TestModelArguments();
         const repo = new TestModelKeyRepo();
 
-        repo.create("anyKey", tm, (err: Err, model?: TestModelArguments) => {
-          expect(err).toBeUndefined();
-          expect(model).toBeDefined();
-          expect(mock).toHaveBeenCalledTimes(1);
-          expect(mock).toHaveBeenCalledWith("onCreate", tm, arg1, arg2, expect.any(Function));
-          expect(model?.onCreate).toEqual(arg1 + arg2)
-          callback()
-        })
+        const model = await repo.create(tm);
+        expect(model).toBeDefined();
+        expect(mock).toHaveBeenCalledTimes(1);
+        expect(mock).toHaveBeenCalledWith("onCreate", tm, arg1, arg2, expect.any(Function));
+        expect(model?.onCreate).toEqual(arg1 + arg2)
       })
-
     })
-  })
 
+  })
 })

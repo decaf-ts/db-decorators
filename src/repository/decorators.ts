@@ -11,7 +11,7 @@ export function repository<T extends DBModel>(
   model: Constructor<T>,
   nameOverride?: string,
 ) {
-  return (original: object, propertyKey?: string) => {
+  return (original: any, propertyKey?: string) => {
     if (propertyKey) {
       const injectableName: string | undefined = Reflect.getMetadata(
         getDBKey(DBKeys.REPOSITORY),
@@ -22,17 +22,14 @@ export function repository<T extends DBModel>(
       return inject(injectableName)(original, propertyKey);
     }
 
-    metadata(
-      getDBKey(DBKeys.REPOSITORY),
-      nameOverride || original.constructor.name,
-    )(model);
-    injectable(nameOverride, true, (instance: IRepository<T>) => {
+    metadata(getDBKey(DBKeys.REPOSITORY), nameOverride || original.name)(model);
+    return injectable(nameOverride, true, (instance: IRepository<T>) => {
       Object.defineProperty(instance, DBKeys.CLASS, {
         enumerable: false,
         configurable: false,
         writable: false,
         value: model,
       });
-    });
+    })(original);
   };
 }

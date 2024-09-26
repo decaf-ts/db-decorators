@@ -3,12 +3,13 @@ import { DBModel } from "../model/DBModel";
 import { Constructor } from "@decaf-ts/decorator-validation";
 import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
-import { InternalError, ObserverError, ValidationError } from "./errors";
+import { InternalError, ObserverError } from "./errors";
 import { DataCache } from "./DataCache";
 import { getDBKey } from "../model/decorators";
 import { DBKeys } from "../model/constants";
 import { Observable } from "../interfaces/Observable";
 import { Observer } from "../interfaces/Observer";
+import { wrapMethod } from "./wrappers";
 
 export abstract class Repository<T extends DBModel>
   implements IRepository<T>, Observable
@@ -35,7 +36,18 @@ export abstract class Repository<T extends DBModel>
     return this._cache;
   }
 
-  protected constructor() {}
+  protected constructor() {
+    const self = this;
+    [this.create, this.read, this.update, this.delete].forEach((m) => {
+      const name = m.name;
+      wrapMethod(
+        self,
+        (self as any)[name + "Prefix"],
+        m,
+        (self as any)[name + "Suffix"],
+      );
+    });
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async create(model: T, ...args: any[]): Promise<T> {
@@ -43,16 +55,13 @@ export abstract class Repository<T extends DBModel>
   }
 
   protected async createPrefix(model: T, ...args: any[]) {
+    model = new this.class(model);
     await enforceDBDecorators(
       this,
       model,
       OperationKeys.CREATE,
       OperationKeys.ON,
     );
-
-    const errors = model.hasErrors();
-    if (errors) throw new ValidationError(errors.toString());
-
     return [model, ...args];
   }
 
@@ -98,6 +107,7 @@ export abstract class Repository<T extends DBModel>
   }
 
   protected async updateSuffix(model: T) {
+    model = new this.class(model);
     await enforceDBDecorators(
       this,
       model,
@@ -113,19 +123,6 @@ export abstract class Repository<T extends DBModel>
       model,
       OperationKeys.UPDATE,
       OperationKeys.ON,
-    );
-
-    const pk = "";
-
-    const oldModel = await this.read(pk);
-    const errors = model.hasErrors(oldModel);
-    if (errors) throw new ValidationError(errors.toString());
-    await enforceDBDecorators(
-      this,
-      model,
-      OperationKeys.UPDATE,
-      OperationKeys.ON,
-      oldModel,
     );
     return [model, ...args];
   }

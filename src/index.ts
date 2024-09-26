@@ -31,3 +31,10 @@
  * @namespace Utils
  * @memberOf module:db-decorators
  */
+
+export * from "./identity";
+export * from "./interfaces";
+export * from "./model";
+export * from "./operations";
+export * from "./repository";
+export * from "./validation";

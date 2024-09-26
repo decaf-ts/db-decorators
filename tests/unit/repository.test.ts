@@ -1,83 +1,38 @@
-// @ts-ignore
-import {InheritanceTestModel, TestModelAsync} from "./TestModel";
-import {
-  InheritanceRamRepository,
-  KeylessTestRamRepository,
-  TestRamRepository
-// @ts-ignore
-} from "./TestRepository";
-import {AsyncRepository, InjectableRegistryImp, setInjectablesRegistry} from "../../src";
-import {Err} from "@decaf-ts/logging";
+import {InheritanceTestModel, TestModel} from "./TestModel";
+import {Injectables} from "@decaf-ts/injectable-decorators";
+import {IRepository} from "../../src/interfaces/IRepository";
+import {RamRepository} from "./RamRepository";
+import {InheritanceRamRepository} from "./testRepositories";
 
 describe(`Async Repository`, function () {
 
-  const testModel = new TestModelAsync();
+  const testModel = new TestModel();
 
   beforeEach(() => {
-    setInjectablesRegistry(new InjectableRegistryImp());
+    Injectables.reset();
   });
 
   it(`Instantiates`, function () {
-    const testRepository: AsyncRepository<TestModelAsync> = new TestRamRepository();
+    const testRepository: IRepository<TestModel> = new RamRepository();
     expect(testRepository).not.toBeNull();
   });
 
-  it(`Fills Properties Nicely`, function (testFinished) {
-    const testRepository: AsyncRepository<TestModelAsync> = new TestRamRepository();
+  it(`Fills Properties Nicely`, async () => {
+    const testRepository: IRepository<TestModel> = new RamRepository();
 
-    testRepository.create("testModel.id", testModel, (err: Err, result?: TestModelAsync) => {
-      expect(err).toBeUndefined();
-      expect(result).toBeDefined();
-      if (result) {
-        expect(result.id).toBeDefined();
-        expect(result.updatedOn).toBeDefined();
-        expect(result.createdOn).toBeDefined();
-      }
-      testFinished();
-    });
+    const result = await testRepository.create(testModel)
+    expect(result.id).toBeDefined();
+    expect(result.updatedOn).toBeDefined();
+    expect(result.createdOn).toBeDefined();
   });
 
-  it("Supports inheritance", testFinished => {
+  it("Supports inheritance", async () => {
     const inheritedModel = new InheritanceTestModel();
     const repo = new InheritanceRamRepository();
 
-    repo.create("some key", inheritedModel, (err: Err, result) => {
-      expect(err).toBeUndefined();
-      expect(result).toBeDefined();
-      expect(result?.id).toBeDefined();
-      expect(result?.updatedOn).toBeDefined();
-      expect(result?.createdOn).toBeDefined();
-      testFinished();
-    })
-
+    const result = await repo.create(inheritedModel)
+    expect(result?.id).toBeDefined();
+    expect(result?.updatedOn).toBeDefined();
+    expect(result?.createdOn).toBeDefined();
   })
-});
-
-describe(`Keyless Async Repository`, function () {
-
-  const testModel = new TestModelAsync();
-
-  beforeEach(() => {
-    setInjectablesRegistry(new InjectableRegistryImp());
-  });
-
-  it(`Instantiates`, function () {
-    const testRepository: AsyncRepository<TestModelAsync> = new KeylessTestRamRepository();
-    expect(testRepository).not.toBeNull();
-  });
-
-  it(`Fills Properties Nicely`, function (testfinished) {
-    const testRepository: KeylessTestRamRepository = new KeylessTestRamRepository();
-
-    testRepository.create(testModel, (err: Err, result?: TestModelAsync) => {
-      expect(err).toBeUndefined();
-      expect(result).toBeDefined();
-      if (result) {
-        expect(result.id).toBeDefined();
-        expect(result.updatedOn).toBeDefined();
-        expect(result.createdOn).toBeDefined();
-      }
-      testfinished();
-    });
-  });
 });

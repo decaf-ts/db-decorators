@@ -1,6 +1,5 @@
 import {
   Constructor,
-  Errors,
   Model,
   ModelArg,
   ModelErrorDefinition,
@@ -20,7 +19,7 @@ import { IRepository } from "../interfaces/IRepository";
 import { getDBKey } from "./decorators";
 import { DBKeys } from "./constants";
 import { InternalError, NotFoundError } from "../repository/errors";
-import { Injectables } from "@decaf-ts/injectable-decorators/lib/Injectables";
+import { Injectables } from "@decaf-ts/injectable-decorators";
 
 /**
  * @summary Validates the update of a model
@@ -61,42 +60,43 @@ export function validateCompare<T extends DBModel>(
 
       decorators.shift(); // remove the design:type decorator, since the type will already be checked
 
-      let errs: { [indexer: string]: Errors } | undefined = decorators.reduce(
-        (
-          acc: undefined | { [indexer: string]: Errors },
-          decorator: { key: string; props: {} },
-        ) => {
-          const validator: UpdateValidator = Validation.get(
-            decorator.key,
-          ) as UpdateValidator;
-          if (!validator) {
-            console.error(
-              `Could not find Matching validator for ${decorator.key} for property ${String(decoratedProperty.prop)}`,
+      let errs: Record<string, string | undefined> | undefined =
+        decorators.reduce(
+          (
+            acc: undefined | { [indexer: string]: string | undefined },
+            decorator: DecoratorMetadata,
+          ) => {
+            const validator: UpdateValidator = Validation.get(
+              decorator.key,
+            ) as UpdateValidator;
+            if (!validator) {
+              console.error(
+                `Could not find Matching validator for ${decorator.key} for property ${String(decoratedProperty.prop)}`,
+              );
+              return acc;
+            }
+
+            const err: string | undefined = validator.updateHasErrors(
+              newModel[prop.toString()],
+              oldModel[prop.toString()],
+              ...Object.values(decorator.props),
             );
+            if (err) {
+              acc = acc || {};
+              acc[decorator.key] = err;
+            }
+
             return acc;
-          }
-
-          const err: Errors = validator.updateHasErrors(
-            newModel[prop.toString()],
-            oldModel[prop.toString()],
-            ...Object.values(decorator.props),
-          );
-          if (err) {
-            acc = acc || {};
-            acc[decorator.key] = err;
-          }
-
-          return acc;
-        },
-        undefined,
-      );
+          },
+          undefined,
+        );
 
       errs =
         errs ||
         Object.keys(newModel)
           .filter((k) => !errs || !errs[k])
           .reduce((acc: Record<string, any> | undefined, prop) => {
-            let err: Errors;
+            let err: string | undefined;
             // if a nested Model
             const allDecorators = getPropertyDecorators(
               ValidationKeys.REFLECT,

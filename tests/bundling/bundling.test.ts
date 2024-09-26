@@ -1,7 +1,7 @@
-import {UpdateValidationKeys} from "../../lib"; // at least one import is needed so the file is considered a module byt jest
+import {UpdateValidationKeys} from "../../src"; // at least one import is needed so the file is considered a module byt jest
 
 describe("Distribution Tests", () => {
-    it.only ("reads lib", () => {
+    it("reads lib", () => {
         try {
             const {UpdateValidationKeys} = require("../../lib");
             expect(UpdateValidationKeys).toBeDefined();
