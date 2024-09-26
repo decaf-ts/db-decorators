@@ -77,8 +77,8 @@ export function validateCompare<T extends DBModel>(
             }
 
             const err: string | undefined = validator.updateHasErrors(
-              newModel[prop.toString()],
-              oldModel[prop.toString()],
+              (newModel as any)[prop.toString()],
+              (oldModel as any)[prop.toString()],
               ...Object.values(decorator.props),
             );
             if (err) {

@@ -68,7 +68,7 @@ export function findPrimaryKey<T extends DBModel>(model: T) {
  */
 export function findModelId(model: DBModel, returnEmpty = false) {
   const idProp = findPrimaryKey(model).id;
-  const modelId = model[idProp];
+  const modelId = (model as any)[idProp];
   if (!modelId && !returnEmpty)
     throw new NotFoundError(
       sf("No value for the Id is defined under the property {0}", idProp),

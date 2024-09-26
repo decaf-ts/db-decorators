@@ -1,4 +1,4 @@
-import { IRegistry, Model } from "@decaf-ts/decorator-validation";
+import { Hashing, IRegistry, Model } from "@decaf-ts/decorator-validation";
 import { OperationHandler } from "./types";
 import { OperationsRegistry } from "./OperationsRegistry";
 import { DBModel } from "../model/DBModel";
@@ -22,7 +22,7 @@ export class Operations {
     console.warn(
       "Handler name not defined. A name will be generated, but this is not desirable. please avoid using anonymous functions",
     );
-    return Model.hash(handler.toString());
+    return Hashing.hash(handler.toString());
   }
 
   static genKey(str: string) {

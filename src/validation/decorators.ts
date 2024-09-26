@@ -101,12 +101,12 @@ export async function uniqueOnCreateUpdate<
 >(this: V, data: Y, key: string, model: T): Promise<void> {
   if (!(model as any)[key]) return;
   try {
-    await this.read(model[key]);
+    await this.read((model as any)[key]);
   } catch (e: any) {
     if (e instanceof NotFoundError) return;
   }
   throw new ConflictError(
-    `model already exists with ${key} equal to ${JSON.stringify(model[key], undefined, 2)}`,
+    `model already exists with ${key} equal to ${JSON.stringify((model as any)[key], undefined, 2)}`,
   );
 }
 

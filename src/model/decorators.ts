@@ -2,7 +2,7 @@ import { DBKeys, DefaultSeparator } from "./constants";
 import { OrderDirection } from "../validation/constants";
 import { apply, metadata } from "@decaf-ts/reflection";
 import { IndexMetadata } from "../repository/types";
-import { Model, sf } from "@decaf-ts/decorator-validation";
+import { Hashing, Model, sf } from "@decaf-ts/decorator-validation";
 import { DBModel } from "./DBModel";
 import { onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
@@ -46,9 +46,9 @@ export function hashOnCreateUpdate<T extends DBModel, V extends IRepository<T>>(
   model: T,
   oldModel?: T,
 ): void {
-  if (!model[key]) return;
-  const hash = Model.hash((model as any)[key]);
-  if (oldModel && oldModel[key] === hash) return;
+  if (!(model as any)[key]) return;
+  const hash = Hashing.hash((model as any)[key]);
+  if (oldModel && (model as any)[key] === hash) return;
   (model as any)[key] = hash;
 }
 

@@ -147,9 +147,11 @@ describe(`DBModel`, function () {
 
     let manager: IRepository<OuterTestModel>
 
+    let created: OuterTestModel
+
     it("Passes nested validation", async () => {
       manager = new OuterTestModelRepo();
-      const model: OuterTestModel = new OuterTestModel({
+      const model = new OuterTestModel({
         id: Date.now().toString(),
         child: {
           id: Date.now().toString(),
@@ -157,7 +159,7 @@ describe(`DBModel`, function () {
         }
       })
 
-      const created = await manager.create(model);
+      created = await manager.create(model);
       expect(created).toBeDefined()
 
       const validateMock = jest.spyOn((created?.child as InnerTestModel), "hasErrors");
@@ -167,8 +169,9 @@ describe(`DBModel`, function () {
 
     it("fails update due to validation", async () => {
 
-      let toUpdate = new OuterTestModel(Object.assign({}, model, {
+      let toUpdate = new OuterTestModel(Object.assign({}, created, {
         child: {
+          id: (created.child as InnerTestModel).id,
           value: "updated"
         }
       }))
