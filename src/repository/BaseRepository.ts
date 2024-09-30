@@ -3,7 +3,7 @@ import { DBModel } from "../model/DBModel";
 import { Constructor, sf } from "@decaf-ts/decorator-validation";
 import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
-import { InternalError, ObserverError } from "./errors";
+import { InternalError } from "./errors";
 import { DataCache } from "./DataCache";
 import { wrapMethod } from "./wrappers";
 import { findModelId } from "../identity";

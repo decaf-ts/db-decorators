@@ -129,6 +129,7 @@ export async function serializeOnCreateUpdate<
   T extends DBModel,
   V extends IRepository<T>,
   Y = any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 >(this: V, data: Y, key: string, model: T, oldModel: T): Promise<void> {
   if (!(model as any)[key]) return;
   try {

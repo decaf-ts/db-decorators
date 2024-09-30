@@ -1,5 +1,4 @@
 import {
-  DEFAULT_ERROR_MESSAGES as DEM,
   ModelErrorDefinition,
   ModelErrors,
   ModelKeys,
