@@ -91,9 +91,9 @@ export async function enforceDBDecorators<
       let data: any;
       for (let i = 0; i < handlers.length; i++) {
         handler = handlers[i];
-        data = handlerArgs[i];
+        data = Object.values(handlerArgs)[i];
 
-        const args: any[] = [data, prop, model];
+        const args: any[] = [data.data, prop, model];
 
         if (operation === OperationKeys.UPDATE) {
           if (!oldModel)
@@ -125,9 +125,9 @@ export function getDbDecorators<T extends DBModel>(
   extraPrefix?: string,
 ): Record<string, DecoratorMetadata[]> | undefined {
   const decorators: Record<string, DecoratorMetadata[]> | undefined =
-    getAllPropertyDecoratorsRecursive(
+    getAllPropertyDecorators(
       model,
-      undefined,
+      // undefined,
       OperationKeys.REFLECT + (extraPrefix ? extraPrefix : ""),
     );
   if (!decorators) return;

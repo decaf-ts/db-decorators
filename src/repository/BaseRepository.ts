@@ -89,7 +89,7 @@ export abstract class BaseRepository<T extends DBModel>
     await enforceDBDecorators(
       this,
       model,
-      OperationKeys.DELETE,
+      OperationKeys.READ,
       OperationKeys.ON,
     );
     return [key, ...args];

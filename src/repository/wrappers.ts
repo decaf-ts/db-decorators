@@ -85,7 +85,7 @@ export function wrapMethod(
   async function wrapper(this: any, ...args: any[]) {
     const transformedArgs = await Promise.resolve(before.call(obj, ...args));
     const results = await Promise.resolve(method.call(obj, ...transformedArgs));
-    return after.call(this, results);
+    return Promise.resolve(after.call(this, results));
   }
   const wrapped = wrapper.bind(obj);
   const name = methodName ? methodName : method.name;

@@ -38,6 +38,7 @@ export abstract class Repository<T extends DBModel> extends BaseRepository<T> {
       if (id) await this.read(id.toString());
     } catch (e: any) {
       if (e instanceof NotFoundError) return [model, ...args];
+      throw e;
     }
 
     throw new ConflictError(
