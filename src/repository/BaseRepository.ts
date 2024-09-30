@@ -5,17 +5,13 @@ import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError, ObserverError } from "./errors";
 import { DataCache } from "./DataCache";
-import { Observable } from "../interfaces/Observable";
-import { Observer } from "../interfaces/Observer";
 import { wrapMethod } from "./wrappers";
 import { findModelId } from "../identity";
 
 export abstract class BaseRepository<T extends DBModel>
-  implements IRepository<T>, Observable
+  implements IRepository<T>
 {
   private readonly _class!: Constructor<T>;
-
-  private observers!: Observer[];
 
   private _cache?: DataCache;
 
@@ -148,44 +144,6 @@ export abstract class BaseRepository<T extends DBModel>
       OperationKeys.ON,
     );
     return [key, ...args];
-  }
-
-  /**
-   * @summary Registers an {@link Observer}
-   * @param {Observer} observer
-   *
-   * @see {Observable#observe}
-   */
-  observe(observer: Observer): void {
-    const index = this.observers.indexOf(observer);
-    if (index !== -1) throw new InternalError("Observer already registered");
-    this.observers.push(observer);
-  }
-
-  /**
-   * @summary Unregisters an {@link Observer}
-   * @param {Observer} observer
-   *
-   * @see {Observable#unObserve}
-   */
-  unObserve(observer: Observer): void {
-    const index = this.observers.indexOf(observer);
-    if (index === -1) throw new InternalError("Failed to find Observer");
-    this.observers.splice(index, 1);
-  }
-
-  /**
-   * @summary calls all registered {@link Observer}s to update themselves
-   * @param {any[]} [args] optional arguments to be passed to the {@link Observer#refresh} method
-   */
-  async updateObservers(...args: any[]): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      Promise.all(this.observers.map((o: Observer) => o.refresh(...args)))
-        .then(() => {
-          resolve();
-        })
-        .catch((e: any) => reject(new ObserverError(e)));
-    });
   }
 
   toString() {

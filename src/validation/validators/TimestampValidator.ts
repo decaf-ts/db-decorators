@@ -15,6 +15,7 @@ export class TimestampValidator extends Validator {
     super(DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   hasErrors(value: any, ...args: any[]): string | undefined {
     return undefined;
   }

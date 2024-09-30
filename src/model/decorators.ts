@@ -2,7 +2,7 @@ import { DBKeys, DefaultSeparator } from "./constants";
 import { OrderDirection } from "../validation/constants";
 import { apply, metadata } from "@decaf-ts/reflection";
 import { IndexMetadata } from "../repository/types";
-import { Hashing, Model, sf } from "@decaf-ts/decorator-validation";
+import { Hashing, sf } from "@decaf-ts/decorator-validation";
 import { DBModel } from "./DBModel";
 import { onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";

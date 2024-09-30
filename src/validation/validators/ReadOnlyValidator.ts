@@ -19,6 +19,7 @@ export class ReadOnlyValidator extends Validator {
   /**
    * @inheritDoc
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   hasErrors(value: any, ...args: any[]): string | undefined {
     return undefined;
   }
