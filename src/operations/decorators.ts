@@ -7,7 +7,7 @@ import {
 } from "./types";
 import { DBOperations, OperationKeys } from "./constants";
 import { Operations } from "./Operations";
-import { apply, CustomDecorator, metadata } from "@decaf-ts/reflection";
+import { apply, metadata } from "@decaf-ts/reflection";
 
 function handle(op: OperationKeys, handler: OperationHandler<any, any, any>) {
   return (target: any, propertyKey: string) => {
@@ -250,25 +250,44 @@ export function operation<T>(
   baseOp: OperationKeys.ON | OperationKeys.AFTER,
   operation: OperationKeys[] = DBOperations.ALL,
   handler: OperationHandler<any, any, T>,
-  data?: T,
+  dataToAdd?: T,
 ) {
-  const ops = operation.reduce(
-    (accum: CustomDecorator<any>[], op: OperationKeys) => {
-      const operat = `${baseOp.toString()}${op.toString()}`;
-
-      const m_data: OperationMetadata<T> = {
-        operation: operat as OperationKeys,
-        handler: Operations.getHandlerName(handler),
-        metadata: data,
-      };
-      accum.push(
-        metadata(Operations.genKey(operat), m_data) as CustomDecorator<any>,
-        handle(operat as OperationKeys, handler) as CustomDecorator<any>,
+  return (target: object, propertyKey: string | symbol) => {
+    const name = target.constructor.name;
+    const decorators = operation.reduce((accum: any[], op) => {
+      const compoundKey = baseOp + op;
+      let data = Reflect.getMetadata(
+        Operations.genKey(compoundKey),
+        target,
+        propertyKey,
       );
-      return accum;
-    },
-    [],
-  );
+      if (!data)
+        data = {
+          operation: op,
+          handlers: {},
+        };
 
-  return apply(...ops);
+      const handlerKey = Operations.getHandlerName(handler);
+
+      if (
+        !data.handlers[name] ||
+        !data.handlers[name][propertyKey] ||
+        !(handlerKey in data.handlers[name][propertyKey])
+      ) {
+        data.handlers[name] = data.handlers[name] || {};
+        data.handlers[name][propertyKey] =
+          data.handlers[name][propertyKey] || {};
+        data.handlers[name][propertyKey][handlerKey] = {
+          data: dataToAdd,
+        };
+
+        accum.push(
+          handle(compoundKey as OperationKeys, handler),
+          metadata(Operations.genKey(compoundKey), data),
+        );
+      }
+      return accum;
+    }, []);
+    return apply(...decorators)(target, propertyKey);
+  };
 }

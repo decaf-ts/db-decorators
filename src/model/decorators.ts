@@ -40,12 +40,11 @@ export function index(compositions?: string[], directions?: OrderDirection[]) {
   );
 }
 
-export function hashOnCreateUpdate<T extends DBModel, V extends IRepository<T>>(
-  this: V,
-  key: string,
-  model: T,
-  oldModel?: T,
-): void {
+export function hashOnCreateUpdate<
+  T extends DBModel,
+  V extends IRepository<T>,
+  Y = any,
+>(this: V, data: Y, key: string, model: T, oldModel?: T): void {
   if (!(model as any)[key]) return;
   const hash = Hashing.hash((model as any)[key]);
   if (oldModel && (model as any)[key] === hash) return;

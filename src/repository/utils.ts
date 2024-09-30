@@ -8,7 +8,37 @@ import {
   getAllPropertyDecorators,
 } from "@decaf-ts/reflection";
 import { InternalError } from "./errors";
-import { ModelKeys, sf } from "@decaf-ts/decorator-validation";
+import { Constructor, ModelKeys, sf } from "@decaf-ts/decorator-validation";
+
+/**
+ * @summary retrieves the arguments for the handler
+ * @param {any} dec the decorator
+ * @param {string} prop the property name
+ * @param {{}} m the model
+ * @param {{}} [accum] accumulator used for internal recursiveness
+ *
+ * @function getHandlerArgs
+ * @memberOf module:db-decorators.Repository
+ */
+export const getHandlerArgs = function (
+  dec: any,
+  prop: string,
+  m: Constructor<any>,
+  accum?: Record<string, { args: string[] }>,
+): Record<string, { args: string[] }> | void {
+  const name = m.constructor.name;
+  if (!name) throw new InternalError("Could not determine model class");
+  accum = accum || {};
+
+  if (dec.props.handlers[name] && dec.props.handlers[name][prop])
+    accum = { ...dec.props.handlers[name][prop], ...accum };
+
+  let proto = Object.getPrototypeOf(m);
+  if (proto === Object.prototype) return accum;
+  if (proto.constructor.name === name) proto = Object.getPrototypeOf(proto);
+
+  return getHandlerArgs(dec, prop, proto, accum);
+};
 
 /**
  *
@@ -41,26 +71,40 @@ export async function enforceDBDecorators<
   for (const prop in decorators) {
     const decs: DecoratorMetadata[] = decorators[prop];
     for (const dec of decs) {
-      const { key, props } = dec;
-      const handler: OperationHandler<T, Y, V> | undefined = Operations.get(
-        model.constructor.name,
+      const { key } = dec;
+      const handlers: OperationHandler<T, Y, V>[] | undefined = Operations.get(
+        model,
         prop,
         prefix + key,
       );
-      if (!handler)
+      if (!handlers || !handlers.length)
         throw new InternalError(
-          `Could not find registered handler for the operation ${prop}`,
+          `Could not find registered handler for the operation ${prefix + key} under property ${prop}`,
         );
-      const args: any[] = [props, prop, model];
 
-      if (operation === OperationKeys.UPDATE) {
-        if (!oldModel) throw new InternalError("Missing old model argument");
-        args.push(oldModel);
+      const handlerArgs = getHandlerArgs(dec, prop, model as any);
+
+      if (!handlerArgs || Object.values(handlerArgs).length !== handlers.length)
+        throw new InternalError(sf("Args and handlers length do not match"));
+
+      let handler: OperationHandler<any, any, any>;
+      let data: any;
+      for (let i = 0; i < handlers.length; i++) {
+        handler = handlers[i];
+        data = handlerArgs[i];
+
+        const args: any[] = [data, prop, model];
+
+        if (operation === OperationKeys.UPDATE) {
+          if (!oldModel)
+            throw new InternalError("Missing old model for update operation");
+          args.push(oldModel);
+        }
+        await (handler as UpdateOperationHandler<T, Y, V>).apply(
+          repo,
+          args as [V, any, T, T],
+        );
       }
-      await (handler as UpdateOperationHandler<T, Y, V>).apply(
-        repo,
-        args as [V, any, T, T],
-      );
     }
   }
 }
@@ -81,8 +125,9 @@ export function getDbDecorators<T extends DBModel>(
   extraPrefix?: string,
 ): Record<string, DecoratorMetadata[]> | undefined {
   const decorators: Record<string, DecoratorMetadata[]> | undefined =
-    getAllPropertyDecorators(
+    getAllPropertyDecoratorsRecursive(
       model,
+      undefined,
       OperationKeys.REFLECT + (extraPrefix ? extraPrefix : ""),
     );
   if (!decorators) return;

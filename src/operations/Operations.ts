@@ -1,4 +1,4 @@
-import { Hashing, IRegistry, Model } from "@decaf-ts/decorator-validation";
+import { Hashing } from "@decaf-ts/decorator-validation";
 import { OperationHandler } from "./types";
 import { OperationsRegistry } from "./OperationsRegistry";
 import { DBModel } from "../model/DBModel";
@@ -12,7 +12,7 @@ import { OperationKeys } from "./constants";
  * @category Operations
  */
 export class Operations {
-  private static registry: IRegistry<OperationHandler<any, any, any>>;
+  private static registry: OperationsRegistry;
 
   private constructor() {}
 
@@ -29,17 +29,17 @@ export class Operations {
     return OperationKeys.REFLECT + str;
   }
 
-  static get(targetName: string, propKey: string, operation: string) {
+  static get(
+    targetName: string | Record<string, any>,
+    propKey: string,
+    operation: string,
+  ) {
     return Operations.registry.get(targetName, propKey, operation);
   }
 
   private static getOpRegistry() {
     if (!Operations.registry) Operations.registry = new OperationsRegistry();
     return Operations.registry;
-  }
-
-  static setOpRegistry(registry: IRegistry<OperationHandler<any, any, any>>) {
-    Operations.registry = registry;
   }
 
   static register<V extends DBModel>(

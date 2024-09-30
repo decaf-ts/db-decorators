@@ -1,6 +1,7 @@
 import {TestRamRepository} from "./testRepositories";
 import {TestModel} from "./TestModel";
 import {IRepository} from "../../src/interfaces/IRepository";
+import {ValidationError} from "../../src";
 
 describe("Update Validation", () => {
 
@@ -33,6 +34,7 @@ describe("Update Validation", () => {
 
     it('denies validation when required', async () => {
         let tm = new TestModel({
+            id: Date.now().toString(),
             name: "test",
             address: "testtttt"
         });
@@ -44,19 +46,25 @@ describe("Update Validation", () => {
         let errs = newTm.hasErrors();
         expect(errs).toBeUndefined();
 
-        newTm.address = "tttttttesst";
+        const toUpdate = new TestModel(Object.assign({}, newTm, {
+            address: "tttttttesst"
+        }));
 
-        errs = newTm.hasErrors(tm, "id", "createdOn", "updatedOn");
+        errs = toUpdate.hasErrors(newTm, "updatedOn");
         expect(errs).toBeUndefined();
 
-        const otherNewTm = await repo.update(new TestModel(newTm));
-        errs = otherNewTm.hasErrors(newTm);
+        const otherNewTm = await repo.update(toUpdate);
+        errs = otherNewTm.hasErrors(toUpdate);
         expect(errs).toBeUndefined();
 
-        otherNewTm.name = "ttttt";
-        errs = newTm.hasErrors(newTm);
+
+        const toFailUpdate = new TestModel(Object.assign({}, otherNewTm, {
+            name: "tttttttesst"
+        }));
+
+        errs = otherNewTm.hasErrors(toFailUpdate);
         expect(errs).toBeDefined();
 
-        await repo.update(new TestModel(otherNewTm));
+        await expect(() => repo.update(new TestModel(toFailUpdate))).rejects.toThrowError(ValidationError)
     });
 });

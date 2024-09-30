@@ -3,9 +3,11 @@ import {Injectables} from "@decaf-ts/injectable-decorators";
 import {IRepository} from "../../src/interfaces/IRepository";
 import {InheritanceRamRepository, TestRamRepository} from "./testRepositories";
 
-describe(`Async Repository`, function () {
+describe(`Repository`, function () {
 
-  const testModel = new TestModel();
+  const testModel = new TestModel({
+    id: Date.now().toString()
+  });
 
   beforeEach(() => {
     Injectables.reset();
@@ -20,13 +22,14 @@ describe(`Async Repository`, function () {
     const testRepository: IRepository<TestModel> = new TestRamRepository();
 
     const result = await testRepository.create(testModel)
-    expect(result.id).toBeDefined();
     expect(result.updatedOn).toBeDefined();
     expect(result.createdOn).toBeDefined();
   });
 
   it("Supports inheritance", async () => {
-    const inheritedModel = new InheritanceTestModel();
+    const inheritedModel = new InheritanceTestModel({
+      id: Date.now().toString()
+    });
     const repo = new InheritanceRamRepository();
 
     const result = await repo.create(inheritedModel)

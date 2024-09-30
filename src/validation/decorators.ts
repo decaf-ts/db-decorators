@@ -34,13 +34,12 @@ export function readonly(
   });
 }
 
-export function timestampHandler(
-  this: IRepository<any>,
-  key: string,
-  model: any,
-) {
-  model[key] = new Date();
-  return model;
+export function timestampHandler<
+  T extends DBModel,
+  V extends IRepository<T>,
+  Y = any,
+>(this: V, data: Y, key: string, model: T): void {
+  (model as any)[key] = new Date();
 }
 
 /**
@@ -129,7 +128,8 @@ export function unique() {
 export async function serializeOnCreateUpdate<
   T extends DBModel,
   V extends IRepository<T>,
->(this: V, key: string, model: T): Promise<void> {
+  Y = any,
+>(this: V, data: Y, key: string, model: T, oldModel: T): Promise<void> {
   if (!(model as any)[key]) return;
   try {
     (model as any)[key] = JSON.stringify((model as any)[key]);
@@ -147,7 +147,8 @@ export async function serializeOnCreateUpdate<
 export async function serializeAfterAll<
   T extends DBModel,
   V extends IRepository<T>,
->(this: V, key: string, model: T): Promise<void> {
+  Y = any,
+>(this: V, data: Y, key: string, model: T): Promise<void> {
   if (!(model as any)[key]) return;
   if (typeof (model as any)[key] !== "string") return;
 

@@ -1,8 +1,8 @@
-import { IRegistry } from "@decaf-ts/decorator-validation";
 import { OperationHandler } from "./types";
 import { DBModel } from "../model/DBModel";
 import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
+import { Operations } from "./Operations";
 
 /**
  * @summary Holds the registered operation handlers
@@ -14,31 +14,49 @@ import { IRepository } from "../interfaces/IRepository";
  *
  * @category Operations
  */
-export class OperationsRegistry
-  implements IRegistry<OperationHandler<any, any, any>>
-{
+export class OperationsRegistry {
   private readonly cache: Record<
     string,
-    Record<string, Record<string, OperationHandler<any, any, any>>>
+    Record<
+      string | symbol,
+      Record<string, Record<string, OperationHandler<any, any, any>>>
+    >
   > = {};
 
   /**
    * @summary retrieves an {@link OperationHandler} if it exists
-   * @param {string} targetName
+   * @param {string} target
    * @param {string} propKey
    * @param {string} operation
+   * @param accum
    * @return {OperationHandler | undefined}
    */
   get<T extends DBModel, V extends IRepository<T>, Y>(
-    targetName: string,
+    target: string | Record<string, any>,
     propKey: string,
     operation: string,
-  ): OperationHandler<T, V, Y> | undefined {
+    accum?: OperationHandler<T, V, Y>[],
+  ): OperationHandler<T, V, Y>[] | undefined {
+    accum = accum || [];
+    let name;
     try {
-      return this.cache[targetName][propKey][operation];
+      name = typeof target === "string" ? target : target.constructor.name;
+      accum.unshift(
+        ...Object.values(this.cache[name][propKey][operation] || []),
+      );
     } catch (e) {
-      return undefined;
+      if (
+        typeof target === "string" ||
+        target === Object.prototype ||
+        Object.getPrototypeOf(target) === Object.prototype
+      )
+        return accum;
     }
+
+    let proto = Object.getPrototypeOf(target);
+    if (proto.constructor.name === name) proto = Object.getPrototypeOf(proto);
+
+    return this.get<T, V, Y>(proto, propKey, operation, accum);
   }
 
   /**
@@ -55,10 +73,13 @@ export class OperationsRegistry
     propKey: string | symbol,
   ): void {
     const name = target.constructor.name;
+    const handlerName = Operations.getHandlerName(handler);
+
     if (!this.cache[name]) this.cache[name] = {};
-    if (!this.cache[name][propKey as string])
-      this.cache[name][propKey as string] = {};
-    if (this.cache[name][propKey as string][operation]) return;
-    this.cache[name][propKey as string][operation] = handler;
+    if (!this.cache[name][propKey]) this.cache[name][propKey] = {};
+    if (!this.cache[name][propKey][operation])
+      this.cache[name][propKey][operation] = {};
+    if (this.cache[name][propKey][operation][handlerName]) return;
+    this.cache[name][propKey][operation][handlerName] = handler;
   }
 }

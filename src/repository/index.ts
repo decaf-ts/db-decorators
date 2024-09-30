@@ -1,3 +1,4 @@
+export * from "./BaseRepository";
 export * from "./constants";
 export * from "./DataCache";
 export * from "./decorators";
