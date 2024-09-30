@@ -1,15 +1,18 @@
 ![Banner](./workdocs/assets/Banner.png)
-## Simple Model Validation Engine
+## DB Decorators
 
-![Licence](https://img.shields.io/github/license/decaf-ts/decorator-validation.svg?style=plastic)
-![GitHub language count](https://img.shields.io/github/languages/count/decaf-ts/decorator-validation?style=plastic)
-![GitHub top language](https://img.shields.io/github/languages/top/decaf-ts/decorator-validation?style=plastic)
-[![Tests](https://github.com/decaf-ts/decorator-validation/actions/workflows/jest-test.yaml/badge.svg)](http://www.pdmfc.com)
-[![CodeQL](https://github.com/starnowski/posmulten/workflows/CodeQL/badge.svg)](https://github.com/decaf-ts/decorator-validation/actions?query=workflow%3ACodeQL)
+Extension to Decorator Validation with common db functionalities
 
-![Open Issues](https://img.shields.io/github/issues/decaf-ts/decorator-validation.svg)
-![Closed Issues](https://img.shields.io/github/issues-closed/decaf-ts/decorator-validation.svg)
-![Pull Requests](https://img.shields.io/github/issues-pr-closed/decaf-ts/decorator-validation.svg)
+
+![Licence](https://img.shields.io/github/license/decaf-ts/db-decorators.svg?style=plastic)
+![GitHub language count](https://img.shields.io/github/languages/count/decaf-ts/db-decorators?style=plastic)
+![GitHub top language](https://img.shields.io/github/languages/top/decaf-ts/db-decorators?style=plastic)
+[![Tests](https://github.com/decaf-ts/db-decorators/actions/workflows/jest-test.yaml/badge.svg)](http://www.pdmfc.com)
+[![CodeQL](https://github.com/starnowski/posmulten/workflows/CodeQL/badge.svg)](https://github.com/decaf-ts/db-decorators/actions?query=workflow%3ACodeQL)
+
+![Open Issues](https://img.shields.io/github/issues/decaf-ts/db-decorators.svg)
+![Closed Issues](https://img.shields.io/github/issues-closed/decaf-ts/db-decorators.svg)
+![Pull Requests](https://img.shields.io/github/issues-pr-closed/decaf-ts/db-decorators.svg)
 ![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg)
 
 ![Line Coverage](workdocs/badges/badge-lines.svg)
@@ -18,24 +21,15 @@
 ![Branch Coverage](workdocs/badges/badge-branches.svg)
 
 
-![Forks](https://img.shields.io/github/forks/decaf-ts/decorator-validation.svg)
-![Stars](https://img.shields.io/github/stars/decaf-ts/decorator-validation.svg)
-![Watchers](https://img.shields.io/github/watchers/decaf-ts/decorator-validation.svg)
+![Forks](https://img.shields.io/github/forks/decaf-ts/db-decorators.svg)
+![Stars](https://img.shields.io/github/stars/decaf-ts/db-decorators.svg)
+![Watchers](https://img.shields.io/github/watchers/decaf-ts/db-decorators.svg)
 
 ![Node Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbadges%2Fshields%2Fmaster%2Fpackage.json&label=Node&query=$.engines.node&colorB=blue)
 ![NPM Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbadges%2Fshields%2Fmaster%2Fpackage.json&label=NPM&query=$.engines.npm&colorB=purple)
 
 ### Decorator based
 
-Simple implementation of a Typescript decorator based validation system.
-
-Meant to be easily extended, customized and integrated with the browser's input validation mechanisms
-
-Provides access to common features in other languages:
-- Model serialization/deserialization;
-- Model Hashing;
-- Model Equality;
-- TODO: Model Deep Cloning
 ## Considerations
 
 #### Typescript Compilation options
@@ -53,6 +47,7 @@ when importing  these libraries the following flag in `tsconfig.compilerOptions`
 ### Related
 
 [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=decaf-ts&repo=decorator-validation)](https://github.com/decaf-ts/decorator-validation)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=decaf-ts&repo=injectable-decorators)](https://github.com/decaf-ts/injectable-decorators)
 ### Social
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/decaf-ts/)
@@ -86,7 +81,7 @@ The following npm scripts are available for development:
 ### Repository Structure
 
 ```
-decorator-validation
+db-decorators
 │
 │   .gitignore              <-- Defines files ignored to git
 │   .npmignore              <-- Defines files ignored by npm
@@ -142,11 +137,11 @@ decorator-validation
 
 ## Getting help
 
-If you have bug reports, questions or suggestions please [create a new issue](https://github.com/decaf-ts/decorator-validation/issues/new/choose).
+If you have bug reports, questions or suggestions please [create a new issue](https://github.com/decaf-ts/db-decorators/issues/new/choose).
 
 ## Contributing
 
-I am grateful for any contributions made to this project. Please read [this](./workdocs/98-Contributing.md) to get started.
+I am grateful for any contributions made to this project. Please read [this](./workdocs/tutorials/Contributing.md) to get started.
 
 ## Supporting
 
