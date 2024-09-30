@@ -38,17 +38,14 @@ export async function enforceDBDecorators<
 
   if (!decorators) return;
 
-  const propIterator = async function (props: string[]): Promise<void> {
-    const prop: string | undefined = props.shift();
-    if (!prop) return;
-
+  for (const prop in decorators) {
     const decs: DecoratorMetadata[] = decorators[prop];
     for (const dec of decs) {
       const { key, props } = dec;
       const handler: OperationHandler<T, Y, V> | undefined = Operations.get(
         model.constructor.name,
         prop,
-        key,
+        prefix + key,
       );
       if (!handler)
         throw new InternalError(
@@ -60,17 +57,12 @@ export async function enforceDBDecorators<
         if (!oldModel) throw new InternalError("Missing old model argument");
         args.push(oldModel);
       }
-      await Promise.resolve(
-        (handler as UpdateOperationHandler<T, Y, V>).apply(
-          repo,
-          args as [V, any, T, T],
-        ),
+      await (handler as UpdateOperationHandler<T, Y, V>).apply(
+        repo,
+        args as [V, any, T, T],
       );
     }
-    await propIterator(props);
-  };
-
-  return propIterator(Object.keys(decorators));
+  }
 }
 
 /**

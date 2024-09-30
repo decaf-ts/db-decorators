@@ -23,11 +23,6 @@ export abstract class Repository<T extends DBModel>
   get class() {
     if (!this._class)
       throw new InternalError(`No class definition found for this repository`);
-
-    const metadata = Reflect.getMetadata(getDBKey(DBKeys.REPOSITORY), this);
-
-    console.log(`metadata: ${JSON.stringify(metadata, undefined, 2)}`);
-
     return this._class;
   }
 

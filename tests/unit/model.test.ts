@@ -169,19 +169,20 @@ describe(`DBModel`, function () {
 
     it("fails update due to validation", async () => {
 
-      let toUpdate = new OuterTestModel(Object.assign({}, created, {
+      let toUpdate = new OuterTestModel({
+        id: created.id,
         child: {
           id: (created.child as InnerTestModel).id,
           value: "updated"
         }
-      }))
-
-      toUpdate = await manager.update(toUpdate);
-
+      })
       const validateMock = jest.spyOn(toUpdate?.child as InnerTestModel, "hasErrors");
 
-      expect(toUpdate?.hasErrors()).toBeUndefined();
-      expect(toUpdate?.hasErrors(model)).toBeDefined();
+      await expect(() => manager.update(toUpdate)).rejects.toThrowError(ValidationError);
+
+      expect(toUpdate.hasErrors()).toBeUndefined();
+      const errs = toUpdate.hasErrors(created)
+      expect(errs).toBeDefined();
       expect(validateMock).toHaveBeenCalledTimes(3) // because the update call it one for non update properties, and another for update
 
     })
@@ -198,11 +199,14 @@ describe(`DBModel`, function () {
       const manager = new OuterListTestRepository()
 
       const model = new OuterListTestModel({
-        children: [
+        id: Date.now().toString(),
+        children:[
           {
+            id: Date.now().toString(),
             value: "1"
           },
           {
+            id: Date.now().toString(),
             value: "2"
           }
         ]
@@ -223,19 +227,22 @@ describe(`DBModel`, function () {
 
 
       let toUpdate = new OuterListTestModel({
+        id: created.id,
         children: [
           {
+            id: (created.children as InnerTestModel[])[0].id,
             value: "2"
           },
           {
+            id: (created.children as InnerTestModel[])[1].id,
             value: "3"
           }
         ]
       })
-      toUpdate = await manager.update(toUpdate)
 
       validateMock1 = jest.spyOn((toUpdate?.children as InnerTestModel[])[0] as InnerTestModel, "hasErrors");
       validateMock2 = jest.spyOn((toUpdate?.children as InnerTestModel[])[1] as InnerTestModel, "hasErrors");
+      await expect(() => manager.update(toUpdate)).rejects.toThrowError(ValidationError)
 
       expect(toUpdate?.hasErrors()).toBeUndefined();
       expect(toUpdate?.hasErrors(created)).toBeDefined();

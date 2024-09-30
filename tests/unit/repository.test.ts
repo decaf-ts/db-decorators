@@ -1,8 +1,7 @@
 import {InheritanceTestModel, TestModel} from "./TestModel";
 import {Injectables} from "@decaf-ts/injectable-decorators";
 import {IRepository} from "../../src/interfaces/IRepository";
-import {RamRepository} from "./RamRepository";
-import {InheritanceRamRepository} from "./testRepositories";
+import {InheritanceRamRepository, TestRamRepository} from "./testRepositories";
 
 describe(`Async Repository`, function () {
 
@@ -13,12 +12,12 @@ describe(`Async Repository`, function () {
   });
 
   it(`Instantiates`, function () {
-    const testRepository: IRepository<TestModel> = new RamRepository();
+    const testRepository: IRepository<TestModel> = new TestRamRepository();
     expect(testRepository).not.toBeNull();
   });
 
   it(`Fills Properties Nicely`, async () => {
-    const testRepository: IRepository<TestModel> = new RamRepository();
+    const testRepository: IRepository<TestModel> = new TestRamRepository();
 
     const result = await testRepository.create(testModel)
     expect(result.id).toBeDefined();
