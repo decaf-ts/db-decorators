@@ -5,10 +5,11 @@ import { OperationKeys } from "../operations/constants";
 import { ConflictError, NotFoundError, ValidationError } from "./errors";
 import { BaseRepository } from "./BaseRepository";
 import { findModelId } from "../identity";
+import { Constructor } from "@decaf-ts/decorator-validation";
 
 export abstract class Repository<T extends DBModel> extends BaseRepository<T> {
-  protected constructor() {
-    super();
+  protected constructor(clazz?: Constructor<T>) {
+    super(clazz);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

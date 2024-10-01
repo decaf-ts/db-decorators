@@ -10,7 +10,6 @@ import {
 import {DBModel} from "../../src/model/DBModel";
 import {readonly} from "../../src/validation/decorators";
 import {RamRepository} from "./RamRepository";
-import {repository} from "../../src/repository/decorators";
 import {ValidationError} from "../../src/repository/errors";
 import {IRepository} from "../../src/interfaces/IRepository";
 import {Injectables} from "@decaf-ts/injectable-decorators";
@@ -124,10 +123,9 @@ describe(`DBModel`, function () {
       Injectables.reset()
     })
 
-    @repository(OuterTestModel)
     class OuterTestModelRepo extends RamRepository<OuterTestModel>{
       constructor() {
-        super();
+        super(OuterTestModel);
       }
     }
 
@@ -187,10 +185,9 @@ describe(`DBModel`, function () {
 
     })
 
-    @repository(OuterListTestModel)
     class OuterListTestRepository extends RamRepository<OuterListTestModel>{
       constructor() {
-        super();
+        super(OuterListTestModel);
       }
     }
 

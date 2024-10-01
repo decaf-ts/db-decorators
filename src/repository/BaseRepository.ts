@@ -26,7 +26,8 @@ export abstract class BaseRepository<T extends DBModel>
     return this._cache;
   }
 
-  protected constructor() {
+  protected constructor(clazz?: Constructor<T>) {
+    if (clazz) this._class = clazz;
     const self = this;
     [this.create, this.read, this.update, this.delete].forEach((m) => {
       const name = m.name;

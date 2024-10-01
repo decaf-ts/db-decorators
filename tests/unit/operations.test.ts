@@ -5,7 +5,6 @@ import {DBModel} from "../../src/model/DBModel";
 import {timestamp} from "../../src/validation/decorators";
 import {IRepository} from "../../src/interfaces/IRepository";
 import {RamRepository} from "./RamRepository";
-import {repository} from "../../src/repository/decorators";
 import {InternalError} from "../../src/repository/errors";
 import {Injectables} from "@decaf-ts/injectable-decorators";
 import {id} from "../../src";
@@ -66,10 +65,9 @@ describe("Operations decorators", () => {
       }
     }
 
-    @repository(TestModelOn)
     class TestModelOnRepo extends RamRepository<TestModelOn> {
       constructor() {
-        super();
+        super(TestModelOn);
       }
     }
 
@@ -101,10 +99,9 @@ describe("Operations decorators", () => {
         }
       }
 
-      @repository(TestModelOnRead)
       class TestModelOnReadRepo extends RamRepository<TestModelOnRead> {
         constructor() {
-          super();
+          super(TestModelOnRead);
         }
       }
 
@@ -166,10 +163,9 @@ describe("Operations decorators", () => {
         }
       }
 
-      @repository(TestModelMultiple)
       class TestModelMultipleRepo extends RamRepository<TestModelMultiple> {
         constructor() {
-          super();
+          super(TestModelMultiple);
         }
       }
 
@@ -223,24 +219,21 @@ describe("Operations decorators", () => {
         }
       }
 
-      @repository(BaseModel)
       class BaseModelRepo extends RamRepository<BaseModel> {
         constructor() {
-          super();
+          super(BaseModel);
         }
       }
 
-      @repository(OverriddenBaseModel)
       class OverriddenBaseModelRepo extends RamRepository<OverriddenBaseModel> {
         constructor() {
-          super();
+          super(OverriddenBaseModel);
         }
       }
 
-      @repository(OtherBaseModel)
       class OtherBaseModelRepo extends RamRepository<OtherBaseModel> {
         constructor() {
-          super();
+          super(OtherBaseModel);
         }
       }
 
@@ -300,17 +293,15 @@ describe("Operations decorators", () => {
 
       }
 
-      @repository(OrderBaseModel)
       class BaseModelRepo extends RamRepository<OrderBaseModel> {
         constructor() {
-          super();
+          super(OrderBaseModel);
         }
       }
 
-      @repository(OverriddenOrderBaseModel)
       class OverriddenOrderBaseModelRepo extends RamRepository<OverriddenOrderBaseModel> {
         constructor() {
-          super();
+          super(OverriddenOrderBaseModel);
         }
       }
 
@@ -367,10 +358,9 @@ describe("Operations decorators", () => {
           }
         }
 
-        @repository(TestModelKey)
         class TestModelKeyRepo extends RamRepository<TestModelKey> {
           constructor() {
-            super();
+            super(TestModelKey);
           }
         }
 
@@ -402,10 +392,9 @@ describe("Operations decorators", () => {
           }
         }
 
-        @repository(TestModelArguments)
         class TestModelKeyRepo extends RamRepository<TestModelArguments> {
           constructor() {
-            super();
+            super(TestModelArguments);
           }
         }
 

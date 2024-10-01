@@ -4,13 +4,13 @@ import {findModelId} from "../../src/identity/utils";
 import {enforceDBDecorators} from "../../src/repository/utils";
 import {OperationKeys} from "../../src/operations/constants";
 import {ConflictError, NotFoundError, ValidationError} from "../../src/repository/errors";
-import {sf} from "@decaf-ts/decorator-validation";
+import {Constructor, sf} from "@decaf-ts/decorator-validation";
 
 export class RamRepository<T extends DBModel> extends Repository<T> {
   protected ram: Record<string, T> = {};
 
-  constructor() {
-    super()
+  constructor(clazz?: Constructor<T>) {
+    super(clazz)
   }
 
   async create(model: T): Promise<T> {
