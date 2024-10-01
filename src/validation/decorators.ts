@@ -93,38 +93,6 @@ export function timestamp(
   return apply(...decorators);
 }
 
-export async function uniqueOnCreateUpdate<
-  T extends DBModel,
-  V extends IRepository<T>,
-  Y = any,
->(this: V, data: Y, key: string, model: T): Promise<void> {
-  if (!(model as any)[key]) return;
-  try {
-    await this.read((model as any)[key]);
-  } catch (e: any) {
-    if (e instanceof NotFoundError) return;
-  }
-  throw new ConflictError(
-    `model already exists with ${key} equal to ${JSON.stringify((model as any)[key], undefined, 2)}`,
-  );
-}
-
-/**
- * @summary Unique Decorator
- * @description Tags a property as unique.
- *  No other elements in that table can have the same property value
- *
- * @function unique
- *
- * @memberOf module:wallet-db.Decorators
- */
-export function unique() {
-  return apply(
-    onCreateUpdate(uniqueOnCreateUpdate),
-    metadata(getDBKey(DBKeys.UNIQUE), {}),
-  );
-}
-
 export async function serializeOnCreateUpdate<
   T extends DBModel,
   V extends IRepository<T>,
