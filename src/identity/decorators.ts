@@ -5,9 +5,5 @@ import { readonly } from "../validation/decorators";
 import { DBKeys } from "../model/constants";
 
 export function id() {
-  return apply(
-    required(),
-    readonly(),
-    metadata(getDBKey(DBKeys.ID), {}),
-  );
+  return apply(required(), readonly(), metadata(getDBKey(DBKeys.ID), {}));
 }
