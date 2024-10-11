@@ -34,39 +34,41 @@ export function hash() {
   );
 }
 
-export function composedFromCreateUpdate(
-  args: string[],
-  separator: string = DefaultSeparator,
-  type: "keys" | "values" = "values",
-  prefix = "",
-  suffix = "",
-) {
-  return function composedFromCreateUpdate<
-    T extends DBModel,
-    V extends IRepository<T>,
-  >(this: V, key: string, model: T) {
-    try {
-      const composed = args.map((arg: string) => {
-        if (!(arg in model))
-          throw new InternalError(
-            sf("Property {0} not found to compose from", arg),
-          );
-        if (type === "keys") return arg;
-        if (typeof (model as any)[arg] === "undefined")
-          throw new InternalError(
-            sf("Property {0} does not contain a value to compose from", arg),
-          );
-        return ((model as any)[arg] as any).toString();
-      });
+export type ComposedFromMetadata = {
+  args: string[];
+  separator: string;
+  hashResult: boolean;
+  type: "keys" | "values";
+  prefix?: string;
+  suffix?: string;
+};
 
-      if (prefix) composed.unshift(prefix);
-      if (suffix) composed.push(suffix);
+export function composedFromCreateUpdate<
+  T extends DBModel,
+  V extends IRepository<T>,
+>(this: V, data: ComposedFromMetadata, key: string, model: T) {
+  try {
+    const { args, type, prefix, suffix, separator } = data;
+    const composed = args.map((arg: string) => {
+      if (!(arg in model))
+        throw new InternalError(
+          sf("Property {0} not found to compose from", arg),
+        );
+      if (type === "keys") return arg;
+      if (typeof (model as any)[arg] === "undefined")
+        throw new InternalError(
+          sf("Property {0} does not contain a value to compose from", arg),
+        );
+      return ((model as any)[arg] as any).toString();
+    });
 
-      (model as any)[key] = composed.join(separator);
-    } catch (e: any) {
-      throw new InternalError(`Failed to compose value: ${e}`);
-    }
-  };
+    if (prefix) composed.unshift(prefix);
+    if (suffix) composed.push(suffix);
+
+    (model as any)[key] = composed.join(separator);
+  } catch (e: any) {
+    throw new InternalError(`Failed to compose value: ${e}`);
+  }
 }
 
 function composedFrom(
@@ -77,7 +79,7 @@ function composedFrom(
   prefix = "",
   suffix = "",
 ) {
-  const data = {
+  const data: ComposedFromMetadata = {
     args: args,
     hashResult: hashResult,
     separator: separator,
@@ -87,9 +89,7 @@ function composedFrom(
   };
 
   const decorators = [
-    onCreateUpdate(
-      composedFromCreateUpdate(args, separator, type, prefix, suffix),
-    ),
+    onCreateUpdate(composedFromCreateUpdate, data),
     metadata(getDBKey(DBKeys.COMPOSED), data),
   ];
   if (hashResult) decorators.push(hash());
@@ -98,18 +98,20 @@ function composedFrom(
 
 export function composedFromKeys(
   args: string[],
+  separator: string = DefaultSeparator,
   hash: boolean = false,
   prefix = "",
   suffix = "",
 ) {
-  return composedFrom(args, hash, DefaultSeparator, "keys", prefix, suffix);
+  return composedFrom(args, hash, separator, "keys", prefix, suffix);
 }
 
 export function composed(
   args: string[],
+  separator: string = DefaultSeparator,
   hash: boolean = false,
   prefix = "",
   suffix = "",
 ) {
-  return composedFrom(args, hash, DefaultSeparator, "values", prefix, suffix);
+  return composedFrom(args, hash, separator, "values", prefix, suffix);
 }

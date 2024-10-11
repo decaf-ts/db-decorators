@@ -1,11 +1,10 @@
 import { DBModel } from "../model/DBModel";
-import { sf } from "@decaf-ts/decorator-validation";
 import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { ConflictError, NotFoundError, ValidationError } from "./errors";
 import { BaseRepository } from "./BaseRepository";
 import { findModelId } from "../identity";
-import { Constructor } from "@decaf-ts/decorator-validation";
+import { Constructor, sf } from "@decaf-ts/decorator-validation";
 
 export abstract class Repository<T extends DBModel> extends BaseRepository<T> {
   protected constructor(clazz?: Constructor<T>) {
@@ -64,7 +63,6 @@ export abstract class Repository<T extends DBModel> extends BaseRepository<T> {
       OperationKeys.ON,
     );
 
-    await this.read(key);
     return [key, ...args];
   }
 
