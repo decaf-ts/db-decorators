@@ -98,7 +98,6 @@ export abstract class BaseRepository<T extends DBModel>
   }
 
   protected async updateSuffix(model: T) {
-    model = new this.class(model);
     await enforceDBDecorators(
       this,
       model,
