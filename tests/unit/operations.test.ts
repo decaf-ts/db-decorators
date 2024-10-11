@@ -117,7 +117,7 @@ describe("Operations decorators", () => {
       const newModel = await repo.read(model.id as string);
       expect(newModel).toBeDefined();
 
-      expect(mock).toHaveBeenCalledTimes(2);
+      expect(mock).toHaveBeenCalledTimes(1);
       expect(mock).toHaveBeenCalledWith(undefined, "read", expect.objectContaining({"id": undefined, "read": "test"}));
     })
 

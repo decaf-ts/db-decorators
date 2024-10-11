@@ -31,19 +31,21 @@ export abstract class Repository<T extends DBModel> extends BaseRepository<T> {
     const errors = model.hasErrors();
     if (errors) throw new ValidationError(errors.toString());
 
-    let id: string | number | undefined;
-    try {
-      id = findModelId(model, true);
-      if (!id) return [model, ...args];
-      if (id) await this.read(id.toString());
-    } catch (e: any) {
-      if (e instanceof NotFoundError) return [model, ...args];
-      throw e;
-    }
-
-    throw new ConflictError(
-      sf("Model with id {0} already exists", id as string),
-    );
+    return [model, ...args];
+    //
+    // let id: string | number | undefined;
+    // try {
+    //   id = findModelId(model, true);
+    //   if (!id) return [model, ...args];
+    //   if (id) await this.read(id.toString());
+    // } catch (e: any) {
+    //   if (e instanceof NotFoundError) return [model, ...args];
+    //   throw e;
+    // }
+    //
+    // throw new ConflictError(
+    //   sf("Model with id {0} already exists", id as string),
+    // );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
