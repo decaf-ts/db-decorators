@@ -4,7 +4,7 @@ import { OperationKeys } from "../operations/constants";
 import { ValidationError } from "./errors";
 import { BaseRepository } from "./BaseRepository";
 import { findModelId } from "../identity";
-import { Constructor, Model } from "@decaf-ts/decorator-validation";
+import { Constructor } from "@decaf-ts/decorator-validation";
 
 export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
   protected constructor(clazz?: Constructor<M>) {
@@ -53,7 +53,6 @@ export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
     model: M,
     ...args: any[]
   ): Promise<[M, ...args: any[]]> {
-    model = new this.class(model);
     const pk = findModelId(model);
 
     const oldModel = await this.read(pk);
@@ -73,13 +72,33 @@ export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
     return [model, ...args];
   }
 
-  protected merge(oldModel: M, model: M): M {
-    const extract = (model: M) =>
-      Object.entries(model).reduce((accum: Record<string, any>, [key, val]) => {
-        if (typeof val !== "undefined") accum[key] = val;
-        return accum;
-      }, {});
+  protected async updateAllPrefix(models: M[], ...args: any[]) {
+    const ids = models.map((m) => findModelId(m));
+    const oldModels = await this.readAll(ids);
+    models = models.map((m, i) => this.merge(oldModels[i], m));
+    await Promise.all(
+      models.map((m, i) =>
+        enforceDBDecorators(
+          this,
+          m,
+          OperationKeys.UPDATE,
+          OperationKeys.ON,
+          oldModels[i],
+        ),
+      ),
+    );
 
-    return new this.class(Object.assign({}, extract(oldModel), extract(model)));
+    const errors = models
+      .map((m, i) => m.hasErrors(oldModels[i], m))
+      .reduce((accum: string | undefined, e, i) => {
+        if (!!e)
+          accum =
+            typeof accum === "string"
+              ? accum + `\n - ${i}: ${e.toString()}`
+              : ` - ${i}: ${e.toString()}`;
+        return accum;
+      }, undefined);
+    if (errors) throw new ValidationError(errors);
+    return [models, ...args];
   }
 }

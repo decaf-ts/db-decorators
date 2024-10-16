@@ -251,6 +251,16 @@ export abstract class BaseRepository<M extends DBModel>
     return models;
   }
 
+  protected merge(oldModel: M, model: M): M {
+    const extract = (model: M) =>
+      Object.entries(model).reduce((accum: Record<string, any>, [key, val]) => {
+        if (typeof val !== "undefined") accum[key] = val;
+        return accum;
+      }, {});
+
+    return new this.class(Object.assign({}, extract(oldModel), extract(model)));
+  }
+
   toString() {
     return sf(
       "[{0}] - Repository for {1}",
