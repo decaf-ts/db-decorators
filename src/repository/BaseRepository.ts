@@ -6,12 +6,12 @@ import { OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
 import { DataCache } from "./DataCache";
 import { wrapMethod } from "./wrappers";
-import { findModelId } from "../identity";
+import { findModelId, findPrimaryKey } from "../identity";
 
-export abstract class BaseRepository<T extends DBModel>
-  implements IRepository<T>
+export abstract class BaseRepository<M extends DBModel>
+  implements IRepository<M>
 {
-  private readonly _class!: Constructor<T>;
+  private readonly _class!: Constructor<M>;
 
   private _cache?: DataCache;
 
@@ -26,7 +26,7 @@ export abstract class BaseRepository<T extends DBModel>
     return this._cache;
   }
 
-  protected constructor(clazz?: Constructor<T>) {
+  protected constructor(clazz?: Constructor<M>) {
     if (clazz) this._class = clazz;
     const self = this;
     [this.create, this.read, this.update, this.delete].forEach((m) => {
@@ -41,11 +41,15 @@ export abstract class BaseRepository<T extends DBModel>
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async create(model: T, ...args: any[]): Promise<T> {
+  async create(model: M, ...args: any[]): Promise<M> {
     throw new Error("Child classes must implement this.");
   }
 
-  protected async createPrefix(model: T, ...args: any[]) {
+  async createAll(models: M[], ...args: any[]) {
+    return await Promise.all(models.map((m) => this.create(m, ...args)));
+  }
+
+  protected async createPrefix(model: M, ...args: any[]) {
     model = new this.class(model);
     await enforceDBDecorators(
       this,
@@ -56,7 +60,7 @@ export abstract class BaseRepository<T extends DBModel>
     return [model, ...args];
   }
 
-  protected async createSuffix(model: T) {
+  protected async createSuffix(model: M) {
     await enforceDBDecorators(
       this,
       model,
@@ -66,12 +70,34 @@ export abstract class BaseRepository<T extends DBModel>
     return model;
   }
 
+  protected async createAllPrefix(models: M[], ...args: any[]) {
+    await Promise.all(
+      models.map((m) =>
+        enforceDBDecorators(this, m, OperationKeys.CREATE, OperationKeys.ON),
+      ),
+    );
+    return [models, ...args];
+  }
+
+  protected async createAllSuffix(models: M[]) {
+    await Promise.all(
+      models.map((m) =>
+        enforceDBDecorators(this, m, OperationKeys.CREATE, OperationKeys.AFTER),
+      ),
+    );
+    return models;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async read(key: string, ...args: any[]): Promise<T> {
+  async read(key: string | number, ...args: any[]): Promise<M> {
     throw new Error("Child classes must implement this");
   }
 
-  protected async readSuffix(model: T) {
+  async readAll(keys: string[] | number[], ...args: any[]): Promise<M[]> {
+    return await Promise.all(keys.map((id) => this.read(id, ...args)));
+  }
+
+  protected async readSuffix(model: M) {
     await enforceDBDecorators(
       this,
       model,
@@ -82,7 +108,9 @@ export abstract class BaseRepository<T extends DBModel>
   }
 
   protected async readPrefix(key: string, ...args: any[]) {
-    const model: T = new this.class();
+    const model: M = new this.class();
+    const pk = findPrimaryKey(model).id;
+    (model as Record<string, any>)[pk] = key;
     await enforceDBDecorators(
       this,
       model,
@@ -92,12 +120,43 @@ export abstract class BaseRepository<T extends DBModel>
     return [key, ...args];
   }
 
+  protected async readAllPrefix(keys: string[] | number[], ...args: any[]) {
+    const model: M = new this.class();
+    const pk = findPrimaryKey(model).id;
+    await Promise.all(
+      keys.map(async (k) => {
+        const m = new this.class();
+        (m as Record<string, any>)[pk] = k;
+        return enforceDBDecorators(
+          this,
+          m,
+          OperationKeys.READ,
+          OperationKeys.ON,
+        );
+      }),
+    );
+    return [keys, ...args];
+  }
+
+  protected async readAllSuffix(models: M[]) {
+    await Promise.all(
+      models.map((m) =>
+        enforceDBDecorators(this, m, OperationKeys.READ, OperationKeys.AFTER),
+      ),
+    );
+    return models;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(model: T, ...args: any[]): Promise<T> {
+  async update(model: M, ...args: any[]): Promise<M> {
     throw new Error("Child classes must implement this");
   }
 
-  protected async updateSuffix(model: T) {
+  async updateAll(models: M[], ...args: any): Promise<M[]> {
+    return Promise.all(models.map((m) => this.update(m, ...args)));
+  }
+
+  protected async updateSuffix(model: M) {
     await enforceDBDecorators(
       this,
       model,
@@ -107,7 +166,7 @@ export abstract class BaseRepository<T extends DBModel>
     return model;
   }
 
-  protected async updatePrefix(model: T, ...args: any[]) {
+  protected async updatePrefix(model: M, ...args: any[]) {
     const id = findModelId(model);
     const oldModel = await this.read(id);
     await enforceDBDecorators(
@@ -120,12 +179,34 @@ export abstract class BaseRepository<T extends DBModel>
     return [model, ...args];
   }
 
+  protected async updateAllPrefix(models: M[], ...args: any[]) {
+    await Promise.all(
+      models.map((m) =>
+        enforceDBDecorators(this, m, OperationKeys.UPDATE, OperationKeys.ON),
+      ),
+    );
+    return [models, ...args];
+  }
+
+  protected async updateAllSuffix(models: M[]) {
+    await Promise.all(
+      models.map((m) =>
+        enforceDBDecorators(this, m, OperationKeys.UPDATE, OperationKeys.AFTER),
+      ),
+    );
+    return models;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async delete(key: string, ...args: any[]): Promise<T> {
+  async delete(key: string | number, ...args: any[]): Promise<M> {
     throw new Error("Child classes must implement this");
   }
 
-  protected async deleteSuffix(model: T) {
+  async deleteAll(keys: string[] | number[], ...args: any[]): Promise<M[]> {
+    return Promise.all(keys.map((k) => this.delete(k, ...args)));
+  }
+
+  protected async deleteSuffix(model: M) {
     await enforceDBDecorators(
       this,
       model,
@@ -144,6 +225,30 @@ export abstract class BaseRepository<T extends DBModel>
       OperationKeys.ON,
     );
     return [key, ...args];
+  }
+
+  protected async deleteAllPrefix(keys: string[] | number[], ...args: any[]) {
+    const models = await this.readAll(keys, ...args);
+    await Promise.all(
+      models.map(async (m) => {
+        return enforceDBDecorators(
+          this,
+          m,
+          OperationKeys.DELETE,
+          OperationKeys.ON,
+        );
+      }),
+    );
+    return [keys, ...args];
+  }
+
+  protected async deleteAllSuffix(models: M[]) {
+    await Promise.all(
+      models.map((m) =>
+        enforceDBDecorators(this, m, OperationKeys.DELETE, OperationKeys.AFTER),
+      ),
+    );
+    return models;
   }
 
   toString() {

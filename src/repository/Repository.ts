@@ -4,22 +4,22 @@ import { OperationKeys } from "../operations/constants";
 import { ValidationError } from "./errors";
 import { BaseRepository } from "./BaseRepository";
 import { findModelId } from "../identity";
-import { Constructor } from "@decaf-ts/decorator-validation";
+import { Constructor, Model } from "@decaf-ts/decorator-validation";
 
-export abstract class Repository<T extends DBModel> extends BaseRepository<T> {
-  protected constructor(clazz?: Constructor<T>) {
+export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
+  protected constructor(clazz?: Constructor<M>) {
     super(clazz);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async create(model: T): Promise<T> {
+  async create(model: M): Promise<M> {
     throw new Error("Child classes must implement this.");
   }
 
   protected override async createPrefix(
-    model: T,
+    model: M,
     ...args: any[]
-  ): Promise<[T, ...any[]]> {
+  ): Promise<[M, ...any[]]> {
     model = new this.class(model);
     await enforceDBDecorators(
       this,
@@ -32,60 +32,33 @@ export abstract class Repository<T extends DBModel> extends BaseRepository<T> {
     if (errors) throw new ValidationError(errors.toString());
 
     return [model, ...args];
-    //
-    // let id: string | number | undefined;
-    // try {
-    //   id = findModelId(model, true);
-    //   if (!id) return [model, ...args];
-    //   if (id) await this.read(id.toString());
-    // } catch (e: any) {
-    //   if (e instanceof NotFoundError) return [model, ...args];
-    //   throw e;
-    // }
-    //
-    // throw new ConflictError(
-    //   sf("Model with id {0} already exists", id as string),
-    // );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async delete(key: string | number): Promise<T> {
-    throw new Error("Child classes must implement this.");
-  }
-
-  protected override async deletePrefix(
-    key: string | number,
-    ...args: any[]
-  ): Promise<[string | number, ...any[]]> {
-    const model = new this.class();
-    await enforceDBDecorators(
-      this,
-      model,
-      OperationKeys.DELETE,
-      OperationKeys.ON,
-    );
-
-    return [key, ...args];
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async read(key: string | number): Promise<T> {
+  async delete(key: string | number): Promise<M> {
     throw new Error("Child classes must implement this.");
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(model: T): Promise<T> {
+  async read(key: string | number): Promise<M> {
+    throw new Error("Child classes must implement this.");
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async update(model: M): Promise<M> {
     throw new Error("Child classes must implement this.");
   }
 
   protected async updatePrefix(
-    model: T,
+    model: M,
     ...args: any[]
-  ): Promise<[T, ...args: any[]]> {
+  ): Promise<[M, ...args: any[]]> {
     model = new this.class(model);
     const pk = findModelId(model);
 
     const oldModel = await this.read(pk);
+
+    model = this.merge(oldModel, model);
 
     await enforceDBDecorators(
       this,
@@ -98,5 +71,15 @@ export abstract class Repository<T extends DBModel> extends BaseRepository<T> {
     const errors = model.hasErrors(oldModel);
     if (errors) throw new ValidationError(errors.toString());
     return [model, ...args];
+  }
+
+  protected merge(oldModel: M, model: M): M {
+    const extract = (model: M) =>
+      Object.entries(model).reduce((accum: Record<string, any>, [key, val]) => {
+        if (typeof val !== "undefined") accum[key] = val;
+        return accum;
+      }, {});
+
+    return new this.class(Object.assign({}, extract(oldModel), extract(model)));
   }
 }

@@ -6,7 +6,7 @@
  *
  * @category Managers
  */
-export interface CrudOperator<T> {
+export interface CrudOperator<M> {
   /**
    * @summary Create a new model
    * @param {T} model
@@ -14,7 +14,7 @@ export interface CrudOperator<T> {
    *
    * @method
    */
-  create(model: T, ...args: any[]): Promise<T>;
+  create(model: M, ...args: any[]): Promise<M>;
   /**
    * @summary Read a model
    * @param {string} key
@@ -22,7 +22,7 @@ export interface CrudOperator<T> {
    *
    * @method
    */
-  read(key: string, ...args: any[]): Promise<T>;
+  read(key: string | number, ...args: any[]): Promise<M>;
   /**
    * @summary update a model
    * @param {T} model
@@ -30,7 +30,7 @@ export interface CrudOperator<T> {
    *
    * @method
    */
-  update(model: T, ...args: any[]): Promise<T>;
+  update(model: M, ...args: any[]): Promise<M>;
   /**
    * @summary delete a model
    * @param {string} key
@@ -38,5 +38,5 @@ export interface CrudOperator<T> {
    *
    * @method
    */
-  delete(key: string, ...args: any[]): Promise<T>;
+  delete(key: string | number, ...args: any[]): Promise<M>;
 }

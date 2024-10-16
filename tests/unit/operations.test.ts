@@ -118,7 +118,7 @@ describe("Operations decorators", () => {
       expect(newModel).toBeDefined();
 
       expect(mock).toHaveBeenCalledTimes(1);
-      expect(mock).toHaveBeenCalledWith(undefined, "read", expect.objectContaining({"id": undefined, "read": "test"}));
+      expect(mock).toHaveBeenCalledWith(undefined, "read", expect.objectContaining({"id": model.id as string, "read": "test"}));
     })
 
     it("calls handler on update", async () => {
