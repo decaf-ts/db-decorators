@@ -45,8 +45,8 @@ export abstract class BaseRepository<M extends DBModel>
     throw new Error("Child classes must implement this.");
   }
 
-  async createAll(models: M[], ...args: any[]) {
-    return await Promise.all(models.map((m) => this.create(m, ...args)));
+  async createAll(models: M[], ...args: any[]): Promise<M[]> {
+    return Promise.all(models.map((m) => this.create(m, ...args)));
   }
 
   protected async createPrefix(model: M, ...args: any[]) {
@@ -72,9 +72,16 @@ export abstract class BaseRepository<M extends DBModel>
 
   protected async createAllPrefix(models: M[], ...args: any[]) {
     await Promise.all(
-      models.map((m) =>
-        enforceDBDecorators(this, m, OperationKeys.CREATE, OperationKeys.ON),
-      ),
+      models.map(async (m) => {
+        m = new this.class(m);
+        await enforceDBDecorators(
+          this,
+          m,
+          OperationKeys.CREATE,
+          OperationKeys.ON,
+        );
+        return m;
+      }),
     );
     return [models, ...args];
   }
@@ -181,9 +188,11 @@ export abstract class BaseRepository<M extends DBModel>
 
   protected async updateAllPrefix(models: M[], ...args: any[]) {
     await Promise.all(
-      models.map((m) =>
-        enforceDBDecorators(this, m, OperationKeys.UPDATE, OperationKeys.ON),
-      ),
+      models.map((m) => {
+        m = new this.class(m);
+        enforceDBDecorators(this, m, OperationKeys.UPDATE, OperationKeys.ON);
+        return m;
+      }),
     );
     return [models, ...args];
   }
