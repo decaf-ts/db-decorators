@@ -34,6 +34,33 @@ export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
     return [model, ...args];
   }
 
+  protected async createAllPrefix(models: M[], ...args: any[]): Promise<any[]> {
+    await Promise.all(
+      models.map(async (m) => {
+        m = new this.class(m);
+        await enforceDBDecorators(
+          this,
+          m,
+          OperationKeys.CREATE,
+          OperationKeys.ON,
+        );
+        return m;
+      }),
+    );
+    const errors = models
+      .map((m) => m.hasErrors())
+      .reduce((accum: string | undefined, e, i) => {
+        if (!!e)
+          accum =
+            typeof accum === "string"
+              ? accum + `\n - ${i}: ${e.toString()}`
+              : ` - ${i}: ${e.toString()}`;
+        return accum;
+      }, undefined);
+    if (errors) throw new ValidationError(errors);
+    return [models, ...args];
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async delete(key: string | number): Promise<M> {
     throw new Error("Child classes must implement this.");
