@@ -1,10 +1,9 @@
 import { minlength, Model, ModelArg } from "@decaf-ts/decorator-validation";
-import { DBModel } from "../../src/model/DBModel";
 import { readonly, timestamp } from "../../src/validation/decorators";
 import { DBOperations } from "../../src/operations/constants";
 import { id } from "../../src/identity/decorators";
 
-export class TestModel extends DBModel {
+export class TestModel extends Model {
   @id()
   id!: string | number;
 

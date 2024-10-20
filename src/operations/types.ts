@@ -1,4 +1,3 @@
-import { DBModel } from "../model/DBModel";
 import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 
@@ -12,7 +11,7 @@ export type OperationMetadata<T> = {
  * @typedef OperationHandler
  * @memberOf db-decorators.operations
  */
-export type OperationHandler<T extends DBModel, Y extends IRepository<T>, V> =
+export type OperationHandler<T extends Model, Y extends IRepository<T>, V> =
   | StandardOperationHandler<T, Y, V>
   | UpdateOperationHandler<T, Y, V>
   | IdOperationHandler<T, Y, V>;
@@ -22,7 +21,7 @@ export type OperationHandler<T extends DBModel, Y extends IRepository<T>, V> =
  * @memberOf db-decorators.operations
  */
 export type StandardOperationHandler<
-  T extends DBModel,
+  T extends Model,
   Y extends IRepository<T>,
   V,
 > = (this: Y, metadata: V, key: any, model: T) => Promise<void> | void;
@@ -31,18 +30,19 @@ export type StandardOperationHandler<
  * @typedef IdOperationHandler
  * @memberOf db-decorators.operations
  */
-export type IdOperationHandler<
-  T extends DBModel,
-  Y extends IRepository<T>,
-  V,
-> = (this: Y, decorator: V, key: any, id: string) => Promise<void> | void;
+export type IdOperationHandler<T extends Model, Y extends IRepository<T>, V> = (
+  this: Y,
+  decorator: V,
+  key: any,
+  id: string
+) => Promise<void> | void;
 
 /**
  * @typedef AfterOperationHandler
  * @memberOf db-decorators.operations
  */
 export type UpdateOperationHandler<
-  T extends DBModel,
+  T extends Model,
   Y extends IRepository<T>,
   V,
 > = (
@@ -50,5 +50,5 @@ export type UpdateOperationHandler<
   decorator: V,
   key: any,
   model: T,
-  oldModel: T,
+  oldModel: T
 ) => Promise<void> | void;

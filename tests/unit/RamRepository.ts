@@ -1,16 +1,9 @@
-import { DBModel } from "../../src/model/DBModel";
 import { Repository } from "../../src/repository/Repository";
 import { findModelId } from "../../src/identity/utils";
-import { enforceDBDecorators } from "../../src/repository/utils";
-import { OperationKeys } from "../../src/operations/constants";
-import {
-  ConflictError,
-  NotFoundError,
-  ValidationError,
-} from "../../src/repository/errors";
-import { Constructor, sf } from "@decaf-ts/decorator-validation";
+import { NotFoundError } from "../../src/repository/errors";
+import { Constructor } from "@decaf-ts/decorator-validation";
 
-export class RamRepository<T extends DBModel> extends Repository<T> {
+export class RamRepository<T extends Model> extends Repository<T> {
   protected ram: Record<string, T> = {};
 
   constructor(clazz?: Constructor<T>) {

@@ -1,5 +1,4 @@
 import { IRepository } from "../interfaces/IRepository";
-import { DBModel } from "../model/DBModel";
 import { Constructor, sf } from "@decaf-ts/decorator-validation";
 import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
@@ -8,7 +7,7 @@ import { DataCache } from "./DataCache";
 import { wrapMethod } from "./wrappers";
 import { findModelId, findPrimaryKey } from "../identity";
 
-export abstract class BaseRepository<M extends DBModel>
+export abstract class BaseRepository<M extends Model>
   implements IRepository<M>
 {
   private readonly _class!: Constructor<M>;

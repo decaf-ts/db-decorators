@@ -1,4 +1,3 @@
-import { DBModel } from "../model/DBModel";
 import { Operations } from "../operations/Operations";
 import { OperationHandler, UpdateOperationHandler } from "../operations/types";
 import { IRepository } from "../interfaces/IRepository";
@@ -24,7 +23,7 @@ export const getHandlerArgs = function (
   dec: any,
   prop: string,
   m: Constructor<any>,
-  accum?: Record<string, { args: string[] }>,
+  accum?: Record<string, { args: string[] }>
 ): Record<string, { args: string[] }> | void {
   const name = m.constructor.name;
   if (!name) throw new InternalError("Could not determine model class");
@@ -53,7 +52,7 @@ export const getHandlerArgs = function (
  * @memberOf db-decorators.utils
  */
 export async function enforceDBDecorators<
-  T extends DBModel,
+  T extends Model,
   Y extends IRepository<T>,
   V,
 >(
@@ -61,7 +60,7 @@ export async function enforceDBDecorators<
   model: T,
   operation: string,
   prefix: string,
-  oldModel?: T,
+  oldModel?: T
 ): Promise<void> {
   const decorators: Record<string, DecoratorMetadata[]> | undefined =
     getDbDecorators(model, operation, prefix);
@@ -75,11 +74,11 @@ export async function enforceDBDecorators<
       const handlers: OperationHandler<T, Y, V>[] | undefined = Operations.get(
         model,
         prop,
-        prefix + key,
+        prefix + key
       );
       if (!handlers || !handlers.length)
         throw new InternalError(
-          `Could not find registered handler for the operation ${prefix + key} under property ${prop}`,
+          `Could not find registered handler for the operation ${prefix + key} under property ${prop}`
         );
 
       const handlerArgs = getHandlerArgs(dec, prop, model as any);
@@ -102,7 +101,7 @@ export async function enforceDBDecorators<
         }
         await (handler as UpdateOperationHandler<T, Y, V>).apply(
           repo,
-          args as [V, any, T, T],
+          args as [V, any, T, T]
         );
       }
     }
@@ -119,16 +118,16 @@ export async function enforceDBDecorators<
  *
  * @memberOf db-decorators.utils
  */
-export function getDbDecorators<T extends DBModel>(
+export function getDbDecorators<T extends Model>(
   model: T,
   operation: string,
-  extraPrefix?: string,
+  extraPrefix?: string
 ): Record<string, DecoratorMetadata[]> | undefined {
   const decorators: Record<string, DecoratorMetadata[]> | undefined =
     getAllPropertyDecorators(
       model,
       // undefined,
-      OperationKeys.REFLECT + (extraPrefix ? extraPrefix : ""),
+      OperationKeys.REFLECT + (extraPrefix ? extraPrefix : "")
     );
   if (!decorators) return;
   return Object.keys(decorators).reduce(
@@ -140,7 +139,7 @@ export function getDbDecorators<T extends DBModel>(
       }
       return accum;
     },
-    undefined,
+    undefined
   );
 }
 
@@ -153,7 +152,7 @@ export function getDbDecorators<T extends DBModel>(
  * @function getAllPropertyDecoratorsRecursive
  * @memberOf module:db-decorators.Repository
  */
-export const getAllPropertyDecoratorsRecursive = function <T extends DBModel>(
+export const getAllPropertyDecoratorsRecursive = function <T extends Model>(
   model: T,
   accum: { [indexer: string]: any[] } | undefined,
   ...prefixes: string[]
@@ -179,8 +178,8 @@ export const getAllPropertyDecoratorsRecursive = function <T extends DBModel>(
           !operation ||
           !operation.match(
             new RegExp(
-              `^(:?${OperationKeys.ON}|${OperationKeys.AFTER})(:?${OperationKeys.CREATE}|${OperationKeys.READ}|${OperationKeys.UPDATE}|${OperationKeys.DELETE})$`,
-            ),
+              `^(:?${OperationKeys.ON}|${OperationKeys.AFTER})(:?${OperationKeys.CREATE}|${OperationKeys.READ}|${OperationKeys.UPDATE}|${OperationKeys.DELETE})$`
+            )
           )
         ) {
           accumulator[key].push(val);
@@ -212,12 +211,12 @@ export const getAllPropertyDecoratorsRecursive = function <T extends DBModel>(
                     sf(
                       "Skipping handler registration for {0} under prop {0} because handler is the same",
                       clazz,
-                      handlerProp,
-                    ),
+                      handlerProp
+                    )
                   );
-                },
+                }
               );
-            },
+            }
           );
         });
       });

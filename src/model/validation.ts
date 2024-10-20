@@ -11,7 +11,6 @@ import {
 } from "@decaf-ts/decorator-validation";
 import { DecoratorMetadata, getPropertyDecorators } from "@decaf-ts/reflection";
 import { UpdateValidationKeys, UpdateValidator } from "../validation";
-import { DBModel } from "./DBModel";
 import { findModelId } from "../identity";
 
 /**
@@ -26,7 +25,7 @@ import { findModelId } from "../identity";
  *
  * @memberOf module:db-decorators.Model
  */
-export function validateCompare<T extends DBModel>(
+export function validateCompare<T extends Model>(
   oldModel: T,
   newModel: T,
   ...exceptions: string[]

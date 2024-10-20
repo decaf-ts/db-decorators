@@ -1,7 +1,6 @@
 import { Model, model, ModelArg } from "@decaf-ts/decorator-validation";
 import { after, on, onCreate } from "../../src/operations/decorators";
 import { DBOperations, OperationKeys } from "../../src/operations/constants";
-import { DBModel } from "../../src/model/DBModel";
 import { timestamp } from "../../src/validation/decorators";
 import { IRepository } from "../../src/interfaces/IRepository";
 import { RamRepository } from "./RamRepository";
@@ -17,47 +16,47 @@ describe("Operations decorators", () => {
 
     class Handler {
       static async handler(
-        this: IRepository<DBModel>,
+        this: IRepository<Model>,
         data: any,
         key: string,
-        model: DBModel
+        model: Model
       ) {
         (model as { [indexer: string]: any })[key as string] = "test";
       }
 
       static async otherHandler(
-        this: IRepository<DBModel>,
+        this: IRepository<Model>,
         data: any,
         key: string,
-        model: DBModel
+        model: Model
       ) {
         (model as { [indexer: string]: any })[key as string] = "test2";
       }
 
       static async yetAnotherHandler(
-        this: IRepository<DBModel>,
+        this: IRepository<Model>,
         data: any,
         key: string,
-        model: DBModel
+        model: Model
       ) {
         (model as { [indexer: string]: any })[key as string] = new Date();
       }
 
       static async argHandler(
-        this: IRepository<DBModel>,
+        this: IRepository<Model>,
         data: { arg1: string; arg2: string },
         key: string,
-        model: DBModel
+        model: Model
       ) {
         (model as { [indexer: string]: any })[key as string] =
           data.arg1 + data.arg2;
       }
 
       static async anotherArgHandler(
-        this: IRepository<DBModel>,
+        this: IRepository<Model>,
         data: number,
         key: string,
-        model: DBModel
+        model: Model
       ) {
         const currentDate: Date | undefined = (
           model as { [indexer: string]: any }
@@ -68,7 +67,7 @@ describe("Operations decorators", () => {
       }
     }
 
-    class TestModelOn extends DBModel {
+    class TestModelOn extends Model {
       @id()
       id!: string;
 
@@ -109,7 +108,7 @@ describe("Operations decorators", () => {
     it("calls handler on read", async () => {
       const mock = jest.spyOn(Handler, "handler");
 
-      class TestModelOnRead extends DBModel {
+      class TestModelOnRead extends Model {
         @id()
         id!: string;
 
@@ -172,7 +171,7 @@ describe("Operations decorators", () => {
       const otherMock: any = jest.spyOn(Handler, "otherHandler");
       Object.defineProperty(otherMock, "name", { value: "otherMock" }); // making sure the function names are different since the hash will be the same
 
-      class TestModelMultiple extends DBModel {
+      class TestModelMultiple extends Model {
         @id()
         id!: string;
 
@@ -213,7 +212,7 @@ describe("Operations decorators", () => {
     it("Handles property overrides", async () => {
       const mock: any = jest.spyOn(Handler, "yetAnotherHandler");
 
-      class BaseModel extends DBModel {
+      class BaseModel extends Model {
         @id()
         id!: string;
 
@@ -292,7 +291,7 @@ describe("Operations decorators", () => {
       const mock = jest.spyOn(Handler, "anotherArgHandler");
       const yearDiff = 1;
 
-      class OrderBaseModel extends DBModel {
+      class OrderBaseModel extends Model {
         @id()
         id!: string;
 
@@ -370,7 +369,7 @@ describe("Operations decorators", () => {
       it("Properly fills the key as the propertyKey", async () => {
         const mock: any = jest.spyOn(Handler, "handler");
 
-        class TestModelKey extends DBModel {
+        class TestModelKey extends Model {
           @id()
           id!: string;
           @on(DBOperations.CREATE, Handler.handler)
@@ -404,7 +403,7 @@ describe("Operations decorators", () => {
         const arg1 = "this is an arg";
         const arg2 = "this is an arg too";
 
-        class TestModelArguments extends DBModel {
+        class TestModelArguments extends Model {
           @id()
           id!: string;
           @on(DBOperations.CREATE, Handler.argHandler, {

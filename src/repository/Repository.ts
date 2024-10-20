@@ -1,4 +1,3 @@
-import { DBModel } from "../model/DBModel";
 import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { ValidationError } from "./errors";
@@ -7,7 +6,7 @@ import { findModelId } from "../identity";
 import { Constructor } from "@decaf-ts/decorator-validation";
 import { DBKeys } from "../model";
 
-export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
+export abstract class Repository<M extends Model> extends BaseRepository<M> {
   protected constructor(clazz?: Constructor<M>) {
     super(clazz);
   }

@@ -1,7 +1,7 @@
 import { ModelKeys } from "@decaf-ts/decorator-validation";
 
 /**
- * @summary Holds the DBModel reflection keys
+ * @summary Holds the Model reflection keys
  * @const DBKeys
  *
  * @memberOf module:db-decorators.Model

@@ -1,5 +1,4 @@
 import { OperationHandler } from "./types";
-import { DBModel } from "../model/DBModel";
 import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 import { Operations } from "./Operations";
@@ -31,7 +30,7 @@ export class OperationsRegistry {
    * @param accum
    * @return {OperationHandler | undefined}
    */
-  get<T extends DBModel, V extends IRepository<T>, Y>(
+  get<T extends Model, V extends IRepository<T>, Y>(
     target: string | Record<string, any>,
     propKey: string,
     operation: string,
@@ -67,7 +66,7 @@ export class OperationsRegistry {
    * @param {{}} target
    * @param {string | symbol} propKey
    */
-  register<T extends DBModel, V extends IRepository<T>, Y>(
+  register<T extends Model, V extends IRepository<T>, Y>(
     handler: OperationHandler<T, V, Y>,
     operation: OperationKeys,
     target: T,

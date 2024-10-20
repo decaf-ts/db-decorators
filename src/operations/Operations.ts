@@ -1,7 +1,6 @@
 import { Hashing } from "@decaf-ts/decorator-validation";
 import { OperationHandler } from "./types";
 import { OperationsRegistry } from "./OperationsRegistry";
-import { DBModel } from "../model/DBModel";
 import { OperationKeys } from "./constants";
 
 /**
@@ -20,7 +19,7 @@ export class Operations {
     if (handler.name) return handler.name;
 
     console.warn(
-      "Handler name not defined. A name will be generated, but this is not desirable. please avoid using anonymous functions",
+      "Handler name not defined. A name will be generated, but this is not desirable. please avoid using anonymous functions"
     );
     return Hashing.hash(handler.toString());
   }
@@ -32,7 +31,7 @@ export class Operations {
   static get(
     targetName: string | Record<string, any>,
     propKey: string,
-    operation: string,
+    operation: string
   ) {
     return Operations.registry.get(targetName, propKey, operation);
   }
@@ -42,17 +41,17 @@ export class Operations {
     return Operations.registry;
   }
 
-  static register<V extends DBModel>(
+  static register<V extends Model>(
     handler: OperationHandler<V, any, any>,
     operation: OperationKeys,
     target: V,
-    propKey: string | symbol,
+    propKey: string | symbol
   ) {
     Operations.getOpRegistry().register(
       handler as any,
       operation,
       target,
-      propKey,
+      propKey
     );
   }
 }

@@ -10,7 +10,6 @@ import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
 import { DBOperations, OperationKeys } from "../operations/constants";
 import { after, on, onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
-import { DBModel } from "../model/DBModel";
 import { SerializationError } from "../repository/errors";
 import { apply, CustomDecorator, metadata } from "@decaf-ts/reflection";
 import { getDBKey } from "../model/decorators";
@@ -37,7 +36,7 @@ export function readonly(
 }
 
 export function timestampHandler<
-  T extends DBModel,
+  T extends Model,
   V extends IRepository<T>,
   Y = any,
 >(this: V, data: Y, key: string, model: T): void {
@@ -96,7 +95,7 @@ export function timestamp(
 }
 
 export async function serializeOnCreateUpdate<
-  T extends DBModel,
+  T extends Model,
   V extends IRepository<T>,
   Y = any,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -117,7 +116,7 @@ export async function serializeOnCreateUpdate<
 }
 
 export async function serializeAfterAll<
-  T extends DBModel,
+  T extends Model,
   V extends IRepository<T>,
   Y = any,
 >(this: V, data: Y, key: string, model: T): Promise<void> {

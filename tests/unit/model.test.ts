@@ -8,7 +8,6 @@ import {
   ModelErrorDefinition,
   required,
 } from "@decaf-ts/decorator-validation";
-import { DBModel } from "../../src/model/DBModel";
 import { readonly } from "../../src/validation/decorators";
 import { RamRepository } from "./RamRepository";
 import { ValidationError } from "../../src/repository/errors";
@@ -17,7 +16,7 @@ import { Injectables } from "@decaf-ts/injectable-decorators";
 import { id } from "../../src";
 
 @model()
-class InnerTestModel extends DBModel {
+class InnerTestModel extends Model {
   @id()
   id!: string;
 
@@ -38,7 +37,7 @@ class InnerTestModel extends DBModel {
 }
 
 @model()
-class OuterTestModel extends DBModel {
+class OuterTestModel extends Model {
   @id()
   id!: string;
 
@@ -58,7 +57,7 @@ class OuterTestModel extends DBModel {
 }
 
 @model()
-class OuterListTestModel extends DBModel {
+class OuterListTestModel extends Model {
   @id()
   id!: string;
 
@@ -72,7 +71,7 @@ class OuterListTestModel extends DBModel {
   }
 }
 
-describe(`DBModel`, function () {
+describe(`DB extended Model`, function () {
   it(`Instantiates`, function () {
     const testModel = new TestModel();
     expect(testModel).not.toBeNull();

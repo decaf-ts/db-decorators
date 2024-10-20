@@ -1,7 +1,6 @@
 import { DBKeys, DefaultSeparator } from "./constants";
-import { apply, metadata } from "@decaf-ts/reflection";
+import { apply } from "@decaf-ts/reflection";
 import { Hashing, propMetadata, sf } from "@decaf-ts/decorator-validation";
-import { DBModel } from "./DBModel";
 import { onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { InternalError } from "../repository/errors";
@@ -17,7 +16,7 @@ export function getDBKey(str: string) {
 }
 
 export function hashOnCreateUpdate<
-  T extends DBModel,
+  T extends Model,
   V extends IRepository<T>,
   Y = any,
 >(this: V, data: Y, key: string, model: T, oldModel?: T): void {
@@ -44,7 +43,7 @@ export type ComposedFromMetadata = {
 };
 
 export function composedFromCreateUpdate<
-  T extends DBModel,
+  T extends Model,
   V extends IRepository<T>,
 >(this: V, data: ComposedFromMetadata, key: string, model: T) {
   try {
