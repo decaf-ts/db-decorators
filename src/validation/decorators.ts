@@ -4,7 +4,6 @@ import {
   required,
   sf,
   type,
-  Validation,
 } from "@decaf-ts/decorator-validation";
 import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
