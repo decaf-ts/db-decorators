@@ -6,10 +6,9 @@ import {
   Serializable,
   Validatable,
   Model,
+  validate,
 } from "@decaf-ts/decorator-validation";
 import { validateCompare } from "./validation";
-
-const original = Model.prototype.hasErrors;
 
 Model.prototype.hasErrors = function <M extends Model>(
   this: M,
@@ -21,7 +20,7 @@ Model.prototype.hasErrors = function <M extends Model>(
     previousVersion = undefined;
   }
 
-  const errs = original.call(this, ...exclusions);
+  const errs = validate(this, ...exclusions);
   if (errs || !previousVersion) return errs;
 
   return validateCompare(previousVersion, this, ...exclusions);

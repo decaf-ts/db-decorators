@@ -31,7 +31,6 @@
  * @namespace Utils
  * @memberOf module:db-decorators
  */
-
 export * from "./identity";
 export * from "./interfaces";
 export * from "./model";
