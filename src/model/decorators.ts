@@ -4,6 +4,7 @@ import { Hashing, propMetadata, sf } from "@decaf-ts/decorator-validation";
 import { onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { InternalError } from "../repository/errors";
+import { Repository } from "../repository/Repository";
 
 /**
  *
@@ -11,15 +12,11 @@ import { InternalError } from "../repository/errors";
  * @memberOf db-decorators.model
  */
 
-export function getDBKey(str: string) {
-  return DBKeys.REFLECT + str;
-}
-
 export function hashOnCreateUpdate<
-  T extends Model,
-  V extends IRepository<T>,
+  M extends Model,
+  R extends IRepository<M>,
   Y = any,
->(this: V, data: Y, key: string, model: T, oldModel?: T): void {
+>(this: R, data: Y, key: string, model: M, oldModel?: M): void {
   if (!(model as any)[key]) return;
   const hash = Hashing.hash((model as any)[key]);
   if (oldModel && (model as any)[key] === hash) return;
@@ -29,7 +26,7 @@ export function hashOnCreateUpdate<
 export function hash() {
   return apply(
     onCreateUpdate(hashOnCreateUpdate),
-    propMetadata(getDBKey(DBKeys.HASH), {})
+    propMetadata(Repository.key(DBKeys.HASH), {})
   );
 }
 
@@ -89,7 +86,7 @@ function composedFrom(
 
   const decorators = [
     onCreateUpdate(composedFromCreateUpdate, data),
-    propMetadata(getDBKey(DBKeys.COMPOSED), data),
+    propMetadata(Repository.key(DBKeys.COMPOSED), data),
   ];
   if (hashResult) decorators.push(hash());
   return apply(...decorators);

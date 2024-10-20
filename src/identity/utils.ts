@@ -1,4 +1,3 @@
-import { getDBKey } from "../model/decorators";
 import { DBKeys } from "../model/constants";
 import { getAllPropertyDecoratorsRecursive } from "../repository/utils";
 import { ModelKeys, sf } from "@decaf-ts/decorator-validation";
@@ -21,7 +20,7 @@ export function findPrimaryKey<T extends Model>(model: T) {
   const decorators = getAllPropertyDecoratorsRecursive(
     model,
     undefined,
-    getDBKey(DBKeys.ID)
+    DBKeys.REFLECT + DBKeys.ID
   );
   const idDecorators = Object.entries(decorators as object).reduce(
     (accum: { [indexer: string]: any[] }, [prop, decs]) => {

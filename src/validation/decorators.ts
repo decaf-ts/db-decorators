@@ -4,6 +4,7 @@ import {
   required,
   sf,
   type,
+  Validation,
 } from "@decaf-ts/decorator-validation";
 import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
@@ -12,7 +13,7 @@ import { after, on, onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { SerializationError } from "../repository/errors";
 import { apply, CustomDecorator, metadata } from "@decaf-ts/reflection";
-import { getDBKey } from "../model/decorators";
+import { Repository } from "../repository";
 
 export function getDBUpdateKey(str: string) {
   return UpdateValidationKeys.REFLECT + str;
@@ -150,7 +151,7 @@ export function serialize() {
     onCreateUpdate(serializeOnCreateUpdate),
     after(DBOperations.ALL, serializeAfterAll),
     type([String.name, Object.name]),
-    metadata(getDBKey(DBKeys.SERIALIZE), {})
+    metadata(Repository.key(DBKeys.SERIALIZE), {})
   );
 }
 

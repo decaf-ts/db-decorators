@@ -5,7 +5,7 @@ import { OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
 import { DataCache } from "./DataCache";
 import { wrapMethod } from "./wrappers";
-import { findModelId, findPrimaryKey } from "../identity";
+import { findModelId, findPrimaryKey } from "../identity/utils";
 
 export abstract class BaseRepository<M extends Model>
   implements IRepository<M>
