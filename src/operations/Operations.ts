@@ -25,7 +25,7 @@ export class Operations {
     return Hashing.hash(handler.toString());
   }
 
-  static genKey(str: string) {
+  static key(str: string) {
     return OperationKeys.REFLECT + str;
   }
 

@@ -5,6 +5,7 @@ import { ValidationError } from "./errors";
 import { BaseRepository } from "./BaseRepository";
 import { findModelId } from "../identity";
 import { Constructor } from "@decaf-ts/decorator-validation";
+import { DBKeys } from "../model";
 
 export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
   protected constructor(clazz?: Constructor<M>) {
@@ -25,7 +26,7 @@ export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
       this,
       model,
       OperationKeys.CREATE,
-      OperationKeys.ON,
+      OperationKeys.ON
     );
 
     const errors = model.hasErrors();
@@ -42,10 +43,10 @@ export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
           this,
           m,
           OperationKeys.CREATE,
-          OperationKeys.ON,
+          OperationKeys.ON
         );
         return m;
-      }),
+      })
     );
     const errors = models
       .map((m) => m.hasErrors())
@@ -91,7 +92,7 @@ export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
       model,
       OperationKeys.UPDATE,
       OperationKeys.ON,
-      oldModel,
+      oldModel
     );
 
     const errors = model.hasErrors(oldModel);
@@ -110,9 +111,9 @@ export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
           m,
           OperationKeys.UPDATE,
           OperationKeys.ON,
-          oldModels[i],
-        ),
-      ),
+          oldModels[i]
+        )
+      )
     );
 
     const errors = models
@@ -127,5 +128,9 @@ export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
       }, undefined);
     if (errors) throw new ValidationError(errors);
     return [models, ...args];
+  }
+
+  static key(key: string) {
+    return DBKeys.REFLECT + key;
   }
 }

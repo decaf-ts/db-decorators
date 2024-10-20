@@ -5,7 +5,7 @@
  * @memberOf module:db-decorators.Operations
  */
 export enum OperationKeys {
-  REFLECT = "operations.db.",
+  REFLECT = "decaf.model.db.operations.",
   CREATE = "create",
   READ = "read",
   UPDATE = "update",

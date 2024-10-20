@@ -7,7 +7,7 @@ import { ModelKeys } from "@decaf-ts/decorator-validation";
  * @memberOf module:db-decorators.Model
  */
 export const DBKeys = {
-  REFLECT: `${ModelKeys.REFLECT}db.`,
+  REFLECT: `${ModelKeys.REFLECT}persistence.`,
   REPOSITORY: "repository",
   CLASS: "_class",
   ID: "id",

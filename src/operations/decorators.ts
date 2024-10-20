@@ -257,7 +257,7 @@ export function operation<T>(
     const decorators = operation.reduce((accum: any[], op) => {
       const compoundKey = baseOp + op;
       let data = Reflect.getMetadata(
-        Operations.genKey(compoundKey),
+        Operations.key(compoundKey),
         target,
         propertyKey
       );
@@ -283,7 +283,7 @@ export function operation<T>(
 
         accum.push(
           handle(compoundKey as OperationKeys, handler),
-          propMetadata(Operations.genKey(compoundKey), data)
+          propMetadata(Operations.key(compoundKey), data)
         );
       }
       return accum;
