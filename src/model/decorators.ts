@@ -1,6 +1,6 @@
 import { DBKeys, DefaultSeparator } from "./constants";
 import { apply, metadata } from "@decaf-ts/reflection";
-import { Hashing, sf } from "@decaf-ts/decorator-validation";
+import { Hashing, propMetadata, sf } from "@decaf-ts/decorator-validation";
 import { DBModel } from "./DBModel";
 import { onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
@@ -30,7 +30,7 @@ export function hashOnCreateUpdate<
 export function hash() {
   return apply(
     onCreateUpdate(hashOnCreateUpdate),
-    metadata(getDBKey(DBKeys.HASH), {}),
+    propMetadata(getDBKey(DBKeys.HASH), {})
   );
 }
 
@@ -52,12 +52,12 @@ export function composedFromCreateUpdate<
     const composed = args.map((arg: string) => {
       if (!(arg in model))
         throw new InternalError(
-          sf("Property {0} not found to compose from", arg),
+          sf("Property {0} not found to compose from", arg)
         );
       if (type === "keys") return arg;
       if (typeof (model as any)[arg] === "undefined")
         throw new InternalError(
-          sf("Property {0} does not contain a value to compose from", arg),
+          sf("Property {0} does not contain a value to compose from", arg)
         );
       return ((model as any)[arg] as any).toString();
     });
@@ -77,7 +77,7 @@ function composedFrom(
   separator: string = DefaultSeparator,
   type: "keys" | "values" = "values",
   prefix = "",
-  suffix = "",
+  suffix = ""
 ) {
   const data: ComposedFromMetadata = {
     args: args,
@@ -90,7 +90,7 @@ function composedFrom(
 
   const decorators = [
     onCreateUpdate(composedFromCreateUpdate, data),
-    metadata(getDBKey(DBKeys.COMPOSED), data),
+    propMetadata(getDBKey(DBKeys.COMPOSED), data),
   ];
   if (hashResult) decorators.push(hash());
   return apply(...decorators);
@@ -101,7 +101,7 @@ export function composedFromKeys(
   separator: string = DefaultSeparator,
   hash: boolean = false,
   prefix = "",
-  suffix = "",
+  suffix = ""
 ) {
   return composedFrom(args, hash, separator, "keys", prefix, suffix);
 }
@@ -111,7 +111,7 @@ export function composed(
   separator: string = DefaultSeparator,
   hash: boolean = false,
   prefix = "",
-  suffix = "",
+  suffix = ""
 ) {
   return composedFrom(args, hash, separator, "values", prefix, suffix);
 }

@@ -35,15 +35,16 @@ export class OperationsRegistry {
     target: string | Record<string, any>,
     propKey: string,
     operation: string,
-    accum?: OperationHandler<T, V, Y>[],
+    accum?: OperationHandler<T, V, Y>[]
   ): OperationHandler<T, V, Y>[] | undefined {
     accum = accum || [];
     let name;
     try {
       name = typeof target === "string" ? target : target.constructor.name;
       accum.unshift(
-        ...Object.values(this.cache[name][propKey][operation] || []),
+        ...Object.values(this.cache[name][propKey][operation] || [])
       );
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       if (
         typeof target === "string" ||
@@ -70,7 +71,7 @@ export class OperationsRegistry {
     handler: OperationHandler<T, V, Y>,
     operation: OperationKeys,
     target: T,
-    propKey: string | symbol,
+    propKey: string | symbol
   ): void {
     const name = target.constructor.name;
     const handlerName = Operations.getHandlerName(handler);

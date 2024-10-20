@@ -23,7 +23,7 @@ export class TimestampValidator extends Validator {
   public updateHasErrors(
     value: Date | string | number,
     oldValue: Date | string | number,
-    message?: string,
+    message?: string
   ): string | undefined {
     if (value === undefined) return;
 
@@ -32,6 +32,7 @@ export class TimestampValidator extends Validator {
     try {
       value = new Date(value);
       oldValue = new Date(oldValue);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       return message;
     }

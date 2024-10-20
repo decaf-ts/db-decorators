@@ -28,6 +28,7 @@ export abstract class BaseRepository<M extends DBModel>
 
   protected constructor(clazz?: Constructor<M>) {
     if (clazz) this._class = clazz;
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     [this.create, this.read, this.update, this.delete].forEach((m) => {
       const name = m.name;
@@ -35,7 +36,7 @@ export abstract class BaseRepository<M extends DBModel>
         self,
         (self as any)[name + "Prefix"],
         m,
-        (self as any)[name + "Suffix"],
+        (self as any)[name + "Suffix"]
       );
     });
   }
@@ -55,7 +56,7 @@ export abstract class BaseRepository<M extends DBModel>
       this,
       model,
       OperationKeys.CREATE,
-      OperationKeys.ON,
+      OperationKeys.ON
     );
     return [model, ...args];
   }
@@ -65,7 +66,7 @@ export abstract class BaseRepository<M extends DBModel>
       this,
       model,
       OperationKeys.CREATE,
-      OperationKeys.AFTER,
+      OperationKeys.AFTER
     );
     return model;
   }
@@ -78,10 +79,10 @@ export abstract class BaseRepository<M extends DBModel>
           this,
           m,
           OperationKeys.CREATE,
-          OperationKeys.ON,
+          OperationKeys.ON
         );
         return m;
-      }),
+      })
     );
     return [models, ...args];
   }
@@ -89,8 +90,8 @@ export abstract class BaseRepository<M extends DBModel>
   protected async createAllSuffix(models: M[]) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(this, m, OperationKeys.CREATE, OperationKeys.AFTER),
-      ),
+        enforceDBDecorators(this, m, OperationKeys.CREATE, OperationKeys.AFTER)
+      )
     );
     return models;
   }
@@ -109,7 +110,7 @@ export abstract class BaseRepository<M extends DBModel>
       this,
       model,
       OperationKeys.READ,
-      OperationKeys.AFTER,
+      OperationKeys.AFTER
     );
     return model;
   }
@@ -122,7 +123,7 @@ export abstract class BaseRepository<M extends DBModel>
       this,
       model,
       OperationKeys.READ,
-      OperationKeys.ON,
+      OperationKeys.ON
     );
     return [key, ...args];
   }
@@ -138,9 +139,9 @@ export abstract class BaseRepository<M extends DBModel>
           this,
           m,
           OperationKeys.READ,
-          OperationKeys.ON,
+          OperationKeys.ON
         );
-      }),
+      })
     );
     return [keys, ...args];
   }
@@ -148,8 +149,8 @@ export abstract class BaseRepository<M extends DBModel>
   protected async readAllSuffix(models: M[]) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(this, m, OperationKeys.READ, OperationKeys.AFTER),
-      ),
+        enforceDBDecorators(this, m, OperationKeys.READ, OperationKeys.AFTER)
+      )
     );
     return models;
   }
@@ -168,7 +169,7 @@ export abstract class BaseRepository<M extends DBModel>
       this,
       model,
       OperationKeys.UPDATE,
-      OperationKeys.AFTER,
+      OperationKeys.AFTER
     );
     return model;
   }
@@ -181,7 +182,7 @@ export abstract class BaseRepository<M extends DBModel>
       model,
       OperationKeys.UPDATE,
       OperationKeys.ON,
-      oldModel,
+      oldModel
     );
     return [model, ...args];
   }
@@ -192,7 +193,7 @@ export abstract class BaseRepository<M extends DBModel>
         m = new this.class(m);
         enforceDBDecorators(this, m, OperationKeys.UPDATE, OperationKeys.ON);
         return m;
-      }),
+      })
     );
     return [models, ...args];
   }
@@ -200,8 +201,8 @@ export abstract class BaseRepository<M extends DBModel>
   protected async updateAllSuffix(models: M[]) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(this, m, OperationKeys.UPDATE, OperationKeys.AFTER),
-      ),
+        enforceDBDecorators(this, m, OperationKeys.UPDATE, OperationKeys.AFTER)
+      )
     );
     return models;
   }
@@ -220,7 +221,7 @@ export abstract class BaseRepository<M extends DBModel>
       this,
       model,
       OperationKeys.DELETE,
-      OperationKeys.AFTER,
+      OperationKeys.AFTER
     );
     return model;
   }
@@ -231,7 +232,7 @@ export abstract class BaseRepository<M extends DBModel>
       this,
       model,
       OperationKeys.DELETE,
-      OperationKeys.ON,
+      OperationKeys.ON
     );
     return [key, ...args];
   }
@@ -244,9 +245,9 @@ export abstract class BaseRepository<M extends DBModel>
           this,
           m,
           OperationKeys.DELETE,
-          OperationKeys.ON,
+          OperationKeys.ON
         );
-      }),
+      })
     );
     return [keys, ...args];
   }
@@ -254,8 +255,8 @@ export abstract class BaseRepository<M extends DBModel>
   protected async deleteAllSuffix(models: M[]) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(this, m, OperationKeys.DELETE, OperationKeys.AFTER),
-      ),
+        enforceDBDecorators(this, m, OperationKeys.DELETE, OperationKeys.AFTER)
+      )
     );
     return models;
   }
@@ -274,7 +275,7 @@ export abstract class BaseRepository<M extends DBModel>
     return sf(
       "[{0}] - Repository for {1}",
       this.constructor.name,
-      this.class.name,
+      this.class.name
     );
   }
 }

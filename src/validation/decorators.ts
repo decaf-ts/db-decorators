@@ -1,4 +1,10 @@
-import { date, required, sf, type } from "@decaf-ts/decorator-validation";
+import {
+  date,
+  propMetadata,
+  required,
+  sf,
+  type,
+} from "@decaf-ts/decorator-validation";
 import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
 import { DBOperations, OperationKeys } from "../operations/constants";
@@ -23,9 +29,9 @@ export function getDBUpdateKey(str: string) {
  * @category Decorators
  */
 export function readonly(
-  message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID,
+  message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID
 ) {
-  return metadata(getDBUpdateKey(DBKeys.READONLY), {
+  return propMetadata(getDBUpdateKey(DBKeys.READONLY), {
     message: message,
   });
 }
@@ -71,7 +77,7 @@ export function timestampHandler<
  */
 export function timestamp(
   operation: OperationKeys[] = DBOperations.CREATE_UPDATE as unknown as OperationKeys[],
-  format: string = DEFAULT_TIMESTAMP_FORMAT,
+  format: string = DEFAULT_TIMESTAMP_FORMAT
 ) {
   const decorators: CustomDecorator<any>[] = [
     date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE) as CustomDecorator<any>,
@@ -83,7 +89,7 @@ export function timestamp(
     decorators.push(
       metadata(getDBUpdateKey(DBKeys.TIMESTAMP), {
         message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
-      }),
+      })
     );
 
   return apply(...decorators);
@@ -101,10 +107,11 @@ export async function serializeOnCreateUpdate<
   } catch (e: any) {
     throw new SerializationError(
       sf(
-        "Failed to serialize {0} property on {0} model",
+        "Failed to serialize {0} property on {1} model: {2}",
         key,
         model.constructor.name,
-      ),
+        e.message
+      )
     );
   }
 }
@@ -122,10 +129,11 @@ export async function serializeAfterAll<
   } catch (e: any) {
     throw new SerializationError(
       sf(
-        "Failed to deserialize {0} property on {0} model",
+        "Failed to deserialize {0} property on {1} model: {2}",
         key,
         model.constructor.name,
-      ),
+        e.message
+      )
     );
   }
 }
@@ -143,7 +151,7 @@ export function serialize() {
     onCreateUpdate(serializeOnCreateUpdate),
     after(DBOperations.ALL, serializeAfterAll),
     type([String.name, Object.name]),
-    metadata(getDBKey(DBKeys.SERIALIZE), {}),
+    metadata(getDBKey(DBKeys.SERIALIZE), {})
   );
 }
 

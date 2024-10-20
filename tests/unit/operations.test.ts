@@ -1,67 +1,92 @@
-import {constructFromObject, model} from "@decaf-ts/decorator-validation";
-import {after, on, onCreate} from "../../src/operations/decorators";
-import {DBOperations, OperationKeys} from "../../src/operations/constants";
-import {DBModel} from "../../src/model/DBModel";
-import {timestamp} from "../../src/validation/decorators";
-import {IRepository} from "../../src/interfaces/IRepository";
-import {RamRepository} from "./RamRepository";
-import {InternalError} from "../../src/repository/errors";
-import {Injectables} from "@decaf-ts/injectable-decorators";
-import {id} from "../../src";
+import { Model, model, ModelArg } from "@decaf-ts/decorator-validation";
+import { after, on, onCreate } from "../../src/operations/decorators";
+import { DBOperations, OperationKeys } from "../../src/operations/constants";
+import { DBModel } from "../../src/model/DBModel";
+import { timestamp } from "../../src/validation/decorators";
+import { IRepository } from "../../src/interfaces/IRepository";
+import { RamRepository } from "./RamRepository";
+import { InternalError } from "../../src/repository/errors";
+import { Injectables } from "@decaf-ts/injectable-decorators";
+import { id } from "../../src";
 
 describe("Operations decorators", () => {
   describe("on", () => {
-
     beforeEach(() => {
       jest.clearAllMocks();
-    })
+    });
 
     class Handler {
-
-      static async handler(this: IRepository<DBModel>, data: any, key: string, model: DBModel) {
+      static async handler(
+        this: IRepository<DBModel>,
+        data: any,
+        key: string,
+        model: DBModel
+      ) {
         (model as { [indexer: string]: any })[key as string] = "test";
       }
 
-      static async otherHandler(this: IRepository<DBModel>, data: any, key: string, model: DBModel) {
+      static async otherHandler(
+        this: IRepository<DBModel>,
+        data: any,
+        key: string,
+        model: DBModel
+      ) {
         (model as { [indexer: string]: any })[key as string] = "test2";
       }
 
-      static async yetAnotherHandler(this: IRepository<DBModel>, data: any, key: string, model: DBModel) {
+      static async yetAnotherHandler(
+        this: IRepository<DBModel>,
+        data: any,
+        key: string,
+        model: DBModel
+      ) {
         (model as { [indexer: string]: any })[key as string] = new Date();
       }
 
-      static async argHandler(this: IRepository<DBModel>, data: { arg1: string, arg2: string }, key: string, model: DBModel) {
-        (model as { [indexer: string]: any })[key as string] = data.arg1 + data.arg2;
+      static async argHandler(
+        this: IRepository<DBModel>,
+        data: { arg1: string; arg2: string },
+        key: string,
+        model: DBModel
+      ) {
+        (model as { [indexer: string]: any })[key as string] =
+          data.arg1 + data.arg2;
       }
 
-      static async anotherArgHandler(this: IRepository<DBModel>, data: number, key: string, model: DBModel) {
-        const currentDate: Date | undefined = (model as { [indexer: string]: any })[key as string];
-        if (!currentDate)
-          throw new InternalError("date not provided");
-        (model as { [indexer: string]: any })[key as string] = currentDate.setFullYear(currentDate.getFullYear() + data);
+      static async anotherArgHandler(
+        this: IRepository<DBModel>,
+        data: number,
+        key: string,
+        model: DBModel
+      ) {
+        const currentDate: Date | undefined = (
+          model as { [indexer: string]: any }
+        )[key as string];
+        if (!currentDate) throw new InternalError("date not provided");
+        (model as { [indexer: string]: any })[key as string] =
+          currentDate.setFullYear(currentDate.getFullYear() + data);
       }
     }
 
     class TestModelOn extends DBModel {
-
       @id()
-      id?: string = undefined;
+      id!: string;
 
       @on(DBOperations.CREATE, Handler.handler)
-      create?: string = undefined;
+      create?: string;
 
       @on(DBOperations.UPDATE, Handler.handler)
-      update?: string = undefined;
+      update?: string;
 
       @after([OperationKeys.READ], Handler.handler)
-      read?: string = undefined;
+      read?: string;
 
       @on(DBOperations.DELETE, Handler.handler)
-      delete?: string = undefined;
+      delete?: string;
 
-      constructor(tm?: TestModelOn | {}) {
+      constructor(tm?: ModelArg<TestModelOn>) {
         super();
-        constructFromObject(this, tm)
+        Model.fromObject(this, tm);
       }
     }
 
@@ -73,29 +98,27 @@ describe("Operations decorators", () => {
 
     it("calls handler on create", async () => {
       const tm = new TestModelOn({
-        id: Date.now().toString()
+        id: Date.now().toString(),
       });
       const repo = new TestModelOnRepo();
       const model = await repo.create(tm);
       expect(model).toBeDefined();
       expect(model?.create).toEqual("test");
-    })
+    });
 
     it("calls handler on read", async () => {
-
-      const mock = jest.spyOn(Handler, "handler")
+      const mock = jest.spyOn(Handler, "handler");
 
       class TestModelOnRead extends DBModel {
-
         @id()
-        id?: string = undefined;
+        id!: string;
 
         @on([OperationKeys.READ], Handler.handler)
-        read?: string = undefined;
+        read?: string;
 
         constructor(tm?: TestModelOn | {}) {
           super();
-          constructFromObject(this, tm)
+          Model.fromObject(this, tm);
         }
       }
 
@@ -106,7 +129,7 @@ describe("Operations decorators", () => {
       }
 
       const tm = new TestModelOnRead({
-        id: Date.now().toString()
+        id: Date.now().toString(),
       });
 
       const repo = new TestModelOnReadRepo();
@@ -118,17 +141,21 @@ describe("Operations decorators", () => {
       expect(newModel).toBeDefined();
 
       expect(mock).toHaveBeenCalledTimes(1);
-      expect(mock).toHaveBeenCalledWith(undefined, "read", expect.objectContaining({"id": model.id as string, "read": "test"}));
-    })
+      expect(mock).toHaveBeenCalledWith(
+        undefined,
+        "read",
+        expect.objectContaining({ id: model.id as string, read: "test" })
+      );
+    });
 
     it("calls handler on update", async () => {
       const tm = new TestModelOn({
-        id: Date.now().toString()
+        id: Date.now().toString(),
       });
 
       const repo = new TestModelOnRepo();
 
-      const model = await repo.create(tm)
+      const model = await repo.create(tm);
       expect(model).toBeDefined();
       expect(model?.create).toEqual("test");
 
@@ -136,30 +163,29 @@ describe("Operations decorators", () => {
       expect(newModel).toBeDefined();
       expect(newModel?.create).toEqual("test");
       expect(newModel?.update).toEqual("test");
-    })
+    });
 
     it("calls multiple handlers", async () => {
-
-      const mock: any = jest.spyOn(Handler, "handler")
-      Object.defineProperty(mock, "name", {value: "mock"});                          // making sure the function names are different since the hash will be the same
+      const mock: any = jest.spyOn(Handler, "handler");
+      Object.defineProperty(mock, "name", { value: "mock" }); // making sure the function names are different since the hash will be the same
 
       const otherMock: any = jest.spyOn(Handler, "otherHandler");
-      Object.defineProperty(otherMock, "name", {value: "otherMock"});                          // making sure the function names are different since the hash will be the same
+      Object.defineProperty(otherMock, "name", { value: "otherMock" }); // making sure the function names are different since the hash will be the same
 
       class TestModelMultiple extends DBModel {
         @id()
-        id?: string = undefined;
+        id!: string;
 
         @onCreate(Handler.otherHandler)
         @onCreate(Handler.handler)
-        create?: string = undefined;
+        create?: string;
 
         @timestamp(DBOperations.CREATE_UPDATE)
-        timestamp?: Date | string = undefined;
+        timestamp?: Date | string;
 
-        constructor(tm?: TestModelOn | {}) {
+        constructor(tm?: ModelArg<TestModelMultiple>) {
           super();
-          constructFromObject(this, tm)
+          Model.fromObject(this, tm);
         }
       }
 
@@ -170,46 +196,44 @@ describe("Operations decorators", () => {
       }
 
       const tm = new TestModelMultiple({
-        id: Date.now().toString()
+        id: Date.now().toString(),
       });
 
       const repo = new TestModelMultipleRepo();
 
-      const model = await repo.create(tm)
+      const model = await repo.create(tm);
       expect(model).toBeDefined();
 
       expect(otherMock).toHaveBeenCalledTimes(1);
       expect(mock).toHaveBeenCalledTimes(1);
-      expect(model?.create).toEqual("test2")
-      expect(model?.timestamp).toBeDefined()
-    })
+      expect(model?.create).toEqual("test2");
+      expect(model?.timestamp).toBeDefined();
+    });
 
     it("Handles property overrides", async () => {
-
-      const mock: any = jest.spyOn(Handler, "yetAnotherHandler")
+      const mock: any = jest.spyOn(Handler, "yetAnotherHandler");
 
       class BaseModel extends DBModel {
         @id()
-        id?: string = undefined;
+        id!: string;
 
         @timestamp()
-        updatedOn?: Date | string = undefined;
+        updatedOn!: Date | string;
 
-        constructor(baseModel?: BaseModel | {}) {
+        constructor(baseModel?: ModelArg<BaseModel>) {
           super();
-          constructFromObject<BaseModel>(this, baseModel);
+          Model.fromObject<BaseModel>(this, baseModel);
         }
       }
 
       class OverriddenBaseModel extends BaseModel {
         @onCreate(Handler.yetAnotherHandler)
-        override updatedOn?: Date | string = undefined;
+        override updatedOn!: Date | string;
 
         constructor(immutableSignedBaseModel?: OverriddenBaseModel | {}) {
           super(immutableSignedBaseModel);
-          constructFromObject<OverriddenBaseModel>(this, immutableSignedBaseModel);
+          Model.fromObject<OverriddenBaseModel>(this, immutableSignedBaseModel);
         }
-
       }
 
       @model()
@@ -238,59 +262,60 @@ describe("Operations decorators", () => {
       }
 
       const tm = new BaseModel({
-        id: Date.now().toString()
+        id: Date.now().toString(),
       });
 
       const repo = new BaseModelRepo();
 
-      const baseModel = await repo.create(tm)
+      const baseModel = await repo.create(tm);
 
       expect(baseModel).toBeDefined();
       expect(mock).toHaveBeenCalledTimes(0);
-      expect(baseModel?.updatedOn).toBeDefined()
+      expect(baseModel?.updatedOn).toBeDefined();
 
       const tm2 = new OverriddenBaseModel({
-        id: Date.now().toString()
+        id: Date.now().toString(),
       });
       const repo2 = new OverriddenBaseModelRepo();
-      await repo2.create(tm2)
+      await repo2.create(tm2);
       expect(mock).toHaveBeenCalledTimes(1);
 
       const tm3 = new OtherBaseModel({
-        id: Date.now().toString()
+        id: Date.now().toString(),
       });
       const repo3 = new OtherBaseModelRepo();
-      await repo3.create(tm3)
+      await repo3.create(tm3);
       expect(mock).toHaveBeenCalledTimes(2);
-    })
+    });
 
     it("Handles property overrides in the correct order", async () => {
-
       const mock = jest.spyOn(Handler, "anotherArgHandler");
       const yearDiff = 1;
 
       class OrderBaseModel extends DBModel {
         @id()
-        id?: string = undefined;
+        id!: string;
 
         @timestamp()
-        updatedOn?: Date = undefined;
+        updatedOn!: Date;
 
         constructor(baseModel?: OrderBaseModel | {}) {
           super();
-          constructFromObject<OrderBaseModel>(this, baseModel);
+          Model.fromObject<OrderBaseModel>(this, baseModel);
         }
       }
 
       class OverriddenOrderBaseModel extends OrderBaseModel {
         @onCreate(Handler.anotherArgHandler, yearDiff)
-        override updatedOn?: Date = undefined;
+        override updatedOn!: Date;
 
         constructor(overriddenOrderBaseModel?: OverriddenOrderBaseModel | {}) {
           super(overriddenOrderBaseModel);
-          constructFromObject<OverriddenOrderBaseModel>(this, overriddenOrderBaseModel);
+          Model.fromObject<OverriddenOrderBaseModel>(
+            this,
+            overriddenOrderBaseModel
+          );
         }
-
       }
 
       class BaseModelRepo extends RamRepository<OrderBaseModel> {
@@ -306,55 +331,54 @@ describe("Operations decorators", () => {
       }
 
       const tm = new OrderBaseModel({
-        id: Date.now().toString()
+        id: Date.now().toString(),
       });
 
       const repo = new BaseModelRepo();
 
-      const baseModel = await repo.create(tm)
+      const baseModel = await repo.create(tm);
       expect(baseModel).toBeDefined();
       expect(mock).toHaveBeenCalledTimes(0);
-      expect(baseModel?.updatedOn).toBeDefined()
+      expect(baseModel?.updatedOn).toBeDefined();
 
-      let compareYear: number = (new Date()).getFullYear();
+      let compareYear: number = new Date().getFullYear();
 
-      expect((baseModel?.updatedOn as Date).getFullYear()).toEqual(compareYear)
+      expect((baseModel?.updatedOn as Date).getFullYear()).toEqual(compareYear);
 
       const tm2 = new OverriddenOrderBaseModel({
-        id: Date.now().toString()
+        id: Date.now().toString(),
       });
 
       const repo2 = new OverriddenOrderBaseModelRepo();
 
-      const overModel = await repo2.create(tm2)
+      const overModel = await repo2.create(tm2);
       expect(overModel).toBeDefined();
       expect(mock).toHaveBeenCalledTimes(1);
-      expect(overModel?.updatedOn).toBeDefined()
+      expect(overModel?.updatedOn).toBeDefined();
 
-      compareYear = (new Date()).getFullYear() + yearDiff;
+      compareYear = new Date().getFullYear() + yearDiff;
 
-      expect((overModel?.updatedOn as Date).getFullYear()).toEqual(compareYear)
-    })
+      expect((overModel?.updatedOn as Date).getFullYear()).toEqual(compareYear);
+    });
 
     describe("Properly passes arguments to handler function", () => {
-
       beforeEach(() => {
         Injectables.reset();
         jest.clearAllMocks();
-      })
+      });
 
       it("Properly fills the key as the propertyKey", async () => {
-        const mock: any = jest.spyOn(Handler, "handler")
+        const mock: any = jest.spyOn(Handler, "handler");
 
         class TestModelKey extends DBModel {
           @id()
-          id?: string = undefined;
+          id!: string;
           @on(DBOperations.CREATE, Handler.handler)
-          onCreate?: string = undefined;
+          onCreate?: string;
 
-          constructor(tm?: TestModelKey | {}) {
+          constructor(tm?: ModelArg<TestModelKey>) {
             super();
-            constructFromObject(this, tm)
+            Model.fromObject(this, tm);
           }
         }
 
@@ -365,30 +389,33 @@ describe("Operations decorators", () => {
         }
 
         const tm = new TestModelKey({
-          id: Date.now().toString()
+          id: Date.now().toString(),
         });
         const repo = new TestModelKeyRepo();
 
-        const model = await repo.create(tm)
+        const model = await repo.create(tm);
         expect(model).toBeDefined();
         expect(mock).toHaveBeenCalledTimes(1);
-        expect(model?.onCreate).toEqual("test")
-      })
+        expect(model?.onCreate).toEqual("test");
+      });
 
       it("Properly passes arguments", async () => {
-        const mock: any = jest.spyOn(Handler, "argHandler")
+        const mock: any = jest.spyOn(Handler, "argHandler");
         const arg1 = "this is an arg";
         const arg2 = "this is an arg too";
 
         class TestModelArguments extends DBModel {
           @id()
-          id?: string = undefined;
-          @on(DBOperations.CREATE, Handler.argHandler, {arg1: arg1, arg2: arg2})
-          onCreate?: string = undefined;
+          id!: string;
+          @on(DBOperations.CREATE, Handler.argHandler, {
+            arg1: arg1,
+            arg2: arg2,
+          })
+          onCreate?: string;
 
           constructor(tm?: TestModelArguments | {}) {
             super();
-            constructFromObject(this, tm)
+            Model.fromObject(this, tm);
           }
         }
 
@@ -399,16 +426,15 @@ describe("Operations decorators", () => {
         }
 
         const tm = new TestModelArguments({
-          id: Date.now().toString()
+          id: Date.now().toString(),
         });
         const repo = new TestModelKeyRepo();
 
         const model = await repo.create(tm);
         expect(model).toBeDefined();
         expect(mock).toHaveBeenCalledTimes(1);
-        expect(model?.onCreate).toEqual(arg1 + arg2)
-      })
-    })
-
-  })
-})
+        expect(model?.onCreate).toEqual(arg1 + arg2);
+      });
+    });
+  });
+});

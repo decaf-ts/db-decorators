@@ -50,7 +50,7 @@ export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
     const errors = models
       .map((m) => m.hasErrors())
       .reduce((accum: string | undefined, e, i) => {
-        if (!!e)
+        if (e)
           accum =
             typeof accum === "string"
               ? accum + `\n - ${i}: ${e.toString()}`
@@ -118,7 +118,7 @@ export abstract class Repository<M extends DBModel> extends BaseRepository<M> {
     const errors = models
       .map((m, i) => m.hasErrors(oldModels[i], m))
       .reduce((accum: string | undefined, e, i) => {
-        if (!!e)
+        if (e)
           accum =
             typeof accum === "string"
               ? accum + `\n - ${i}: ${e.toString()}`

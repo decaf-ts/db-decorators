@@ -1,38 +1,35 @@
-import {constructFromObject, minlength, ModelArg} from "@decaf-ts/decorator-validation";
-import {DBModel} from "../../src/model/DBModel";
-import {readonly, timestamp} from "../../src/validation/decorators";
-import {DBOperations} from "../../src/operations/constants";
-import {id} from "../../src/identity/decorators";
+import { minlength, Model, ModelArg } from "@decaf-ts/decorator-validation";
+import { DBModel } from "../../src/model/DBModel";
+import { readonly, timestamp } from "../../src/validation/decorators";
+import { DBOperations } from "../../src/operations/constants";
+import { id } from "../../src/identity/decorators";
 
 export class TestModel extends DBModel {
-
   @id()
-  id?: string | number = undefined;
+  id!: string | number;
 
   @readonly()
-  name?: string = undefined;
+  name?: string;
 
   @minlength(5)
-  address?: string = undefined;
+  address?: string;
 
   @timestamp()
-  updatedOn?: Date = undefined;
+  updatedOn!: Date;
 
   @timestamp(DBOperations.CREATE)
   @readonly()
-  createdOn?: Date = undefined;
+  createdOn!: Date;
 
   public constructor(testModel?: ModelArg<TestModel>) {
     super();
-    constructFromObject(this, testModel);
+    Model.fromObject(this, testModel);
   }
 }
 
-
 export class InheritanceTestModel extends TestModel {
-
   public constructor(testModel?: TestModel | {}) {
     super(testModel);
-    constructFromObject(this, testModel);
+    Model.fromObject(this, testModel);
   }
 }

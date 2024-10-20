@@ -7,6 +7,7 @@ import {
 import { DBOperations, OperationKeys } from "./constants";
 import { Operations } from "./Operations";
 import { apply, metadata } from "@decaf-ts/reflection";
+import { propMetadata } from "@decaf-ts/decorator-validation";
 
 function handle(op: OperationKeys, handler: OperationHandler<any, any, any>) {
   return (target: any, propertyKey: string) => {
@@ -31,7 +32,7 @@ export function onCreateUpdate<T>(
   handler:
     | StandardOperationHandler<any, any, T>
     | UpdateOperationHandler<any, any, T>,
-  data?: T,
+  data?: T
 ) {
   return on(DBOperations.CREATE_UPDATE, handler, data);
 }
@@ -50,7 +51,7 @@ export function onCreateUpdate<T>(
  */
 export function onUpdate<T>(
   handler: UpdateOperationHandler<any, any, T>,
-  data?: T,
+  data?: T
 ) {
   return on(DBOperations.UPDATE, handler, data);
 }
@@ -68,7 +69,7 @@ export function onUpdate<T>(
  */
 export function onCreate<T>(
   handler: StandardOperationHandler<any, any, T>,
-  data?: T,
+  data?: T
 ) {
   return on(DBOperations.CREATE, handler, data);
 }
@@ -121,7 +122,7 @@ export function onDelete<T>(handler: IdOperationHandler<any, any, T>, data: T) {
 export function on<T>(
   op: OperationKeys[] = DBOperations.ALL,
   handler: OperationHandler<any, any, T>,
-  data?: T,
+  data?: T
 ) {
   return operation(OperationKeys.ON, op, handler, data);
 }
@@ -141,7 +142,7 @@ export function afterCreateUpdate<T>(
   handler:
     | StandardOperationHandler<any, any, T>
     | UpdateOperationHandler<any, any, T>,
-  data: T,
+  data: T
 ) {
   return after(DBOperations.CREATE_UPDATE, handler, data);
 }
@@ -160,7 +161,7 @@ export function afterCreateUpdate<T>(
  */
 export function afterUpdate<T>(
   handler: UpdateOperationHandler<any, any, T>,
-  data: T,
+  data: T
 ) {
   return after(DBOperations.UPDATE, handler, data);
 }
@@ -179,7 +180,7 @@ export function afterUpdate<T>(
  */
 export function afterCreate<T>(
   handler: StandardOperationHandler<any, any, T>,
-  data: T,
+  data: T
 ) {
   return after(DBOperations.CREATE, handler, data);
 }
@@ -199,7 +200,7 @@ export function afterCreate<T>(
  */
 export function afterRead<T>(
   handler: StandardOperationHandler<any, any, T>,
-  data?: T,
+  data?: T
 ) {
   return after(DBOperations.READ, handler, data);
 }
@@ -218,7 +219,7 @@ export function afterRead<T>(
  */
 export function afterDelete<T>(
   handler: StandardOperationHandler<any, any, T>,
-  data?: T,
+  data?: T
 ) {
   return after(DBOperations.DELETE, handler, data);
 }
@@ -240,7 +241,7 @@ export function afterDelete<T>(
 export function after<T>(
   op: OperationKeys[] = DBOperations.ALL,
   handler: OperationHandler<any, any, T>,
-  data?: T,
+  data?: T
 ) {
   return operation(OperationKeys.AFTER, op, handler, data);
 }
@@ -249,7 +250,7 @@ export function operation<T>(
   baseOp: OperationKeys.ON | OperationKeys.AFTER,
   operation: OperationKeys[] = DBOperations.ALL,
   handler: OperationHandler<any, any, T>,
-  dataToAdd?: T,
+  dataToAdd?: T
 ) {
   return (target: object, propertyKey: string | symbol) => {
     const name = target.constructor.name;
@@ -258,7 +259,7 @@ export function operation<T>(
       let data = Reflect.getMetadata(
         Operations.genKey(compoundKey),
         target,
-        propertyKey,
+        propertyKey
       );
       if (!data)
         data = {
@@ -282,7 +283,7 @@ export function operation<T>(
 
         accum.push(
           handle(compoundKey as OperationKeys, handler),
-          metadata(Operations.genKey(compoundKey), data),
+          propMetadata(Operations.genKey(compoundKey), data)
         );
       }
       return accum;
