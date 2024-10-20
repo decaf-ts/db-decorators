@@ -6,7 +6,7 @@ import {
 } from "./types";
 import { DBOperations, OperationKeys } from "./constants";
 import { Operations } from "./Operations";
-import { apply, metadata } from "@decaf-ts/reflection";
+import { apply } from "@decaf-ts/reflection";
 import { propMetadata } from "@decaf-ts/decorator-validation";
 
 function handle(op: OperationKeys, handler: OperationHandler<any, any, any>) {
