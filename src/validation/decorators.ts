@@ -8,7 +8,7 @@ import {
   Validation,
 } from "@decaf-ts/decorator-validation";
 import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
-import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
+import { DEFAULT_ERROR_MESSAGES } from "./constants";
 import { DBOperations, OperationKeys } from "../operations/constants";
 import { after, on, onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
