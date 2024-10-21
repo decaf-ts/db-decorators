@@ -1,5 +1,6 @@
 import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
+import { Model } from "@decaf-ts/decorator-validation";
 
 export type OperationMetadata<T> = {
   operation: OperationKeys;

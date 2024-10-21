@@ -2,6 +2,7 @@ import { OperationHandler } from "./types";
 import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 import { Operations } from "./Operations";
+import { Model } from "@decaf-ts/decorator-validation";
 
 /**
  * @summary Holds the registered operation handlers

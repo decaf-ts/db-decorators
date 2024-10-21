@@ -1,6 +1,6 @@
 import { DBKeys } from "../model/constants";
 import { getAllPropertyDecoratorsRecursive } from "../repository/utils";
-import { ModelKeys, sf } from "@decaf-ts/decorator-validation";
+import { Model, ModelKeys, sf } from "@decaf-ts/decorator-validation";
 import { InternalError, NotFoundError } from "../repository/errors";
 
 /**

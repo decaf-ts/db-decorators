@@ -1,9 +1,11 @@
 import {
   date,
+  Model,
   propMetadata,
   required,
   sf,
   type,
+  Validation,
 } from "@decaf-ts/decorator-validation";
 import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "./constants";
@@ -13,10 +15,6 @@ import { IRepository } from "../interfaces/IRepository";
 import { SerializationError } from "../repository/errors";
 import { apply, CustomDecorator, metadata } from "@decaf-ts/reflection";
 import { Repository } from "../repository";
-
-export function getDBUpdateKey(str: string) {
-  return UpdateValidationKeys.REFLECT + str;
-}
 
 /**
  * Marks the property as readonly.
@@ -30,7 +28,7 @@ export function getDBUpdateKey(str: string) {
 export function readonly(
   message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID
 ) {
-  return propMetadata(getDBUpdateKey(DBKeys.READONLY), {
+  return propMetadata(Validation.updateKey(DBKeys.READONLY), {
     message: message,
   });
 }
@@ -86,9 +84,9 @@ export function timestamp(
 
   if (operation.indexOf(OperationKeys.UPDATE) !== -1)
     decorators.push(
-      metadata(getDBUpdateKey(DBKeys.TIMESTAMP), {
+      propMetadata(Validation.updateKey(DBKeys.TIMESTAMP), {
         message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
-      })
+      }) as CustomDecorator<any>
     );
 
   return apply(...decorators);

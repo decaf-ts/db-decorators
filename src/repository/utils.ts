@@ -7,7 +7,12 @@ import {
   getAllPropertyDecorators,
 } from "@decaf-ts/reflection";
 import { InternalError } from "./errors";
-import { Constructor, ModelKeys, sf } from "@decaf-ts/decorator-validation";
+import {
+  Constructor,
+  Model,
+  ModelKeys,
+  sf,
+} from "@decaf-ts/decorator-validation";
 
 /**
  * @summary retrieves the arguments for the handler

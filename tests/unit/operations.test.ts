@@ -412,7 +412,7 @@ describe("Operations decorators", () => {
           })
           onCreate?: string;
 
-          constructor(tm?: TestModelArguments | {}) {
+          constructor(tm?: ModelArg<TestModelArguments>) {
             super();
             Model.fromObject(this, tm);
           }

@@ -1,6 +1,11 @@
 import { DBKeys, DefaultSeparator } from "./constants";
 import { apply } from "@decaf-ts/reflection";
-import { Hashing, propMetadata, sf } from "@decaf-ts/decorator-validation";
+import {
+  Hashing,
+  Model,
+  propMetadata,
+  sf,
+} from "@decaf-ts/decorator-validation";
 import { onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { InternalError } from "../repository/errors";

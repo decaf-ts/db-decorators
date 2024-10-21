@@ -1,5 +1,5 @@
 import { DataCache } from "../repository/DataCache";
-import { Constructor } from "@decaf-ts/decorator-validation";
+import { Constructor, Model } from "@decaf-ts/decorator-validation";
 import { BulkCrudOperator } from "./BulkCrudOperator";
 
 /**

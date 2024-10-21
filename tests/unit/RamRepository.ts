@@ -1,7 +1,7 @@
 import { Repository } from "../../src/repository/Repository";
 import { findModelId } from "../../src/identity/utils";
 import { NotFoundError } from "../../src/repository/errors";
-import { Constructor } from "@decaf-ts/decorator-validation";
+import { Constructor, Model } from "@decaf-ts/decorator-validation";
 
 export class RamRepository<T extends Model> extends Repository<T> {
   protected ram: Record<string, T> = {};

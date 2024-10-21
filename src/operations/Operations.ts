@@ -1,4 +1,4 @@
-import { Hashing } from "@decaf-ts/decorator-validation";
+import { Hashing, Model } from "@decaf-ts/decorator-validation";
 import { OperationHandler } from "./types";
 import { OperationsRegistry } from "./OperationsRegistry";
 import { OperationKeys } from "./constants";

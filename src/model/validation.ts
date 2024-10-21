@@ -1,4 +1,5 @@
 import {
+  Model,
   ModelErrorDefinition,
   ModelErrors,
   ModelKeys,

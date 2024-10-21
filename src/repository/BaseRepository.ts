@@ -1,5 +1,5 @@
 import { IRepository } from "../interfaces/IRepository";
-import { Constructor, sf } from "@decaf-ts/decorator-validation";
+import { Constructor, Model, sf } from "@decaf-ts/decorator-validation";
 import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
