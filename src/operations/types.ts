@@ -2,37 +2,37 @@ import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 import { Model } from "@decaf-ts/decorator-validation";
 
-export type OperationMetadata<T> = {
+export type OperationMetadata<V> = {
   operation: OperationKeys;
   handler: string;
-  metadata?: T;
+  metadata?: V;
 };
 
 /**
  * @typedef OperationHandler
  * @memberOf db-decorators.operations
  */
-export type OperationHandler<T extends Model, Y extends IRepository<T>, V> =
-  | StandardOperationHandler<T, Y, V>
-  | UpdateOperationHandler<T, Y, V>
-  | IdOperationHandler<T, Y, V>;
+export type OperationHandler<M extends Model, R extends IRepository<M>, V> =
+  | StandardOperationHandler<M, R, V>
+  | UpdateOperationHandler<M, R, V>
+  | IdOperationHandler<M, R, V>;
 
 /**
  * @typedef OnOperationHandler
  * @memberOf db-decorators.operations
  */
 export type StandardOperationHandler<
-  T extends Model,
-  Y extends IRepository<T>,
+  M extends Model,
+  R extends IRepository<M>,
   V,
-> = (this: Y, metadata: V, key: any, model: T) => Promise<void> | void;
+> = (this: R, metadata: V, key: any, model: M) => Promise<void> | void;
 
 /**
  * @typedef IdOperationHandler
  * @memberOf db-decorators.operations
  */
-export type IdOperationHandler<T extends Model, Y extends IRepository<T>, V> = (
-  this: Y,
+export type IdOperationHandler<M extends Model, R extends IRepository<M>, V> = (
+  this: R,
   decorator: V,
   key: any,
   id: string
@@ -43,13 +43,13 @@ export type IdOperationHandler<T extends Model, Y extends IRepository<T>, V> = (
  * @memberOf db-decorators.operations
  */
 export type UpdateOperationHandler<
-  T extends Model,
-  Y extends IRepository<T>,
+  M extends Model,
+  R extends IRepository<M>,
   V,
 > = (
-  this: Y,
+  this: R,
   decorator: V,
   key: any,
-  model: T,
-  oldModel: T
+  model: M,
+  oldModel: M
 ) => Promise<void> | void;

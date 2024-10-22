@@ -44,7 +44,7 @@ export function findPrimaryKey<T extends Model>(model: T) {
   if (!idProp) throw new InternalError("Could not find ID decorated Property");
   return {
     id: idProp,
-    props: idDecorators[idProp][0].props.options,
+    props: idDecorators[idProp][0].props,
   };
 }
 
