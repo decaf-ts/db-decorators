@@ -107,6 +107,22 @@ export function onDelete<T>(handler: IdOperationHandler<any, any, T>, data: T) {
 }
 
 /**
+ * @summary Defines a behaviour to set on the defined {@link DBOperations.DELETE}
+ *
+ * @param {OnOperationHandler<any>} handler The method called upon the operation
+ * @param data
+ *
+ * @see on
+ *
+ * @function onAny
+ *
+ * @category Decorators
+ */
+export function onAny<T>(handler: IdOperationHandler<any, any, T>, data: T) {
+  return on(DBOperations.ALL, handler, data);
+}
+
+/**
  * @summary Defines a behaviour to set on the defined {@link DBOperations}
  *
  * @param {OperationKeys[] | DBOperations} op One of {@link DBOperations}
@@ -222,6 +238,26 @@ export function afterDelete<T>(
   data?: T
 ) {
   return after(DBOperations.DELETE, handler, data);
+}
+
+/**
+ * @summary Defines a behaviour to set after the defined {@link DBOperations.DELETE}
+ *
+ * @param {AfterOperationHandler<any>} handler The method called upon the operation
+ * @param data
+ * @param {any[]} [args] Arguments that will be passed in order to the handler method
+ *
+ * @see after
+ *
+ * @function afterAny
+ *
+ * @category Decorators
+ */
+export function afterAny<T>(
+  handler: StandardOperationHandler<any, any, T>,
+  data?: T
+) {
+  return after(DBOperations.ALL, handler, data);
 }
 
 /**
