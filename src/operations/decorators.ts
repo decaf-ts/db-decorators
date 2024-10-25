@@ -102,7 +102,7 @@ export function onRead<T>(handler: IdOperationHandler<any, any, T>, data: T) {
  *
  * @category Decorators
  */
-export function onDelete<T>(handler: IdOperationHandler<any, any, T>, data: T) {
+export function onDelete<T>(handler: OperationHandler<any, any, T>, data: T) {
   return on(DBOperations.DELETE, handler, data);
 }
 
@@ -118,7 +118,7 @@ export function onDelete<T>(handler: IdOperationHandler<any, any, T>, data: T) {
  *
  * @category Decorators
  */
-export function onAny<T>(handler: IdOperationHandler<any, any, T>, data: T) {
+export function onAny<T>(handler: OperationHandler<any, any, T>, data: T) {
   return on(DBOperations.ALL, handler, data);
 }
 

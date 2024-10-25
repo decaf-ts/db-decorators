@@ -40,6 +40,10 @@ export abstract class BaseRepository<M extends Model>
     });
   }
 
+  async timestamp() {
+    return new Date();
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async create(model: M, ...args: any[]): Promise<M> {
     throw new Error("Child classes must implement this.");

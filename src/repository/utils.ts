@@ -99,7 +99,7 @@ export async function enforceDBDecorators<
 
         const args: any[] = [data.data, prop, model];
 
-        if (operation === OperationKeys.UPDATE) {
+        if (operation === OperationKeys.UPDATE && prefix === OperationKeys.ON) {
           if (!oldModel)
             throw new InternalError("Missing old model for update operation");
           args.push(oldModel);

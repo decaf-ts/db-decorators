@@ -10,4 +10,5 @@ import { BulkCrudOperator } from "./BulkCrudOperator";
 export interface IRepository<M extends Model> extends BulkCrudOperator<M> {
   readonly cache: DataCache;
   readonly class: Constructor<M>;
+  timestamp(): Promise<Date>;
 }
