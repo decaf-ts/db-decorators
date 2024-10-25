@@ -28,7 +28,7 @@ export type StandardOperationHandler<
   V,
 > = (
   this: R,
-  context: Context,
+  context: Context<M>,
   metadata: V,
   key: any,
   model: M
@@ -40,7 +40,7 @@ export type StandardOperationHandler<
  */
 export type IdOperationHandler<M extends Model, R extends IRepository<M>, V> = (
   this: R,
-  context: Context,
+  context: Context<M>,
   decorator: V,
   key: any,
   id: string
@@ -56,7 +56,7 @@ export type UpdateOperationHandler<
   V,
 > = (
   this: R,
-  context: Context,
+  context: Context<M>,
   decorator: V,
   key: any,
   model: M,

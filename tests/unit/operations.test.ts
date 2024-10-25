@@ -18,7 +18,7 @@ describe("Operations decorators", () => {
     class Handler {
       static async handler(
         this: IRepository<Model>,
-        context: Context,
+        context: Context<Model>,
         data: any,
         key: string,
         model: Model
@@ -28,7 +28,7 @@ describe("Operations decorators", () => {
 
       static async otherHandler(
         this: IRepository<Model>,
-        context: Context,
+        context: Context<Model>,
         data: any,
         key: string,
         model: Model
@@ -38,7 +38,7 @@ describe("Operations decorators", () => {
 
       static async yetAnotherHandler(
         this: IRepository<Model>,
-        context: Context,
+        context: Context<Model>,
         data: any,
         key: string,
         model: Model
@@ -48,7 +48,7 @@ describe("Operations decorators", () => {
 
       static async argHandler(
         this: IRepository<Model>,
-        context: Context,
+        context: Context<Model>,
         data: { arg1: string; arg2: string },
         key: string,
         model: Model
@@ -59,7 +59,7 @@ describe("Operations decorators", () => {
 
       static async anotherArgHandler(
         this: IRepository<Model>,
-        context: Context,
+        context: Context<Model>,
         data: number,
         key: string,
         model: Model
@@ -121,7 +121,7 @@ describe("Operations decorators", () => {
         @on([OperationKeys.READ], Handler.handler)
         read?: string;
 
-        constructor(tm?: TestModelOn | {}) {
+        constructor(tm?: ModelArg<TestModelOn>) {
           super();
           Model.fromObject(this, tm);
         }

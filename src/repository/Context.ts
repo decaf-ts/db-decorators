@@ -2,9 +2,15 @@ import { DataCache } from "./DataCache";
 import { ContextArgs } from "./utils";
 import { Contextual } from "../interfaces/Contextual";
 import { NotFoundError } from "./errors";
+import { OperationKeys } from "../operations/constants";
+import { Constructor, Model } from "@decaf-ts/decorator-validation";
 
-export class Context extends DataCache {
-  constructor(private parent?: Context) {
+export class Context<M extends Model> extends DataCache {
+  protected constructor(
+    private operation: OperationKeys,
+    private model?: Constructor<M>,
+    private parent?: Context<any>
+  ) {
     super();
   }
 
@@ -23,26 +29,46 @@ export class Context extends DataCache {
     return this.parent.pop(key);
   }
 
-  child(): Context {
-    return this.constructor(this);
+  child<N extends Model>(
+    operation: OperationKeys,
+    model?: Constructor<N>
+  ): Context<N> {
+    return this.constructor(operation, model, this);
   }
 
-  static async fromArgs(
-    contextual: Contextual,
+  static async from<M extends Model>(
+    operation:
+      | OperationKeys.CREATE
+      | OperationKeys.READ
+      | OperationKeys.UPDATE
+      | OperationKeys.DELETE,
+    model: Constructor<M>
+  ) {
+    return new Context(operation, model);
+  }
+
+  static async args<M extends Model>(
+    contextual: Contextual<M>,
+    operation:
+      | OperationKeys.CREATE
+      | OperationKeys.READ
+      | OperationKeys.UPDATE
+      | OperationKeys.DELETE,
+    model: Constructor<M>,
     args: any[]
-  ): Promise<ContextArgs> {
+  ): Promise<ContextArgs<M>> {
     const last = args.pop();
-    let c: Context;
+    let c: Context<M>;
     if (last) {
       if (last instanceof Context) {
         c = last;
         args.push(last);
       } else {
-        c = await contextual.context();
+        c = await contextual.context(operation, model);
         args.push(last, c);
       }
     } else {
-      c = await contextual.context();
+      c = await contextual.context(operation, model);
       args.push(c);
     }
 

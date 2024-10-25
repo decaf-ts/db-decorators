@@ -20,7 +20,12 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     model: M,
     ...args: any[]
   ): Promise<[M, ...any[]]> {
-    const contextArgs = await Context.fromArgs(this, args);
+    const contextArgs = await Context.args(
+      this,
+      OperationKeys.CREATE,
+      this.class,
+      args
+    );
     model = new this.class(model);
     await enforceDBDecorators(
       this,
@@ -37,7 +42,12 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
   }
 
   protected async createAllPrefix(models: M[], ...args: any[]): Promise<any[]> {
-    const contextArgs = await Context.fromArgs(this, args);
+    const contextArgs = await Context.args(
+      this,
+      OperationKeys.CREATE,
+      this.class,
+      args
+    );
     await Promise.all(
       models.map(async (m) => {
         m = new this.class(m);
@@ -84,7 +94,12 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     model: M,
     ...args: any[]
   ): Promise<[M, ...args: any[]]> {
-    const contextArgs = await Context.fromArgs(this, args);
+    const contextArgs = await Context.args(
+      this,
+      OperationKeys.UPDATE,
+      this.class,
+      args
+    );
     const pk = (model as any)[this.pk];
     if (!pk)
       throw new InternalError(
@@ -110,7 +125,12 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
   }
 
   protected async updateAllPrefix(models: M[], ...args: any[]) {
-    const contextArgs = await Context.fromArgs(this, args);
+    const contextArgs = await Context.args(
+      this,
+      OperationKeys.UPDATE,
+      this.class,
+      args
+    );
     const ids = models.map((m) => {
       const id = (m as any)[this.pk];
       if (!id)

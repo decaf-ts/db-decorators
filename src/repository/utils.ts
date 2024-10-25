@@ -15,8 +15,8 @@ import {
 } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
 
-export type ContextArgs = {
-  context: Context;
+export type ContextArgs<M extends Model> = {
+  context: Context<M>;
   args: any[];
 };
 
@@ -64,16 +64,16 @@ export const getHandlerArgs = function (
  * @memberOf db-decorators.utils
  */
 export async function enforceDBDecorators<
-  T extends Model,
-  Y extends IRepository<T>,
+  M extends Model,
+  Y extends IRepository<M>,
   V,
 >(
   repo: Y,
-  context: Context,
-  model: T,
+  context: Context<M>,
+  model: M,
   operation: string,
   prefix: string,
-  oldModel?: T
+  oldModel?: M
 ): Promise<void> {
   const decorators: Record<string, DecoratorMetadata[]> | undefined =
     getDbDecorators(model, operation, prefix);
@@ -84,7 +84,7 @@ export async function enforceDBDecorators<
     const decs: DecoratorMetadata[] = decorators[prop];
     for (const dec of decs) {
       const { key } = dec;
-      const handlers: OperationHandler<T, Y, V>[] | undefined = Operations.get(
+      const handlers: OperationHandler<M, Y, V>[] | undefined = Operations.get(
         model,
         prop,
         prefix + key
@@ -112,9 +112,9 @@ export async function enforceDBDecorators<
             throw new InternalError("Missing old model for update operation");
           args.push(oldModel);
         }
-        await (handler as UpdateOperationHandler<T, Y, V>).apply(
+        await (handler as UpdateOperationHandler<M, Y, V>).apply(
           repo,
-          args as [Context, V, any, T, T]
+          args as [Context<M>, V, any, M, M]
         );
       }
     }

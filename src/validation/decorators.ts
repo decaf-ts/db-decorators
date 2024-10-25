@@ -35,10 +35,10 @@ export function readonly(
 }
 
 export async function timestampHandler<
-  T extends Model,
-  V extends IRepository<T>,
+  M extends Model,
+  V extends IRepository<M>,
   Y = any,
->(this: V, context: Context, data: Y, key: string, model: T): Promise<void> {
+>(this: V, context: Context<M>, data: Y, key: string, model: M): Promise<void> {
   (model as any)[key] = await this.timestamp();
 }
 

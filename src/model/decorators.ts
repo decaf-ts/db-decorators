@@ -46,14 +46,14 @@ export type ComposedFromMetadata = {
 };
 
 export function composedFromCreateUpdate<
-  T extends Model,
-  V extends IRepository<T>,
+  M extends Model,
+  V extends IRepository<M>,
 >(
   this: V,
-  context: Context,
+  context: Context<M>,
   data: ComposedFromMetadata,
   key: string,
-  model: T
+  model: M
 ) {
   try {
     const { args, type, prefix, suffix, separator } = data;

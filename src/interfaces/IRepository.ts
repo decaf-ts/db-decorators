@@ -9,7 +9,7 @@ import { Contextual } from "./Contextual";
  */
 export interface IRepository<M extends Model>
   extends BulkCrudOperator<M>,
-    Contextual {
+    Contextual<M> {
   readonly class: Constructor<M>;
   timestamp(): Promise<Date>;
 }
