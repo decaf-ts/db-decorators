@@ -84,9 +84,10 @@ export function validateCompare<T extends Model>(
     }
   }
   // tests nested classes
-  for (const prop of Object.keys(newModel).filter(
-    (k) => !result || !result[k]
-  )) {
+  for (const prop of Object.keys(newModel).filter((k) => {
+    if (exceptions.includes(k)) return false;
+    return !result || !result[k];
+  })) {
     let err: string | undefined;
     // if a nested Model
     const allDecorators = getPropertyDecorators(

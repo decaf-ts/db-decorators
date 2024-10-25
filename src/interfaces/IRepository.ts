@@ -11,5 +11,6 @@ export interface IRepository<M extends Model>
   extends BulkCrudOperator<M>,
     Contextual<M> {
   readonly class: Constructor<M>;
+  readonly pk: string;
   timestamp(): Promise<Date>;
 }

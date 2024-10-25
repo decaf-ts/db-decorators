@@ -19,7 +19,7 @@ export abstract class BaseRepository<M extends Model>
     return this._class;
   }
 
-  protected get pk() {
+  get pk() {
     if (!this._pk) this._pk = findPrimaryKey(new this.class()).id;
     return this._pk;
   }
