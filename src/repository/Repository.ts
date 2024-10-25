@@ -2,7 +2,6 @@ import { argsWithContext, enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError, ValidationError } from "./errors";
 import { BaseRepository } from "./BaseRepository";
-import { findModelId } from "../identity/utils";
 import { Constructor, Model } from "@decaf-ts/decorator-validation";
 import { DBKeys } from "../model/constants";
 

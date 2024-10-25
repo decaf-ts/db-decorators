@@ -146,7 +146,6 @@ export abstract class BaseRepository<M extends Model>
 
   protected async readAllPrefix(keys: string[] | number[], ...args: any[]) {
     const contextArgs = argsWithContext(args);
-    const model: M = new this.class();
     await Promise.all(
       keys.map(async (k) => {
         const m = new this.class();
