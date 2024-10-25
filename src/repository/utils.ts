@@ -20,25 +20,6 @@ export type ContextArgs = {
   args: any[];
 };
 
-export function argsWithContext(args: any[]) {
-  const last = args.pop();
-  let c: Context;
-  if (last) {
-    if (last instanceof Context) {
-      c = last;
-      args.push(last);
-    } else {
-      c = new Context();
-      args.push(last, c);
-    }
-  } else {
-    c = new Context();
-    args.push(c);
-  }
-
-  return { context: c, args: args };
-}
-
 /**
  * @summary retrieves the arguments for the handler
  * @param {any} dec the decorator

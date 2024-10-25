@@ -1,9 +1,10 @@
-import { argsWithContext, enforceDBDecorators } from "./utils";
+import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError, ValidationError } from "./errors";
 import { BaseRepository } from "./BaseRepository";
 import { Constructor, Model } from "@decaf-ts/decorator-validation";
 import { DBKeys } from "../model/constants";
+import { Context } from "./Context";
 
 export abstract class Repository<M extends Model> extends BaseRepository<M> {
   protected constructor(clazz?: Constructor<M>) {
@@ -19,7 +20,7 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     model: M,
     ...args: any[]
   ): Promise<[M, ...any[]]> {
-    const contextArgs = argsWithContext(args);
+    const contextArgs = await Context.fromArgs(this, args);
     model = new this.class(model);
     await enforceDBDecorators(
       this,
@@ -36,7 +37,7 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
   }
 
   protected async createAllPrefix(models: M[], ...args: any[]): Promise<any[]> {
-    const contextArgs = argsWithContext(args);
+    const contextArgs = await Context.fromArgs(this, args);
     await Promise.all(
       models.map(async (m) => {
         m = new this.class(m);
@@ -83,7 +84,7 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     model: M,
     ...args: any[]
   ): Promise<[M, ...args: any[]]> {
-    const contextArgs = argsWithContext(args);
+    const contextArgs = await Context.fromArgs(this, args);
     const pk = (model as any)[this.pk];
     if (!pk)
       throw new InternalError(
@@ -109,7 +110,7 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
   }
 
   protected async updateAllPrefix(models: M[], ...args: any[]) {
-    const contextArgs = argsWithContext(args);
+    const contextArgs = await Context.fromArgs(this, args);
     const ids = models.map((m) => {
       const id = (m as any)[this.pk];
       if (!id)

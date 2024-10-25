@@ -1,7 +1,7 @@
 import { ConflictError, NotFoundError } from "./errors";
 
 export class DataCache {
-  private cache: Record<string, any> = {};
+  protected cache: Record<string, any> = {};
 
   async get(key: string) {
     if (!(key in this.cache))
