@@ -59,7 +59,7 @@ export function onUpdate<T>(
  * @summary Defines a behaviour to set on the defined {@link DBOperations.CREATE}
  *
  * @param {OnOperationHandler<any>} handler The method called upon the operation
- * @param data?
+ * @param data
  *
  * @see on
  *

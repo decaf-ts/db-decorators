@@ -13,6 +13,31 @@ import {
   ModelKeys,
   sf,
 } from "@decaf-ts/decorator-validation";
+import { Context } from "./Context";
+
+export type ContextArgs = {
+  context: Context;
+  args: any[];
+};
+
+export function argsWithContext(args: any[]) {
+  const last = args.pop();
+  let c: Context;
+  if (last) {
+    if (last instanceof Context) {
+      c = last;
+      args.push(last);
+    } else {
+      c = new Context();
+      args.push(last, c);
+    }
+  } else {
+    c = new Context();
+    args.push(c);
+  }
+
+  return { context: c, args: args };
+}
 
 /**
  * @summary retrieves the arguments for the handler
@@ -47,6 +72,7 @@ export const getHandlerArgs = function (
 /**
  *
  * @param {IRepository<T>} repo
+ * @param context
  * @param {T} model
  * @param operation
  * @param prefix
@@ -62,6 +88,7 @@ export async function enforceDBDecorators<
   V,
 >(
   repo: Y,
+  context: Context,
   model: T,
   operation: string,
   prefix: string,
@@ -97,7 +124,7 @@ export async function enforceDBDecorators<
         handler = handlers[i];
         data = Object.values(handlerArgs)[i];
 
-        const args: any[] = [data.data, prop, model];
+        const args: any[] = [context, data.data, prop, model];
 
         if (operation === OperationKeys.UPDATE && prefix === OperationKeys.ON) {
           if (!oldModel)
@@ -106,7 +133,7 @@ export async function enforceDBDecorators<
         }
         await (handler as UpdateOperationHandler<T, Y, V>).apply(
           repo,
-          args as [V, any, T, T]
+          args as [Context, V, any, T, T]
         );
       }
     }

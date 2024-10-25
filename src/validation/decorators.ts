@@ -15,6 +15,7 @@ import { IRepository } from "../interfaces/IRepository";
 import { SerializationError } from "../repository/errors";
 import { apply, CustomDecorator, metadata } from "@decaf-ts/reflection";
 import { Repository } from "../repository";
+import { Context } from "../repository/Context";
 
 /**
  * Marks the property as readonly.
@@ -37,7 +38,7 @@ export async function timestampHandler<
   T extends Model,
   V extends IRepository<T>,
   Y = any,
->(this: V, data: Y, key: string, model: T): Promise<void> {
+>(this: V, context: Context, data: Y, key: string, model: T): Promise<void> {
   (model as any)[key] = await this.timestamp();
 }
 

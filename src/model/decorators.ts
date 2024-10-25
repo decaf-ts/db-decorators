@@ -10,6 +10,7 @@ import { onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { InternalError } from "../repository/errors";
 import { Repository } from "../repository/Repository";
+import { Context } from "../repository/Context";
 
 /**
  *
@@ -47,7 +48,13 @@ export type ComposedFromMetadata = {
 export function composedFromCreateUpdate<
   T extends Model,
   V extends IRepository<T>,
->(this: V, data: ComposedFromMetadata, key: string, model: T) {
+>(
+  this: V,
+  context: Context,
+  data: ComposedFromMetadata,
+  key: string,
+  model: T
+) {
   try {
     const { args, type, prefix, suffix, separator } = data;
     const composed = args.map((arg: string) => {

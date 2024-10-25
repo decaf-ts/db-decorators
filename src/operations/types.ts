@@ -1,6 +1,7 @@
 import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 import { Model } from "@decaf-ts/decorator-validation";
+import { Context } from "../repository/Context";
 
 export type OperationMetadata<V> = {
   operation: OperationKeys;
@@ -25,7 +26,13 @@ export type StandardOperationHandler<
   M extends Model,
   R extends IRepository<M>,
   V,
-> = (this: R, metadata: V, key: any, model: M) => Promise<void> | void;
+> = (
+  this: R,
+  context: Context,
+  metadata: V,
+  key: any,
+  model: M
+) => Promise<void> | void;
 
 /**
  * @typedef IdOperationHandler
@@ -33,6 +40,7 @@ export type StandardOperationHandler<
  */
 export type IdOperationHandler<M extends Model, R extends IRepository<M>, V> = (
   this: R,
+  context: Context,
   decorator: V,
   key: any,
   id: string
@@ -48,6 +56,7 @@ export type UpdateOperationHandler<
   V,
 > = (
   this: R,
+  context: Context,
   decorator: V,
   key: any,
   model: M,

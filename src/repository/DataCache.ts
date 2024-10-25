@@ -25,6 +25,13 @@ export class DataCache {
     return res;
   }
 
+  async filter(filter: string | RegExp) {
+    if (typeof filter === "string") filter = new RegExp(filter);
+    return Object.keys(this.cache)
+      .filter((k) => !!filter.exec(k))
+      .map((k) => this.cache[k]);
+  }
+
   async purge(key?: string) {
     if (!key) this.cache = {};
     else await this.pop(key);

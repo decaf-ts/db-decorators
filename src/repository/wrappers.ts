@@ -1,3 +1,6 @@
+import { Context } from "./Context";
+import { InternalError } from "./errors";
+
 /**
  * @summary Util method to change a method of an object prefixing it with another
  * @param {any} obj The Base Object
@@ -13,7 +16,7 @@ export function prefixMethod(
   obj: any,
   after: (...args: any[]) => any,
   prefix: (...args: any[]) => any,
-  afterName?: string,
+  afterName?: string
 ) {
   async function wrapper(this: any, ...args: any[]) {
     const results = await Promise.resolve(prefix.call(this, ...args));
@@ -45,7 +48,7 @@ export function suffixMethod(
   obj: any,
   before: (...args: any[]) => any,
   suffix: (...args: any[]) => any,
-  beforeName?: string,
+  beforeName?: string
 ) {
   async function wrapper(this: any, ...args: any[]) {
     const results = await Promise.resolve(before.call(this, ...args));
@@ -71,24 +74,27 @@ export function suffixMethod(
  * @param {Function} after The method to be suffixed
  * @param {string} [methodName] When the after function anme cannot be extracted, pass it here
  *
- * @function wrapMethod
+ * @function wrapMethodWithContext
  *
  * @memberOf module:db-decorators.Repository
  */
-export function wrapMethod(
+export function wrapMethodWithContext(
   obj: any,
   before: (...args: any[]) => any,
   method: (...args: any[]) => any,
   after: (...args: any[]) => any,
-  methodName?: string,
+  methodName?: string
 ) {
   async function wrapper(this: any, ...args: any[]) {
     let transformedArgs = before.call(obj, ...args);
     if (transformedArgs instanceof Promise)
       transformedArgs = await transformedArgs;
+    const context = transformedArgs[transformedArgs.length - 1] as any;
+    if (!(context instanceof Context))
+      throw new InternalError("Missing a context");
     let results = await method.call(obj, ...transformedArgs);
     if (results instanceof Promise) results = await results;
-    results = after.call(this, results);
+    results = after.call(this, results, context);
     if (results instanceof Promise) results = await results;
     return results;
   }

@@ -1,18 +1,17 @@
 import { IRepository } from "../interfaces/IRepository";
 import { Constructor, Model, sf } from "@decaf-ts/decorator-validation";
-import { enforceDBDecorators } from "./utils";
+import { argsWithContext, enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
-import { DataCache } from "./DataCache";
-import { wrapMethod } from "./wrappers";
-import { findModelId, findPrimaryKey } from "../identity/utils";
+import { wrapMethodWithContext } from "./wrappers";
+import { findPrimaryKey } from "../identity/utils";
+import { Context } from "./Context";
 
 export abstract class BaseRepository<M extends Model>
   implements IRepository<M>
 {
   private readonly _class!: Constructor<M>;
-
-  private _cache?: DataCache;
+  private _pk!: string;
 
   get class() {
     if (!this._class)
@@ -20,9 +19,9 @@ export abstract class BaseRepository<M extends Model>
     return this._class;
   }
 
-  get cache(): DataCache {
-    if (!this._cache) this._cache = new DataCache();
-    return this._cache;
+  protected get pk() {
+    if (!this._pk) this._pk = findPrimaryKey(new this.class()).id;
+    return this._pk;
   }
 
   protected constructor(clazz?: Constructor<M>) {
@@ -31,7 +30,7 @@ export abstract class BaseRepository<M extends Model>
     const self = this;
     [this.create, this.read, this.update, this.delete].forEach((m) => {
       const name = m.name;
-      wrapMethod(
+      wrapMethodWithContext(
         self,
         (self as any)[name + "Prefix"],
         m,
@@ -50,23 +49,27 @@ export abstract class BaseRepository<M extends Model>
   }
 
   async createAll(models: M[], ...args: any[]): Promise<M[]> {
-    return Promise.all(models.map((m) => this.create(m, ...args)));
+    const contextArgs = argsWithContext(args);
+    return Promise.all(models.map((m) => this.create(m, ...contextArgs.args)));
   }
 
   protected async createPrefix(model: M, ...args: any[]) {
+    const contextArgs = argsWithContext(args);
     model = new this.class(model);
     await enforceDBDecorators(
       this,
+      contextArgs.context,
       model,
       OperationKeys.CREATE,
       OperationKeys.ON
     );
-    return [model, ...args];
+    return [model, ...contextArgs.args];
   }
 
-  protected async createSuffix(model: M) {
+  protected async createSuffix(model: M, context: Context) {
     await enforceDBDecorators(
       this,
+      context,
       model,
       OperationKeys.CREATE,
       OperationKeys.AFTER
@@ -75,11 +78,13 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async createAllPrefix(models: M[], ...args: any[]) {
+    const contextArgs = argsWithContext(args);
     await Promise.all(
       models.map(async (m) => {
         m = new this.class(m);
         await enforceDBDecorators(
           this,
+          contextArgs.context,
           m,
           OperationKeys.CREATE,
           OperationKeys.ON
@@ -87,13 +92,19 @@ export abstract class BaseRepository<M extends Model>
         return m;
       })
     );
-    return [models, ...args];
+    return [models, ...contextArgs.args];
   }
 
-  protected async createAllSuffix(models: M[]) {
+  protected async createAllSuffix(models: M[], context: Context) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(this, m, OperationKeys.CREATE, OperationKeys.AFTER)
+        enforceDBDecorators(
+          this,
+          context,
+          m,
+          OperationKeys.CREATE,
+          OperationKeys.AFTER
+        )
       )
     );
     return models;
@@ -108,9 +119,10 @@ export abstract class BaseRepository<M extends Model>
     return await Promise.all(keys.map((id) => this.read(id, ...args)));
   }
 
-  protected async readSuffix(model: M) {
+  protected async readSuffix(model: M, context: Context) {
     await enforceDBDecorators(
       this,
+      context,
       model,
       OperationKeys.READ,
       OperationKeys.AFTER
@@ -119,40 +131,48 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async readPrefix(key: string, ...args: any[]) {
+    const contextArgs = argsWithContext(args);
     const model: M = new this.class();
-    const pk = findPrimaryKey(model).id;
-    (model as Record<string, any>)[pk] = key;
+    (model as Record<string, any>)[this.pk] = key;
     await enforceDBDecorators(
       this,
+      contextArgs.context,
       model,
       OperationKeys.READ,
       OperationKeys.ON
     );
-    return [key, ...args];
+    return [key, ...contextArgs.args];
   }
 
   protected async readAllPrefix(keys: string[] | number[], ...args: any[]) {
+    const contextArgs = argsWithContext(args);
     const model: M = new this.class();
-    const pk = findPrimaryKey(model).id;
     await Promise.all(
       keys.map(async (k) => {
         const m = new this.class();
-        (m as Record<string, any>)[pk] = k;
+        (m as Record<string, any>)[this.pk] = k;
         return enforceDBDecorators(
           this,
+          contextArgs.context,
           m,
           OperationKeys.READ,
           OperationKeys.ON
         );
       })
     );
-    return [keys, ...args];
+    return [keys, ...contextArgs.args];
   }
 
-  protected async readAllSuffix(models: M[]) {
+  protected async readAllSuffix(models: M[], context: Context) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(this, m, OperationKeys.READ, OperationKeys.AFTER)
+        enforceDBDecorators(
+          this,
+          context,
+          m,
+          OperationKeys.READ,
+          OperationKeys.AFTER
+        )
       )
     );
     return models;
@@ -164,12 +184,14 @@ export abstract class BaseRepository<M extends Model>
   }
 
   async updateAll(models: M[], ...args: any): Promise<M[]> {
-    return Promise.all(models.map((m) => this.update(m, ...args)));
+    const contextArgs = argsWithContext(args);
+    return Promise.all(models.map((m) => this.update(m, ...contextArgs.args)));
   }
 
-  protected async updateSuffix(model: M) {
+  protected async updateSuffix(model: M, context: Context) {
     await enforceDBDecorators(
       this,
+      context,
       model,
       OperationKeys.UPDATE,
       OperationKeys.AFTER
@@ -178,33 +200,52 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async updatePrefix(model: M, ...args: any[]) {
-    const id = findModelId(model);
+    const contextArgs = argsWithContext(args);
+    const id = (model as any)[this.pk];
+    if (!id)
+      throw new InternalError(
+        `No value for the Id is defined under the property ${this.pk}`
+      );
     const oldModel = await this.read(id);
     await enforceDBDecorators(
       this,
+      contextArgs.context,
       model,
       OperationKeys.UPDATE,
       OperationKeys.ON,
       oldModel
     );
-    return [model, ...args];
+    return [model, ...contextArgs.args];
   }
 
   protected async updateAllPrefix(models: M[], ...args: any[]) {
+    const contextArgs = argsWithContext(args);
     await Promise.all(
       models.map((m) => {
         m = new this.class(m);
-        enforceDBDecorators(this, m, OperationKeys.UPDATE, OperationKeys.ON);
+        enforceDBDecorators(
+          this,
+          contextArgs.context,
+          m,
+          OperationKeys.UPDATE,
+          OperationKeys.ON
+        );
         return m;
       })
     );
-    return [models, ...args];
+    return [models, ...contextArgs.args];
   }
 
-  protected async updateAllSuffix(models: M[]) {
+  protected async updateAllSuffix(models: M[], context: Context) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(this, m, OperationKeys.UPDATE, OperationKeys.AFTER)
+        enforceDBDecorators(
+          this,
+          context,
+          m,
+          OperationKeys.UPDATE,
+          OperationKeys.AFTER
+        )
       )
     );
     return models;
@@ -216,12 +257,14 @@ export abstract class BaseRepository<M extends Model>
   }
 
   async deleteAll(keys: string[] | number[], ...args: any[]): Promise<M[]> {
-    return Promise.all(keys.map((k) => this.delete(k, ...args)));
+    const contextArgs = argsWithContext(args);
+    return Promise.all(keys.map((k) => this.delete(k, ...contextArgs.args)));
   }
 
-  protected async deleteSuffix(model: M) {
+  protected async deleteSuffix(model: M, context: Context) {
     await enforceDBDecorators(
       this,
+      context,
       model,
       OperationKeys.DELETE,
       OperationKeys.AFTER
@@ -230,35 +273,45 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async deletePrefix(key: any, ...args: any[]) {
-    const model = await this.read(key, ...args);
+    const contextArgs = argsWithContext(args);
+    const model = await this.read(key, ...contextArgs.args);
     await enforceDBDecorators(
       this,
+      contextArgs.context,
       model,
       OperationKeys.DELETE,
       OperationKeys.ON
     );
-    return [key, ...args];
+    return [key, ...contextArgs.args];
   }
 
   protected async deleteAllPrefix(keys: string[] | number[], ...args: any[]) {
-    const models = await this.readAll(keys, ...args);
+    const contextArgs = argsWithContext(args);
+    const models = await this.readAll(keys, ...contextArgs.args);
     await Promise.all(
       models.map(async (m) => {
         return enforceDBDecorators(
           this,
+          contextArgs.context,
           m,
           OperationKeys.DELETE,
           OperationKeys.ON
         );
       })
     );
-    return [keys, ...args];
+    return [keys, ...contextArgs.args];
   }
 
-  protected async deleteAllSuffix(models: M[]) {
+  protected async deleteAllSuffix(models: M[], context: Context) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(this, m, OperationKeys.DELETE, OperationKeys.AFTER)
+        enforceDBDecorators(
+          this,
+          context,
+          m,
+          OperationKeys.DELETE,
+          OperationKeys.AFTER
+        )
       )
     );
     return models;

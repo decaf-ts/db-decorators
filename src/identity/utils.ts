@@ -1,7 +1,7 @@
 import { DBKeys } from "../model/constants";
 import { getAllPropertyDecoratorsRecursive } from "../repository/utils";
 import { Model, ModelKeys, sf } from "@decaf-ts/decorator-validation";
-import { InternalError, NotFoundError } from "../repository/errors";
+import { InternalError } from "../repository/errors";
 
 /**
  * @summary Returns the primary key attribute for a {@link Model}
@@ -67,7 +67,7 @@ export function findModelId(model: Model, returnEmpty = false) {
   const idProp = findPrimaryKey(model).id;
   const modelId = (model as any)[idProp];
   if (!modelId && !returnEmpty)
-    throw new NotFoundError(
+    throw new InternalError(
       sf("No value for the Id is defined under the property {0}", idProp)
     );
   return modelId;

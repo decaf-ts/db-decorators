@@ -7,6 +7,7 @@ import { RamRepository } from "./RamRepository";
 import { InternalError } from "../../src/repository/errors";
 import { Injectables } from "@decaf-ts/injectable-decorators";
 import { id } from "../../src";
+import { Context } from "../../src/repository/Context";
 
 describe("Operations decorators", () => {
   describe("on", () => {
@@ -17,6 +18,7 @@ describe("Operations decorators", () => {
     class Handler {
       static async handler(
         this: IRepository<Model>,
+        context: Context,
         data: any,
         key: string,
         model: Model
@@ -26,6 +28,7 @@ describe("Operations decorators", () => {
 
       static async otherHandler(
         this: IRepository<Model>,
+        context: Context,
         data: any,
         key: string,
         model: Model
@@ -35,6 +38,7 @@ describe("Operations decorators", () => {
 
       static async yetAnotherHandler(
         this: IRepository<Model>,
+        context: Context,
         data: any,
         key: string,
         model: Model
@@ -44,6 +48,7 @@ describe("Operations decorators", () => {
 
       static async argHandler(
         this: IRepository<Model>,
+        context: Context,
         data: { arg1: string; arg2: string },
         key: string,
         model: Model
@@ -54,6 +59,7 @@ describe("Operations decorators", () => {
 
       static async anotherArgHandler(
         this: IRepository<Model>,
+        context: Context,
         data: number,
         key: string,
         model: Model
@@ -141,6 +147,7 @@ describe("Operations decorators", () => {
 
       expect(mock).toHaveBeenCalledTimes(1);
       expect(mock).toHaveBeenCalledWith(
+        expect.any(Context),
         undefined,
         "read",
         expect.objectContaining({ id: model.id as string, read: "test" })

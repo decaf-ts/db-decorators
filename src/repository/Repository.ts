@@ -1,6 +1,6 @@
-import { enforceDBDecorators } from "./utils";
+import { argsWithContext, enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
-import { ValidationError } from "./errors";
+import { InternalError, ValidationError } from "./errors";
 import { BaseRepository } from "./BaseRepository";
 import { findModelId } from "../identity/utils";
 import { Constructor, Model } from "@decaf-ts/decorator-validation";
@@ -20,9 +20,11 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     model: M,
     ...args: any[]
   ): Promise<[M, ...any[]]> {
+    const contextArgs = argsWithContext(args);
     model = new this.class(model);
     await enforceDBDecorators(
       this,
+      contextArgs.context,
       model,
       OperationKeys.CREATE,
       OperationKeys.ON
@@ -31,15 +33,17 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     const errors = model.hasErrors();
     if (errors) throw new ValidationError(errors.toString());
 
-    return [model, ...args];
+    return [model, ...contextArgs.args];
   }
 
   protected async createAllPrefix(models: M[], ...args: any[]): Promise<any[]> {
+    const contextArgs = argsWithContext(args);
     await Promise.all(
       models.map(async (m) => {
         m = new this.class(m);
         await enforceDBDecorators(
           this,
+          contextArgs.context,
           m,
           OperationKeys.CREATE,
           OperationKeys.ON
@@ -58,7 +62,7 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
         return accum;
       }, undefined);
     if (errors) throw new ValidationError(errors);
-    return [models, ...args];
+    return [models, ...contextArgs.args];
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -80,7 +84,12 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     model: M,
     ...args: any[]
   ): Promise<[M, ...args: any[]]> {
-    const pk = findModelId(model);
+    const contextArgs = argsWithContext(args);
+    const pk = (model as any)[this.pk];
+    if (!pk)
+      throw new InternalError(
+        `No value for the Id is defined under the property ${this.pk}`
+      );
 
     const oldModel = await this.read(pk);
 
@@ -88,6 +97,7 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
 
     await enforceDBDecorators(
       this,
+      contextArgs.context,
       model,
       OperationKeys.UPDATE,
       OperationKeys.ON,
@@ -96,17 +106,26 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
 
     const errors = model.hasErrors(oldModel);
     if (errors) throw new ValidationError(errors.toString());
-    return [model, ...args];
+    return [model, ...contextArgs.args];
   }
 
   protected async updateAllPrefix(models: M[], ...args: any[]) {
-    const ids = models.map((m) => findModelId(m));
-    const oldModels = await this.readAll(ids);
+    const contextArgs = argsWithContext(args);
+    const ids = models.map((m) => {
+      const id = (m as any)[this.pk];
+      if (!id)
+        throw new InternalError(
+          `No value for the Id is defined under the property ${this.pk}`
+        );
+      return id;
+    });
+    const oldModels = await this.readAll(ids, ...contextArgs.args);
     models = models.map((m, i) => this.merge(oldModels[i], m));
     await Promise.all(
       models.map((m, i) =>
         enforceDBDecorators(
           this,
+          contextArgs.context,
           m,
           OperationKeys.UPDATE,
           OperationKeys.ON,
@@ -126,7 +145,7 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
         return accum;
       }, undefined);
     if (errors) throw new ValidationError(errors);
-    return [models, ...args];
+    return [models, ...contextArgs.args];
   }
 
   static key(key: string) {
