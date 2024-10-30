@@ -53,10 +53,7 @@ export abstract class BaseRepository<M extends Model>
     return Context.from<M>(operation, this.class);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async create(model: M, ...args: any[]): Promise<M> {
-    throw new Error("Child classes must implement this.");
-  }
+  abstract create(model: M, ...args: any[]): Promise<M>;
 
   async createAll(models: M[], ...args: any[]): Promise<M[]> {
     return Promise.all(models.map((m) => this.create(m, ...args)));
@@ -129,10 +126,7 @@ export abstract class BaseRepository<M extends Model>
     return models;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async read(key: string | number, ...args: any[]): Promise<M> {
-    throw new Error("Child classes must implement this");
-  }
+  abstract read(key: string | number, ...args: any[]): Promise<M>;
 
   async readAll(keys: string[] | number[], ...args: any[]): Promise<M[]> {
     return await Promise.all(keys.map((id) => this.read(id, ...args)));
@@ -206,10 +200,7 @@ export abstract class BaseRepository<M extends Model>
     return models;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(model: M, ...args: any[]): Promise<M> {
-    throw new Error("Child classes must implement this");
-  }
+  abstract update(model: M, ...args: any[]): Promise<M>;
 
   async updateAll(models: M[], ...args: any): Promise<M[]> {
     return Promise.all(models.map((m) => this.update(m, ...args)));
@@ -288,10 +279,7 @@ export abstract class BaseRepository<M extends Model>
     return models;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async delete(key: string | number, ...args: any[]): Promise<M> {
-    throw new Error("Child classes must implement this");
-  }
+  abstract delete(key: string | number, ...args: any[]): Promise<M>;
 
   async deleteAll(keys: string[] | number[], ...args: any[]): Promise<M[]> {
     return Promise.all(keys.map((k) => this.delete(k, ...args)));

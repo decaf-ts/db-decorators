@@ -11,11 +11,6 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     super(clazz);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async create(model: M): Promise<M> {
-    throw new Error("Child classes must implement this.");
-  }
-
   protected override async createPrefix(
     model: M,
     ...args: any[]
@@ -73,21 +68,6 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
       }, undefined);
     if (errors) throw new ValidationError(errors);
     return [models, ...contextArgs.args];
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async delete(key: string | number): Promise<M> {
-    throw new Error("Child classes must implement this.");
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async read(key: string | number): Promise<M> {
-    throw new Error("Child classes must implement this.");
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async update(model: M): Promise<M> {
-    throw new Error("Child classes must implement this.");
   }
 
   protected async updatePrefix(
