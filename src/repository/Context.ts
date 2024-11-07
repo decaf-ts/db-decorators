@@ -7,9 +7,9 @@ import { Constructor, Model } from "@decaf-ts/decorator-validation";
 
 export class Context<M extends Model> extends DataCache {
   protected constructor(
-    private operation: OperationKeys,
-    private model?: Constructor<M>,
-    private parent?: Context<any>
+    protected operation: OperationKeys,
+    protected model?: Constructor<M>,
+    protected parent?: Context<any>
   ) {
     super();
   }
