@@ -43,14 +43,14 @@ export abstract class BaseRepository<M extends Model>
     return new Date();
   }
 
-  async context(
+  async context<C extends Context<M> = Context<M>>(
     operation:
       | OperationKeys.CREATE
       | OperationKeys.READ
       | OperationKeys.UPDATE
       | OperationKeys.DELETE
-  ): Promise<Context<M>> {
-    return Context.from<M>(operation, this.class);
+  ): Promise<C> {
+    return Context.from<M, C>(operation, this.class);
   }
 
   abstract create(model: M, ...args: any[]): Promise<M>;

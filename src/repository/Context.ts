@@ -36,7 +36,7 @@ export class Context<M extends Model> extends DataCache {
     return this.constructor(operation, model, this);
   }
 
-  static async from<M extends Model>(
+  static async from<M extends Model, C extends Context<M> = Context<M>>(
     operation:
       | OperationKeys.CREATE
       | OperationKeys.READ
@@ -44,7 +44,7 @@ export class Context<M extends Model> extends DataCache {
       | OperationKeys.DELETE,
     model: Constructor<M>
   ) {
-    return new Context(operation, model);
+    return new Context(operation, model) as C;
   }
 
   static async args<M extends Model>(
