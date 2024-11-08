@@ -39,7 +39,7 @@ export async function timestampHandler<
   V extends IRepository<M>,
   Y = any,
 >(this: V, context: Context<M>, data: Y, key: string, model: M): Promise<void> {
-  (model as any)[key] = await this.timestamp();
+  (model as any)[key] = context.timestamp;
 }
 
 /**

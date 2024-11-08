@@ -39,10 +39,6 @@ export abstract class BaseRepository<M extends Model>
     });
   }
 
-  async timestamp() {
-    return new Date();
-  }
-
   async context<C extends Context<M> = Context<M>>(
     operation:
       | OperationKeys.CREATE

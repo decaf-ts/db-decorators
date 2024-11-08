@@ -14,6 +14,10 @@ export class Context<M extends Model> extends DataCache {
     super();
   }
 
+  get timestamp() {
+    return new Date();
+  }
+
   async get(key: string): Promise<any> {
     try {
       return super.get(key);

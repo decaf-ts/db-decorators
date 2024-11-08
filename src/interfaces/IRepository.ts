@@ -12,5 +12,4 @@ export interface IRepository<M extends Model>
     Contextual<M> {
   readonly class: Constructor<M>;
   readonly pk: string;
-  timestamp(): Promise<Date>;
 }
