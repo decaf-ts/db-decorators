@@ -36,14 +36,14 @@ export class Context<M extends Model> extends DataCache {
     return this.constructor(operation, model, this);
   }
 
-  static async from<M extends Model, C extends Context<M> = Context<M>>(
+  static async from<M extends Model, C extends Context<M>>(
     operation:
       | OperationKeys.CREATE
       | OperationKeys.READ
       | OperationKeys.UPDATE
       | OperationKeys.DELETE,
     model: Constructor<M>
-  ) {
+  ): Promise<C> {
     return new Context(operation, model) as C;
   }
 
