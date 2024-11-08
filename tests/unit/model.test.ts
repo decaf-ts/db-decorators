@@ -95,9 +95,9 @@ describe(`DB extended Model`, function () {
 
     expect(testModel).not.toBeNull();
 
-    // @ts-ignore
+    // @ts-expect-error illegal override for test
     testModel.updatedOn = "test";
-    // @ts-ignore
+    // @ts-expect-error illegal override for test
     testModel.createdOn = "test";
 
     const errors = testModel.hasErrors();

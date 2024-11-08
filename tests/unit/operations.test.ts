@@ -236,7 +236,7 @@ describe("Operations decorators", () => {
         @onCreate(Handler.yetAnotherHandler)
         override updatedOn!: Date | string;
 
-        constructor(immutableSignedBaseModel?: OverriddenBaseModel | {}) {
+        constructor(immutableSignedBaseModel?: ModelArg<OverriddenBaseModel>) {
           super(immutableSignedBaseModel);
           Model.fromObject<OverriddenBaseModel>(this, immutableSignedBaseModel);
         }
@@ -244,7 +244,7 @@ describe("Operations decorators", () => {
 
       @model()
       class OtherBaseModel extends OverriddenBaseModel {
-        constructor(otherBaseModel?: OtherBaseModel | {}) {
+        constructor(otherBaseModel?: ModelArg<OtherBaseModel>) {
           super(otherBaseModel);
         }
       }
@@ -305,7 +305,7 @@ describe("Operations decorators", () => {
         @timestamp()
         updatedOn!: Date;
 
-        constructor(baseModel?: OrderBaseModel | {}) {
+        constructor(baseModel?: ModelArg<OrderBaseModel>) {
           super();
           Model.fromObject<OrderBaseModel>(this, baseModel);
         }
@@ -315,7 +315,9 @@ describe("Operations decorators", () => {
         @onCreate(Handler.anotherArgHandler, yearDiff)
         override updatedOn!: Date;
 
-        constructor(overriddenOrderBaseModel?: OverriddenOrderBaseModel | {}) {
+        constructor(
+          overriddenOrderBaseModel?: ModelArg<OverriddenOrderBaseModel>
+        ) {
           super(overriddenOrderBaseModel);
           Model.fromObject<OverriddenOrderBaseModel>(
             this,

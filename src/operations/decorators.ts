@@ -288,7 +288,7 @@ export function operation<T>(
   handler: OperationHandler<any, any, T>,
   dataToAdd?: T
 ) {
-  return (target: object, propertyKey: string | symbol) => {
+  return (target: object, propertyKey?: any) => {
     const name = target.constructor.name;
     const decorators = operation.reduce((accum: any[], op) => {
       const compoundKey = baseOp + op;
