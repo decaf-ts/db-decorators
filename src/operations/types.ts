@@ -13,10 +13,15 @@ export type OperationMetadata<V> = {
  * @typedef OperationHandler
  * @memberOf db-decorators.operations
  */
-export type OperationHandler<M extends Model, R extends IRepository<M>, V> =
-  | StandardOperationHandler<M, R, V>
-  | UpdateOperationHandler<M, R, V>
-  | IdOperationHandler<M, R, V>;
+export type OperationHandler<
+  M extends Model,
+  R extends IRepository<M>,
+  V,
+  C extends Context<M> = Context<M>,
+> =
+  | StandardOperationHandler<M, R, V, C>
+  | UpdateOperationHandler<M, R, V, C>
+  | IdOperationHandler<M, R, V, C>;
 
 /**
  * @typedef OnOperationHandler
@@ -26,9 +31,10 @@ export type StandardOperationHandler<
   M extends Model,
   R extends IRepository<M>,
   V,
+  C extends Context<M> = Context<M>,
 > = (
   this: R,
-  context: Context<M>,
+  context: C,
   metadata: V,
   key: any,
   model: M
@@ -38,9 +44,14 @@ export type StandardOperationHandler<
  * @typedef IdOperationHandler
  * @memberOf db-decorators.operations
  */
-export type IdOperationHandler<M extends Model, R extends IRepository<M>, V> = (
+export type IdOperationHandler<
+  M extends Model,
+  R extends IRepository<M>,
+  V,
+  C extends Context<M> = Context<M>,
+> = (
   this: R,
-  context: Context<M>,
+  context: C,
   decorator: V,
   key: any,
   id: string
@@ -54,9 +65,10 @@ export type UpdateOperationHandler<
   M extends Model,
   R extends IRepository<M>,
   V,
+  C extends Context<M> = Context<M>,
 > = (
   this: R,
-  context: Context<M>,
+  context: C,
   decorator: V,
   key: any,
   model: M,
