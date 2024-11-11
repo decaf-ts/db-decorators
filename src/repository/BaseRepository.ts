@@ -39,16 +39,6 @@ export abstract class BaseRepository<M extends Model>
     });
   }
 
-  async context<C extends Context<M> = Context<M>>(
-    operation:
-      | OperationKeys.CREATE
-      | OperationKeys.READ
-      | OperationKeys.UPDATE
-      | OperationKeys.DELETE
-  ): Promise<C> {
-    return Context.from<M, C>(operation, this.class);
-  }
-
   abstract create(model: M, ...args: any[]): Promise<M>;
 
   async createAll(models: M[], ...args: any[]): Promise<M[]> {
@@ -57,7 +47,6 @@ export abstract class BaseRepository<M extends Model>
 
   protected async createPrefix(model: M, ...args: any[]) {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.CREATE,
       this.class,
       args
@@ -86,7 +75,6 @@ export abstract class BaseRepository<M extends Model>
 
   protected async createAllPrefix(models: M[], ...args: any[]) {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.CREATE,
       this.class,
       args
@@ -141,7 +129,6 @@ export abstract class BaseRepository<M extends Model>
 
   protected async readPrefix(key: string, ...args: any[]) {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.READ,
       this.class,
       args
@@ -160,7 +147,6 @@ export abstract class BaseRepository<M extends Model>
 
   protected async readAllPrefix(keys: string[] | number[], ...args: any[]) {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.READ,
       this.class,
       args
@@ -215,7 +201,6 @@ export abstract class BaseRepository<M extends Model>
 
   protected async updatePrefix(model: M, ...args: any[]) {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.UPDATE,
       this.class,
       args
@@ -239,7 +224,6 @@ export abstract class BaseRepository<M extends Model>
 
   protected async updateAllPrefix(models: M[], ...args: any[]) {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.UPDATE,
       this.class,
       args
@@ -294,7 +278,6 @@ export abstract class BaseRepository<M extends Model>
 
   protected async deletePrefix(key: any, ...args: any[]) {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.DELETE,
       this.class,
       args
@@ -312,7 +295,6 @@ export abstract class BaseRepository<M extends Model>
 
   protected async deleteAllPrefix(keys: string[] | number[], ...args: any[]) {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.DELETE,
       this.class,
       args

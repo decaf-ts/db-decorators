@@ -46,33 +46,41 @@ export class Context<M extends Model> extends DataCache {
       | OperationKeys.READ
       | OperationKeys.UPDATE
       | OperationKeys.DELETE,
-    model: Constructor<M>
+    model: Constructor<M>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ...args: any[]
   ): Promise<C> {
     return new Context(operation, model) as C;
   }
 
   static async args<M extends Model>(
-    contextual: Contextual<M>,
     operation:
       | OperationKeys.CREATE
       | OperationKeys.READ
       | OperationKeys.UPDATE
       | OperationKeys.DELETE,
     model: Constructor<M>,
-    args: any[]
+    args: any[],
+    contextual?: Contextual<M>
   ): Promise<ContextArgs<M>> {
     const last = args.pop();
+
+    async function getContext() {
+      if (contextual) return contextual.context(operation, model, ...args);
+      return new Context(operation, model);
+    }
+
     let c: Context<M>;
     if (last) {
       if (last instanceof Context) {
         c = last;
         args.push(last);
       } else {
-        c = await contextual.context(operation, model);
+        c = await getContext();
         args.push(last, c);
       }
     } else {
-      c = await contextual.context(operation, model);
+      c = await getContext();
       args.push(c);
     }
 

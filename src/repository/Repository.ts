@@ -16,7 +16,6 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     ...args: any[]
   ): Promise<[M, ...any[]]> {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.CREATE,
       this.class,
       args
@@ -38,7 +37,6 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
 
   protected async createAllPrefix(models: M[], ...args: any[]): Promise<any[]> {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.CREATE,
       this.class,
       args
@@ -75,7 +73,6 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     ...args: any[]
   ): Promise<[M, ...args: any[]]> {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.UPDATE,
       this.class,
       args
@@ -106,7 +103,6 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
 
   protected async updateAllPrefix(models: M[], ...args: any[]) {
     const contextArgs = await Context.args(
-      this,
       OperationKeys.UPDATE,
       this.class,
       args
