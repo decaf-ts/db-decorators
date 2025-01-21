@@ -2,10 +2,7 @@ import { Operations } from "../operations/Operations";
 import { OperationHandler, UpdateOperationHandler } from "../operations/types";
 import { IRepository } from "../interfaces/IRepository";
 import { OperationKeys } from "../operations/constants";
-import {
-  DecoratorMetadata,
-  getAllPropertyDecorators,
-} from "@decaf-ts/reflection";
+import { DecoratorMetadata, Reflection } from "@decaf-ts/reflection";
 import { InternalError } from "./errors";
 import {
   Constructor,
@@ -137,7 +134,7 @@ export function getDbDecorators<T extends Model>(
   extraPrefix?: string
 ): Record<string, DecoratorMetadata[]> | undefined {
   const decorators: Record<string, DecoratorMetadata[]> | undefined =
-    getAllPropertyDecorators(
+    Reflection.getAllPropertyDecorators(
       model,
       // undefined,
       OperationKeys.REFLECT + (extraPrefix ? extraPrefix : "")
@@ -242,7 +239,7 @@ export const getAllPropertyDecoratorsRecursive = function <T extends Model>(
   };
 
   const decs: { [indexer: string]: any[] } | undefined =
-    getAllPropertyDecorators(model, ...prefixes);
+    Reflection.getAllPropertyDecorators(model, ...prefixes);
   if (decs) mergeDecorators(decs);
 
   if (Object.getPrototypeOf(model) === Object.prototype) return accumulator;

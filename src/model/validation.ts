@@ -10,7 +10,7 @@ import {
   ValidationKeys,
   ValidationPropertyDecoratorDefinition,
 } from "@decaf-ts/decorator-validation";
-import { DecoratorMetadata, getPropertyDecorators } from "@decaf-ts/reflection";
+import { DecoratorMetadata, Reflection } from "@decaf-ts/reflection";
 import { UpdateValidationKeys, UpdateValidator } from "../validation";
 import { findModelId } from "../identity";
 
@@ -38,7 +38,7 @@ export function validateCompare<T extends Model>(
       exceptions.indexOf(prop) === -1
     )
       decoratedProperties.push(
-        getPropertyDecorators(
+        Reflection.getPropertyDecorators(
           UpdateValidationKeys.REFLECT,
           newModel,
           prop
@@ -90,12 +90,12 @@ export function validateCompare<T extends Model>(
   })) {
     let err: string | undefined;
     // if a nested Model
-    const allDecorators = getPropertyDecorators(
+    const allDecorators = Reflection.getPropertyDecorators(
       ValidationKeys.REFLECT,
       newModel,
       prop
     ).decorators;
-    const decorators = getPropertyDecorators(
+    const decorators = Reflection.getPropertyDecorators(
       ValidationKeys.REFLECT,
       newModel,
       prop

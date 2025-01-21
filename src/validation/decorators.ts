@@ -13,7 +13,7 @@ import { DBOperations, OperationKeys } from "../operations/constants";
 import { after, on, onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { SerializationError } from "../repository/errors";
-import { apply, CustomDecorator, metadata } from "@decaf-ts/reflection";
+import { apply, metadata } from "@decaf-ts/reflection";
 import { Repository } from "../repository";
 import { Context } from "../repository/Context";
 
@@ -77,17 +77,17 @@ export function timestamp(
   operation: OperationKeys[] = DBOperations.CREATE_UPDATE as unknown as OperationKeys[],
   format: string = DEFAULT_TIMESTAMP_FORMAT
 ) {
-  const decorators: CustomDecorator<any>[] = [
-    date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE) as CustomDecorator<any>,
-    required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED) as CustomDecorator<any>,
-    on(operation, timestampHandler) as CustomDecorator<any>,
+  const decorators: any[] = [
+    date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE),
+    required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED),
+    on(operation, timestampHandler),
   ];
 
   if (operation.indexOf(OperationKeys.UPDATE) !== -1)
     decorators.push(
       propMetadata(Validation.updateKey(DBKeys.TIMESTAMP), {
         message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
-      }) as CustomDecorator<any>
+      })
     );
 
   return apply(...decorators);
