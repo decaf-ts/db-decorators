@@ -14,6 +14,12 @@ export enum OperationKeys {
   AFTER = "after.",
 }
 
+export type CrudOperations =
+  | OperationKeys.CREATE
+  | OperationKeys.READ
+  | OperationKeys.UPDATE
+  | OperationKeys.DELETE;
+
 /**
  * @summary Maps out groups of CRUD operations for easier mapping of decorators
  *
@@ -21,7 +27,7 @@ export enum OperationKeys {
  *
  * @memberOf module:db-decorators.Operations
  */
-export const DBOperations: Record<string, OperationKeys[]> = {
+export const DBOperations: Record<string, CrudOperations[]> = {
   CREATE: [OperationKeys.CREATE],
   READ: [OperationKeys.READ],
   UPDATE: [OperationKeys.UPDATE],
