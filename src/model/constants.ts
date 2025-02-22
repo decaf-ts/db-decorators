@@ -18,6 +18,7 @@ export const DBKeys = {
   TIMESTAMP: "timestamp",
   HASH: "hash",
   COMPOSED: "composed",
+  VERSION: "version",
   ORIGINAL: "__originalObj",
 };
 

@@ -5,12 +5,14 @@ import {
   Model,
   propMetadata,
   sf,
+  type,
 } from "@decaf-ts/decorator-validation";
-import { onCreateUpdate } from "../operations/decorators";
+import { onCreate, onCreateUpdate, onUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { InternalError } from "../repository/errors";
 import { Repository } from "../repository/Repository";
 import { Context } from "../repository/Context";
+import { CrudOperations, OperationKeys } from "../operations";
 
 /**
  *
@@ -122,4 +124,61 @@ export function composed(
   suffix = ""
 ) {
   return composedFrom(args, hash, separator, "values", prefix, suffix);
+}
+
+/**
+ * Creates a decorator function that updates the version of a model during create or update operations.
+ *
+ * @param {CrudOperations} operation - The type of operation being performed (CREATE or UPDATE).
+ * @returns {function} A function that updates the version of the model based on the operation type.
+ *
+ * @template M - Type extending Model
+ * @template V - Type extending IRepository<M>
+ *
+ * @this {V} - The repository instance
+ * @param {Context<M>} context - The context of the operation
+ * @param {unknown} data - Additional data for the operation (not used in this function)
+ * @param {string} key - The key of the version property in the model
+ * @param {M} model - The model being updated
+ * @throws {InternalError} If an invalid operation is provided or if version update fails
+ */
+export function versionCreateUpdate(operation: CrudOperations) {
+  return function versionCreateUpdate<
+    M extends Model,
+    V extends IRepository<M>,
+  >(this: V, context: Context<M>, data: unknown, key: string, model: M) {
+    try {
+      switch (operation) {
+        case OperationKeys.CREATE:
+          (model as any)[key] = 1;
+          break;
+        case OperationKeys.UPDATE:
+          (model as any)[key]++;
+          break;
+        default:
+          throw new InternalError(`Invalid operation: ${operation}`);
+      }
+    } catch (e: unknown) {
+      throw new InternalError(`Failed to update version: ${e}`);
+    }
+  };
+}
+
+/**
+ * @description Creates a decorator for versioning a property in a model.
+ * @summary This decorator applies multiple sub-decorators to handle version management during create and update operations.
+ *
+ * @returns {Function} A composite decorator that:
+ *   - Sets the type of the property to Number
+ *   - Applies a version update on create operations
+ *   - Applies a version update on update operations
+ *   - Adds metadata indicating this property is used for versioning
+ */
+export function version() {
+  return apply(
+    type(Number.name),
+    onCreate(versionCreateUpdate(OperationKeys.CREATE)),
+    onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
+    propMetadata(Repository.key(DBKeys.VERSION), true)
+  );
 }
