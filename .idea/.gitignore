@@ -9,3 +9,5 @@
 /aws/
 vcs.xml
 misc.xml
+*.iml
+modules.xml

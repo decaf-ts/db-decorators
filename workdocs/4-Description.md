@@ -1,1 +1,3 @@
-### Decorator based
+### Description
+
+Declarative approach to database decorators

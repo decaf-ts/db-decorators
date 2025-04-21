@@ -27,7 +27,7 @@ export class TestModel extends Model {
 }
 
 export class InheritanceTestModel extends TestModel {
-  public constructor(testModel?: TestModel | {}) {
+  public constructor(testModel?: ModelArg<InheritanceTestModel>) {
     super(testModel);
     Model.fromObject(this, testModel);
   }
