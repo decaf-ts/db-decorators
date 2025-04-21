@@ -1,8 +1,8 @@
 import {
   Validator,
-  IValidatorRegistry,
-  ValidatorDefinition,
   Validation,
+  ValidatorDefinition,
+  IValidatorRegistry,
 } from "@decaf-ts/decorator-validation";
 import { UpdateValidationKeys } from "./constants";
 
