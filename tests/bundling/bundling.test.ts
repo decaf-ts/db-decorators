@@ -1,4 +1,5 @@
-import { Dirent } from "fs"; // at least one import is needed so the file is considered a module byt jest
+import { Dirent } from "fs";
+import path from "path"; // at least one import is needed so the file is considered a module byt jest
 
 describe("Distribution Tests", () => {
   it("reads lib", () => {
@@ -15,7 +16,7 @@ describe("Distribution Tests", () => {
       let distFile: Dirent[];
       try {
         distFile = require("fs")
-          .readdirSync(require("path").join(process.cwd(), "dist"), {
+          .readdirSync(path.join(__dirname, "../../dist"), {
             withFileTypes: true,
           })
           .filter((d: Dirent) => d.isFile() && !d.name.endsWith("esm.js"));
