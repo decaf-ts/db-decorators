@@ -100,7 +100,7 @@ export function validateCompare<T extends Model>(
       newModel,
       prop
     ).decorators.filter(
-      (d) => [ModelKeys.TYPE, ValidationKeys.TYPE].indexOf(d.key) !== -1
+      (d) => [ModelKeys.TYPE, ValidationKeys.TYPE].indexOf(d.key as any) !== -1
     );
     if (!decorators || !decorators.length) continue;
     const dec = decorators.pop() as DecoratorMetadata;
