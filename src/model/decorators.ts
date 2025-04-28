@@ -1,5 +1,5 @@
 import { DBKeys, DefaultSeparator } from "./constants";
-import { apply } from "@decaf-ts/reflection";
+import { apply, metadata } from "@decaf-ts/reflection";
 import {
   Hashing,
   Model,
@@ -181,4 +181,11 @@ export function version() {
     onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
     propMetadata(Repository.key(DBKeys.VERSION), true)
   );
+}
+
+export function transient() {
+  return function transient(model: any, attribute: string) {
+    propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model, attribute);
+    propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model.constructor);
+  };
 }

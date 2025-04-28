@@ -16,6 +16,7 @@ export const DBKeys = {
   SERIALIZE: "serialize",
   READONLY: "readonly",
   TIMESTAMP: "timestamp",
+  TRANSIENT: "transient",
   HASH: "hash",
   COMPOSED: "composed",
   VERSION: "version",
