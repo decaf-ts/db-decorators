@@ -1,6 +1,7 @@
 import { DBKeys, DefaultSeparator } from "./constants";
 import { apply, metadata } from "@decaf-ts/reflection";
 import {
+  Decoration,
   Hashing,
   Model,
   propMetadata,
@@ -175,17 +176,26 @@ export function versionCreateUpdate(operation: CrudOperations) {
  *   - Adds metadata indicating this property is used for versioning
  */
 export function version() {
-  return apply(
-    type(Number.name),
-    onCreate(versionCreateUpdate(OperationKeys.CREATE)),
-    onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
-    propMetadata(Repository.key(DBKeys.VERSION), true)
-  );
+  const key = Repository.key(DBKeys.VERSION);
+  return Decoration.for(key)
+    .define(
+      type(Number.name),
+      onCreate(versionCreateUpdate(OperationKeys.CREATE)),
+      onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
+      propMetadata(key, true)
+    )
+    .apply();
 }
 
 export function transient() {
-  return function transient(model: any, attribute: string) {
-    propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model, attribute);
-    propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model.constructor);
-  };
+  const key = Repository.key(DBKeys.TRANSIENT);
+  function transientDec(model: any, attribute: any) {
+    propMetadata(key, true)(model, attribute);
+    propMetadata(key, true)(model.constructor);
+  }
+  return Decoration.for(key).define(transientDec).apply();
+  // return function transient(model: any, attribute: string) {
+  //   propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model, attribute);
+  //   propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model.constructor);
+  // };
 }
