@@ -98,7 +98,7 @@ export function timestamp(
       })
     );
 
-  Decoration.for(key)
+  return Decoration.for(key)
     .define(...decorators)
     .apply();
 }
