@@ -7,10 +7,12 @@
  * @extends Error
  */
 export abstract class BaseError extends Error {
-  protected constructor(name: string, msg: string | Error) {
+  readonly code!: number;
+  protected constructor(name: string, msg: string | Error, code: number = 500) {
     if (msg instanceof BaseError) return msg;
     const message = `[${name}] ${msg instanceof Error ? msg.message : msg}`;
     super(message);
+    this.code = code;
     if (msg instanceof Error) this.stack = msg.stack;
   }
 }
@@ -25,7 +27,7 @@ export abstract class BaseError extends Error {
  */
 export class ValidationError extends BaseError {
   constructor(msg: string | Error) {
-    super(ValidationError.name, msg);
+    super(ValidationError.name, msg, 422);
   }
 }
 /**
@@ -38,7 +40,7 @@ export class ValidationError extends BaseError {
  */
 export class InternalError extends BaseError {
   constructor(msg: string | Error) {
-    super(InternalError.name, msg);
+    super(InternalError.name, msg, 500);
   }
 }
 /**
@@ -52,7 +54,7 @@ export class InternalError extends BaseError {
  */
 export class SerializationError extends BaseError {
   constructor(msg: string | Error) {
-    super(SerializationError.name, msg);
+    super(SerializationError.name, msg, 422);
   }
 }
 
@@ -67,7 +69,7 @@ export class SerializationError extends BaseError {
  */
 export class NotFoundError extends BaseError {
   constructor(msg: string | Error) {
-    super(NotFoundError.name, msg);
+    super(NotFoundError.name, msg, 404);
   }
 }
 /**
@@ -81,6 +83,6 @@ export class NotFoundError extends BaseError {
  */
 export class ConflictError extends BaseError {
   constructor(msg: string | Error) {
-    super(ConflictError.name, msg);
+    super(ConflictError.name, msg, 409);
   }
 }

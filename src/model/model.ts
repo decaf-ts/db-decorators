@@ -164,5 +164,7 @@ declare module "@decaf-ts/decorator-validation" {
      * @param {string} str
      */
     static key(str: string): string;
+
+    static isModel(target: Record<string, any>): boolean;
   }
 }

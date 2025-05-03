@@ -1,5 +1,5 @@
 import { IRepository } from "../interfaces/IRepository";
-import { Constructor, Model, sf } from "@decaf-ts/decorator-validation";
+import { Constructor, Model } from "@decaf-ts/decorator-validation";
 import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
@@ -340,10 +340,6 @@ export abstract class BaseRepository<M extends Model>
   }
 
   toString() {
-    return sf(
-      "[{0}] - Repository for {1}",
-      this.constructor.name,
-      this.class.name
-    );
+    return `[${this.class.name} Repository]`;
   }
 }
