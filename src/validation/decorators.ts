@@ -4,7 +4,6 @@ import {
   Model,
   propMetadata,
   required,
-  sf,
   type,
   Validation,
 } from "@decaf-ts/decorator-validation";
@@ -15,7 +14,7 @@ import { after, on, onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { SerializationError } from "../repository/errors";
 import { apply, metadata } from "@decaf-ts/reflection";
-import { Repository } from "../repository";
+import { Repository, RepositoryFlags } from "../repository";
 import { Context } from "../repository/Context";
 
 /**
@@ -42,9 +41,11 @@ export function readonly(
 
 export async function timestampHandler<
   M extends Model,
-  V extends IRepository<M>,
-  Y = any,
->(this: V, context: Context<M>, data: Y, key: string, model: M): Promise<void> {
+  R extends IRepository<M, C, F>,
+  V extends object = object,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
+>(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {
   (model as any)[key] = context.timestamp;
 }
 
@@ -104,44 +105,46 @@ export function timestamp(
 }
 
 export async function serializeOnCreateUpdate<
-  T extends Model,
-  V extends IRepository<T>,
-  Y = any,
+  M extends Model,
+  R extends IRepository<M, C, F>,
+  V extends object = object,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
->(this: V, data: Y, key: string, model: T, oldModel: T): Promise<void> {
-  if (!(model as any)[key]) return;
+>(
+  this: R,
+  context: C,
+  data: V,
+  key: keyof M,
+  model: M,
+  oldModel: M
+): Promise<void> {
+  if (!model[key]) return;
   try {
-    (model as any)[key] = JSON.stringify((model as any)[key]);
-  } catch (e: any) {
+    model[key] = JSON.stringify(model[key]) as M[keyof M];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (e: unknown) {
     throw new SerializationError(
-      sf(
-        "Failed to serialize {0} property on {1} model: {2}",
-        key,
-        model.constructor.name,
-        e.message
-      )
+      `Failed to serialize ${key.toString()} property of model ${model.constructor.name}: e`
     );
   }
 }
 
 export async function serializeAfterAll<
-  T extends Model,
-  V extends IRepository<T>,
-  Y = any,
->(this: V, data: Y, key: string, model: T): Promise<void> {
-  if (!(model as any)[key]) return;
-  if (typeof (model as any)[key] !== "string") return;
+  M extends Model,
+  R extends IRepository<M, C, F>,
+  V extends object = object,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
+>(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {
+  if (!model[key]) return;
+  if (typeof model[key] !== "string") return;
 
   try {
-    (model as any)[key] = JSON.parse((model as any)[key]);
-  } catch (e: any) {
+    model[key] = JSON.parse(model[key]);
+  } catch (e: unknown) {
     throw new SerializationError(
-      sf(
-        "Failed to deserialize {0} property on {1} model: {2}",
-        key,
-        model.constructor.name,
-        e.message
-      )
+      `Failed to deserialize ${key.toString()} property of model ${model.constructor.name}: ${e}`
     );
   }
 }

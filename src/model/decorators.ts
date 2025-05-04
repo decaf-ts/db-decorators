@@ -1,11 +1,10 @@
 import { DBKeys, DefaultSeparator } from "./constants";
-import { apply, metadata } from "@decaf-ts/reflection";
+import { apply } from "@decaf-ts/reflection";
 import {
   Decoration,
   Hashing,
   Model,
   propMetadata,
-  sf,
   type,
 } from "@decaf-ts/decorator-validation";
 import { onCreate, onCreateUpdate, onUpdate } from "../operations/decorators";
@@ -14,6 +13,7 @@ import { InternalError } from "../repository/errors";
 import { Repository } from "../repository/Repository";
 import { Context } from "../repository/Context";
 import { CrudOperations, OperationKeys } from "../operations";
+import { RepositoryFlags } from "../repository";
 
 /**
  *
@@ -23,9 +23,11 @@ import { CrudOperations, OperationKeys } from "../operations";
 
 export function hashOnCreateUpdate<
   M extends Model,
-  R extends IRepository<M>,
-  Y = any,
->(this: R, data: Y, key: string, model: M, oldModel?: M): void {
+  R extends IRepository<M, C, F>,
+  V extends object,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
+>(this: R, context: C, data: V, key: keyof M, model: M, oldModel?: M): void {
   if (!(model as any)[key]) return;
   const hash = Hashing.hash((model as any)[key]);
   if (oldModel && (model as any)[key] === hash) return;
@@ -50,25 +52,20 @@ export type ComposedFromMetadata = {
 
 export function composedFromCreateUpdate<
   M extends Model,
-  V extends IRepository<M>,
->(
-  this: V,
-  context: Context<M>,
-  data: ComposedFromMetadata,
-  key: string,
-  model: M
-) {
+  R extends IRepository<M, C, F>,
+  V extends ComposedFromMetadata,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
+>(this: R, context: C, data: V, key: keyof M, model: M) {
   try {
     const { args, type, prefix, suffix, separator } = data;
     const composed = args.map((arg: string) => {
       if (!(arg in model))
-        throw new InternalError(
-          sf("Property {0} not found to compose from", arg)
-        );
+        throw new InternalError(`Property ${arg} not found to compose from`);
       if (type === "keys") return arg;
       if (typeof (model as any)[arg] === "undefined")
         throw new InternalError(
-          sf("Property {0} does not contain a value to compose from", arg)
+          `Property ${args} does not contain a value to compose from`
         );
       return ((model as any)[arg] as any).toString();
     });
@@ -146,8 +143,11 @@ export function composed(
 export function versionCreateUpdate(operation: CrudOperations) {
   return function versionCreateUpdate<
     M extends Model,
-    V extends IRepository<M>,
-  >(this: V, context: Context<M>, data: unknown, key: string, model: M) {
+    R extends IRepository<M, C, F>,
+    V extends object,
+    F extends RepositoryFlags = RepositoryFlags,
+    C extends Context<F> = Context<F>,
+  >(this: R, context: C, data: V, key: keyof M, model: M) {
     try {
       switch (operation) {
         case OperationKeys.CREATE:
@@ -194,8 +194,4 @@ export function transient() {
     propMetadata(key, true)(model.constructor);
   }
   return Decoration.for(key).define(transientDec).apply();
-  // return function transient(model: any, attribute: string) {
-  //   propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model, attribute);
-  //   propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model.constructor);
-  // };
 }

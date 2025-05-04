@@ -1,9 +1,8 @@
 import { OperationKeys } from "../operations";
-import { Model } from "@decaf-ts/decorator-validation";
-import { Context } from "../repository";
+import { Context, RepositoryFlags } from "../repository";
 
-export interface Contextual<M extends Model> {
-  context<C extends Context<M> = Context<M>>(
+export interface Contextual<F extends RepositoryFlags> {
+  context<C extends Context<F> = Context<F>>(
     operation:
       | OperationKeys.CREATE
       | OperationKeys.READ

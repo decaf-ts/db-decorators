@@ -3,6 +3,7 @@ import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 import { Operations } from "./Operations";
 import { Model } from "@decaf-ts/decorator-validation";
+import { Context, RepositoryFlags } from "../repository";
 
 /**
  * @summary Holds the registered operation handlers
@@ -19,7 +20,7 @@ export class OperationsRegistry {
     string,
     Record<
       string | symbol,
-      Record<string, Record<string, OperationHandler<any, any, any>>>
+      Record<string, Record<string, OperationHandler<any, any, any, any, any>>>
     >
   > = {};
 
@@ -31,12 +32,18 @@ export class OperationsRegistry {
    * @param accum
    * @return {OperationHandler | undefined}
    */
-  get<T extends Model, V extends IRepository<T>, Y>(
+  get<
+    M extends Model,
+    R extends IRepository<M, C, F>,
+    V extends object,
+    F extends RepositoryFlags,
+    C extends Context<F>,
+  >(
     target: string | Record<string, any>,
     propKey: string,
     operation: string,
-    accum?: OperationHandler<T, V, Y>[]
-  ): OperationHandler<T, V, Y>[] | undefined {
+    accum?: OperationHandler<M, R, V, F, C>[]
+  ): OperationHandler<M, R, V, F, C>[] | undefined {
     accum = accum || [];
     let name;
     try {
@@ -45,7 +52,7 @@ export class OperationsRegistry {
         ...Object.values(this.cache[name][propKey][operation] || [])
       );
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (e) {
+    } catch (e: unknown) {
       if (
         typeof target === "string" ||
         target === Object.prototype ||
@@ -57,7 +64,7 @@ export class OperationsRegistry {
     let proto = Object.getPrototypeOf(target);
     if (proto.constructor.name === name) proto = Object.getPrototypeOf(proto);
 
-    return this.get<T, V, Y>(proto, propKey, operation, accum);
+    return this.get<M, R, V, F, C>(proto, propKey, operation, accum);
   }
 
   /**
@@ -67,10 +74,16 @@ export class OperationsRegistry {
    * @param {{}} target
    * @param {string | symbol} propKey
    */
-  register<T extends Model, V extends IRepository<T>, Y>(
-    handler: OperationHandler<T, V, Y>,
+  register<
+    M extends Model,
+    R extends IRepository<M, C, F>,
+    V extends object,
+    F extends RepositoryFlags,
+    C extends Context<F>,
+  >(
+    handler: OperationHandler<M, R, V, F, C>,
     operation: OperationKeys,
-    target: T,
+    target: M,
     propKey: string | symbol
   ): void {
     const name = target.constructor.name;

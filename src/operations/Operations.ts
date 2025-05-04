@@ -2,6 +2,8 @@ import { Hashing, Model } from "@decaf-ts/decorator-validation";
 import { OperationHandler } from "./types";
 import { OperationsRegistry } from "./OperationsRegistry";
 import { OperationKeys } from "./constants";
+import { IRepository } from "../interfaces";
+import { Context, RepositoryFlags } from "../repository";
 
 /**
  * @summary Static class holding common Operation Functionality
@@ -15,7 +17,7 @@ export class Operations {
 
   private constructor() {}
 
-  static getHandlerName(handler: OperationHandler<any, any, any>) {
+  static getHandlerName(handler: OperationHandler<any, any, any, any, any>) {
     if (handler.name) return handler.name;
 
     console.warn(
@@ -28,12 +30,22 @@ export class Operations {
     return OperationKeys.REFLECT + str;
   }
 
-  static get(
+  static get<
+    M extends Model,
+    R extends IRepository<M, C, F>,
+    V extends object,
+    F extends RepositoryFlags,
+    C extends Context<F>,
+  >(
     targetName: string | Record<string, any>,
     propKey: string,
     operation: string
   ) {
-    return Operations.registry.get(targetName, propKey, operation);
+    return Operations.registry.get<M, R, V, F, C>(
+      targetName,
+      propKey,
+      operation
+    );
   }
 
   private static getOpRegistry() {

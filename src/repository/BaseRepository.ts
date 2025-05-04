@@ -6,9 +6,13 @@ import { InternalError } from "./errors";
 import { wrapMethodWithContext } from "./wrappers";
 import { findPrimaryKey } from "../identity/utils";
 import { Context } from "./Context";
+import { RepositoryFlags } from "./types";
 
-export abstract class BaseRepository<M extends Model>
-  implements IRepository<M>
+export abstract class BaseRepository<
+  M extends Model,
+  C extends Context<F>,
+  F extends RepositoryFlags = RepositoryFlags,
+> implements IRepository<M, C, F>
 {
   private readonly _class!: Constructor<M>;
   private _pk!: string;
@@ -62,8 +66,8 @@ export abstract class BaseRepository<M extends Model>
     return [model, ...contextArgs.args];
   }
 
-  protected async createSuffix(model: M, context: Context<M>) {
-    await enforceDBDecorators(
+  protected async createSuffix(model: M, context: C) {
+    await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       context,
       model,
@@ -74,7 +78,7 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async createAllPrefix(models: M[], ...args: any[]) {
-    const contextArgs = await Context.args(
+    const contextArgs = await Context.args<M, C, F>(
       OperationKeys.CREATE,
       this.class,
       args
@@ -82,7 +86,7 @@ export abstract class BaseRepository<M extends Model>
     await Promise.all(
       models.map(async (m) => {
         m = new this.class(m);
-        await enforceDBDecorators(
+        await enforceDBDecorators<M, typeof this, any, F, C>(
           this,
           contextArgs.context,
           m,
@@ -95,10 +99,10 @@ export abstract class BaseRepository<M extends Model>
     return [models, ...contextArgs.args];
   }
 
-  protected async createAllSuffix(models: M[], context: Context<M>) {
+  protected async createAllSuffix(models: M[], context: C) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(
+        enforceDBDecorators<M, typeof this, any, F, C>(
           this,
           context,
           m,
@@ -116,8 +120,8 @@ export abstract class BaseRepository<M extends Model>
     return await Promise.all(keys.map((id) => this.read(id, ...args)));
   }
 
-  protected async readSuffix(model: M, context: Context<M>) {
-    await enforceDBDecorators(
+  protected async readSuffix(model: M, context: C) {
+    await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       context,
       model,
@@ -128,14 +132,14 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async readPrefix(key: string, ...args: any[]) {
-    const contextArgs = await Context.args(
+    const contextArgs = await Context.args<M, C, F>(
       OperationKeys.READ,
       this.class,
       args
     );
     const model: M = new this.class();
     (model as Record<string, any>)[this.pk] = key;
-    await enforceDBDecorators(
+    await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       contextArgs.context,
       model,
@@ -146,7 +150,7 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async readAllPrefix(keys: string[] | number[], ...args: any[]) {
-    const contextArgs = await Context.args(
+    const contextArgs = await Context.args<M, C, F>(
       OperationKeys.READ,
       this.class,
       args
@@ -155,7 +159,7 @@ export abstract class BaseRepository<M extends Model>
       keys.map(async (k) => {
         const m = new this.class();
         (m as Record<string, any>)[this.pk] = k;
-        return enforceDBDecorators(
+        return enforceDBDecorators<M, typeof this, any, F, C>(
           this,
           contextArgs.context,
           m,
@@ -167,10 +171,10 @@ export abstract class BaseRepository<M extends Model>
     return [keys, ...contextArgs.args];
   }
 
-  protected async readAllSuffix(models: M[], context: Context<M>) {
+  protected async readAllSuffix(models: M[], context: C) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(
+        enforceDBDecorators<M, typeof this, any, F, C>(
           this,
           context,
           m,
@@ -188,8 +192,8 @@ export abstract class BaseRepository<M extends Model>
     return Promise.all(models.map((m) => this.update(m, ...args)));
   }
 
-  protected async updateSuffix(model: M, context: Context<M>) {
-    await enforceDBDecorators(
+  protected async updateSuffix(model: M, context: C) {
+    await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       context,
       model,
@@ -200,7 +204,7 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async updatePrefix(model: M, ...args: any[]) {
-    const contextArgs = await Context.args(
+    const contextArgs = await Context.args<M, C, F>(
       OperationKeys.UPDATE,
       this.class,
       args
@@ -211,7 +215,7 @@ export abstract class BaseRepository<M extends Model>
         `No value for the Id is defined under the property ${this.pk}`
       );
     const oldModel = await this.read(id);
-    await enforceDBDecorators(
+    await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       contextArgs.context,
       model,
@@ -223,7 +227,7 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async updateAllPrefix(models: M[], ...args: any[]) {
-    const contextArgs = await Context.args(
+    const contextArgs = await Context.args<M, C, F>(
       OperationKeys.UPDATE,
       this.class,
       args
@@ -231,7 +235,7 @@ export abstract class BaseRepository<M extends Model>
     await Promise.all(
       models.map((m) => {
         m = new this.class(m);
-        enforceDBDecorators(
+        enforceDBDecorators<M, typeof this, any, F, C>(
           this,
           contextArgs.context,
           m,
@@ -244,10 +248,10 @@ export abstract class BaseRepository<M extends Model>
     return [models, ...contextArgs.args];
   }
 
-  protected async updateAllSuffix(models: M[], context: Context<M>) {
+  protected async updateAllSuffix(models: M[], context: C) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(
+        enforceDBDecorators<M, typeof this, any, F, C>(
           this,
           context,
           m,
@@ -265,8 +269,8 @@ export abstract class BaseRepository<M extends Model>
     return Promise.all(keys.map((k) => this.delete(k, ...args)));
   }
 
-  protected async deleteSuffix(model: M, context: Context<M>) {
-    await enforceDBDecorators(
+  protected async deleteSuffix(model: M, context: C) {
+    await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       context,
       model,
@@ -277,13 +281,13 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async deletePrefix(key: any, ...args: any[]) {
-    const contextArgs = await Context.args(
+    const contextArgs = await Context.args<M, C, F>(
       OperationKeys.DELETE,
       this.class,
       args
     );
     const model = await this.read(key, ...contextArgs.args);
-    await enforceDBDecorators(
+    await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       contextArgs.context,
       model,
@@ -294,7 +298,7 @@ export abstract class BaseRepository<M extends Model>
   }
 
   protected async deleteAllPrefix(keys: string[] | number[], ...args: any[]) {
-    const contextArgs = await Context.args(
+    const contextArgs = await Context.args<M, C, F>(
       OperationKeys.DELETE,
       this.class,
       args
@@ -302,7 +306,7 @@ export abstract class BaseRepository<M extends Model>
     const models = await this.readAll(keys, ...contextArgs.args);
     await Promise.all(
       models.map(async (m) => {
-        return enforceDBDecorators(
+        return enforceDBDecorators<M, typeof this, any, F, C>(
           this,
           contextArgs.context,
           m,
@@ -314,10 +318,10 @@ export abstract class BaseRepository<M extends Model>
     return [keys, ...contextArgs.args];
   }
 
-  protected async deleteAllSuffix(models: M[], context: Context<M>) {
+  protected async deleteAllSuffix(models: M[], context: C) {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators(
+        enforceDBDecorators<M, typeof this, any, F, C>(
           this,
           context,
           m,

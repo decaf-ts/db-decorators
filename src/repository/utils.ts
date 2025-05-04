@@ -11,9 +11,13 @@ import {
   sf,
 } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
+import { RepositoryFlags } from "./types";
 
-export type ContextArgs<M extends Model> = {
-  context: Context<M>;
+export type ContextArgs<
+  C extends Context<F>,
+  F extends RepositoryFlags = RepositoryFlags,
+> = {
+  context: C;
   args: any[];
 };
 
@@ -56,17 +60,19 @@ export const getHandlerArgs = function (
  * @param prefix
  *
  * @param oldModel
- * @function enforceDBPropertyDecoratorsAsync
+ * @function enforceDBDecorators
  *
  * @memberOf db-decorators.utils
  */
 export async function enforceDBDecorators<
   M extends Model,
-  Y extends IRepository<M>,
-  V,
+  R extends IRepository<M, C, F>,
+  V extends object = object,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
 >(
-  repo: Y,
-  context: Context<M>,
+  repo: R,
+  context: C,
   model: M,
   operation: string,
   prefix: string,
@@ -81,11 +87,8 @@ export async function enforceDBDecorators<
     const decs: DecoratorMetadata[] = decorators[prop];
     for (const dec of decs) {
       const { key } = dec;
-      const handlers: OperationHandler<M, Y, V>[] | undefined = Operations.get(
-        model,
-        prop,
-        prefix + key
-      );
+      const handlers: OperationHandler<M, R, V, F, C>[] | undefined =
+        Operations.get(model, prop, prefix + key);
       if (!handlers || !handlers.length)
         throw new InternalError(
           `Could not find registered handler for the operation ${prefix + key} under property ${prop}`
@@ -96,7 +99,7 @@ export async function enforceDBDecorators<
       if (!handlerArgs || Object.values(handlerArgs).length !== handlers.length)
         throw new InternalError(sf("Args and handlers length do not match"));
 
-      let handler: OperationHandler<any, any, any>;
+      let handler: OperationHandler<M, R, V, F, C>;
       let data: any;
       for (let i = 0; i < handlers.length; i++) {
         handler = handlers[i];
@@ -109,9 +112,9 @@ export async function enforceDBDecorators<
             throw new InternalError("Missing old model for update operation");
           args.push(oldModel);
         }
-        await (handler as UpdateOperationHandler<M, Y, V>).apply(
+        await (handler as UpdateOperationHandler<M, R, V, F, C>).apply(
           repo,
-          args as [Context<M>, V, any, M, M]
+          args as [C, V, keyof M, M, M]
         );
       }
     }
