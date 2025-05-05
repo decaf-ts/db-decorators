@@ -85,7 +85,7 @@ export abstract class Repository<
     const pk = (model as any)[this.pk];
     if (!pk)
       throw new InternalError(
-        `No value for the Id is defined under the property ${this.pk}`
+        `No value for the Id is defined under the property ${this.pk as string}`
       );
 
     const oldModel = await this.read(pk);
@@ -113,12 +113,12 @@ export abstract class Repository<
       args
     );
     const ids = models.map((m) => {
-      const id = (m as any)[this.pk];
+      const id = m[this.pk];
       if (!id)
         throw new InternalError(
-          `No value for the Id is defined under the property ${this.pk}`
+          `No value for the Id is defined under the property ${this.pk as string}`
         );
-      return id;
+      return id as string;
     });
     const oldModels = await this.readAll(ids, ...contextArgs.args);
     models = models.map((m, i) => this.merge(oldModels[i], m));

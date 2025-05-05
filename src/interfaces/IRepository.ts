@@ -13,5 +13,5 @@ export interface IRepository<
   F extends RepositoryFlags = RepositoryFlags,
 > extends BulkCrudOperator<M> {
   readonly class: Constructor<M>;
-  readonly pk: string;
+  readonly pk: keyof M;
 }

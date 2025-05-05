@@ -23,9 +23,9 @@ export abstract class BaseRepository<
     return this._class;
   }
 
-  get pk() {
+  get pk(): keyof M {
     if (!this._pk) this._pk = findPrimaryKey(new this.class()).id;
-    return this._pk;
+    return this._pk as keyof M;
   }
 
   protected constructor(clazz?: Constructor<M>) {
@@ -138,7 +138,7 @@ export abstract class BaseRepository<
       args
     );
     const model: M = new this.class();
-    (model as Record<string, any>)[this.pk] = key;
+    (model as any)[this.pk] = key;
     await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       contextArgs.context,
@@ -158,7 +158,7 @@ export abstract class BaseRepository<
     await Promise.all(
       keys.map(async (k) => {
         const m = new this.class();
-        (m as Record<string, any>)[this.pk] = k;
+        (m as any)[this.pk] = k;
         return enforceDBDecorators<M, typeof this, any, F, C>(
           this,
           contextArgs.context,
@@ -212,7 +212,7 @@ export abstract class BaseRepository<
     const id = (model as any)[this.pk];
     if (!id)
       throw new InternalError(
-        `No value for the Id is defined under the property ${this.pk}`
+        `No value for the Id is defined under the property ${this.pk as string}`
       );
     const oldModel = await this.read(id);
     await enforceDBDecorators<M, typeof this, any, F, C>(

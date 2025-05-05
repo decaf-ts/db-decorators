@@ -8,5 +8,5 @@ export function id() {
   const key = Repository.key(DBKeys.ID);
   return Decoration.for(key)
     .define(required(), readonly(), propMetadata(key, {}))
-    .apply() as PropertyDecorator;
+    .apply();
 }
