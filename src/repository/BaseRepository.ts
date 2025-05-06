@@ -11,11 +11,11 @@ import { RepositoryFlags } from "./types";
 export abstract class BaseRepository<
   M extends Model,
   C extends Context<F>,
-  F extends RepositoryFlags = RepositoryFlags,
-> implements IRepository<M, C, F>
+  F extends RepositoryFlags,
+> implements IRepository<M, F, C>
 {
   private readonly _class!: Constructor<M>;
-  private _pk!: string;
+  private _pk!: keyof M;
 
   get class() {
     if (!this._class)

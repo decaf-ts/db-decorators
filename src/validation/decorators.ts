@@ -41,7 +41,7 @@ export function readonly(
 
 export async function timestampHandler<
   M extends Model,
-  R extends IRepository<M, C, F>,
+  R extends IRepository<M, F, C>,
   V extends object = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
@@ -106,11 +106,10 @@ export function timestamp(
 
 export async function serializeOnCreateUpdate<
   M extends Model,
-  R extends IRepository<M, C, F>,
+  R extends IRepository<M, F, C>,
   V extends object = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 >(
   this: R,
   context: C,
@@ -132,7 +131,7 @@ export async function serializeOnCreateUpdate<
 
 export async function serializeAfterAll<
   M extends Model,
-  R extends IRepository<M, C, F>,
+  R extends IRepository<M, F, C>,
   V extends object = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,

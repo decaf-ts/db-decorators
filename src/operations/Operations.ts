@@ -32,7 +32,7 @@ export class Operations {
 
   static get<
     M extends Model,
-    R extends IRepository<M, C, F>,
+    R extends IRepository<M, F, C>,
     V extends object,
     F extends RepositoryFlags,
     C extends Context<F>,

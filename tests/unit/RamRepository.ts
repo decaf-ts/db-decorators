@@ -7,8 +7,8 @@ import { RepositoryFlags } from "../../src";
 
 export class RamRepository<M extends Model> extends Repository<
   M,
-  Context<RepositoryFlags>,
-  RepositoryFlags
+  RepositoryFlags,
+  Context<RepositoryFlags>
 > {
   protected ram: Record<string, M> = {};
 

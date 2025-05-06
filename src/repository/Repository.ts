@@ -9,8 +9,8 @@ import { RepositoryFlags } from "./types";
 
 export abstract class Repository<
   M extends Model,
-  C extends Context<F>,
   F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
 > extends BaseRepository<M, C, F> {
   protected constructor(clazz?: Constructor<M>) {
     super(clazz);

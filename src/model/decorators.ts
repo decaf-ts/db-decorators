@@ -23,7 +23,7 @@ import { RepositoryFlags } from "../repository";
 
 export function hashOnCreateUpdate<
   M extends Model,
-  R extends IRepository<M, C, F>,
+  R extends IRepository<M, F, C>,
   V extends object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
@@ -52,7 +52,7 @@ export type ComposedFromMetadata = {
 
 export function composedFromCreateUpdate<
   M extends Model,
-  R extends IRepository<M, C, F>,
+  R extends IRepository<M, F, C>,
   V extends ComposedFromMetadata,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
@@ -143,7 +143,7 @@ export function composed(
 export function versionCreateUpdate(operation: CrudOperations) {
   return function versionCreateUpdate<
     M extends Model,
-    R extends IRepository<M, C, F>,
+    R extends IRepository<M, F, C>,
     V extends object,
     F extends RepositoryFlags = RepositoryFlags,
     C extends Context<F> = Context<F>,

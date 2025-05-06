@@ -6,7 +6,7 @@ import { IRepository } from "../../src/interfaces/IRepository";
 import { RamRepository } from "./RamRepository";
 import { InternalError } from "../../src/repository/errors";
 import { Injectables } from "@decaf-ts/injectable-decorators";
-import { id } from "../../src";
+import { id, RepositoryFlags } from "../../src";
 import { Context } from "../../src/repository/Context";
 
 describe("Operations decorators", () => {
@@ -16,60 +16,63 @@ describe("Operations decorators", () => {
     });
 
     class Handler {
-      static async handler(
-        this: IRepository<Model>,
-        context: Context<Model>,
-        data: any,
-        key: string,
-        model: Model
-      ) {
+      static async handler<
+        M extends Model,
+        R extends IRepository<M, F, C>,
+        V extends object = object,
+        F extends RepositoryFlags = RepositoryFlags,
+        C extends Context<F> = Context<F>,
+      >(this: R, context: C, data: V, key: keyof M, model: M) {
         (model as { [indexer: string]: any })[key as string] = "test";
       }
 
-      static async otherHandler(
-        this: IRepository<Model>,
-        context: Context<Model>,
-        data: any,
-        key: string,
-        model: Model
-      ) {
+      static async otherHandler<
+        M extends Model,
+        R extends IRepository<M, F, C>,
+        V extends object = object,
+        F extends RepositoryFlags = RepositoryFlags,
+        C extends Context<F> = Context<F>,
+      >(this: R, context: C, data: V, key: keyof M, model: M) {
         (model as { [indexer: string]: any })[key as string] = "test2";
       }
 
-      static async yetAnotherHandler(
-        this: IRepository<Model>,
-        context: Context<Model>,
-        data: any,
-        key: string,
-        model: Model
-      ) {
+      static async yetAnotherHandler<
+        M extends Model,
+        R extends IRepository<M, F, C>,
+        V extends object = object,
+        F extends RepositoryFlags = RepositoryFlags,
+        C extends Context<F> = Context<F>,
+      >(this: R, context: C, data: V, key: keyof M, model: M) {
         (model as { [indexer: string]: any })[key as string] = new Date();
       }
 
-      static async argHandler(
-        this: IRepository<Model>,
-        context: Context<Model>,
-        data: { arg1: string; arg2: string },
-        key: string,
-        model: Model
-      ) {
+      static async argHandler<
+        M extends Model,
+        R extends IRepository<M, F, C>,
+        V extends { arg1: string; arg2: string } = {
+          arg1: string;
+          arg2: string;
+        },
+        F extends RepositoryFlags = RepositoryFlags,
+        C extends Context<F> = Context<F>,
+      >(this: R, context: C, data: V, key: keyof M, model: M) {
         (model as { [indexer: string]: any })[key as string] =
           data.arg1 + data.arg2;
       }
 
-      static async anotherArgHandler(
-        this: IRepository<Model>,
-        context: Context<Model>,
-        data: number,
-        key: string,
-        model: Model
-      ) {
+      static async anotherArgHandler<
+        M extends Model,
+        R extends IRepository<M, F, C>,
+        V extends { date: number } = { date: number },
+        F extends RepositoryFlags = RepositoryFlags,
+        C extends Context<F> = Context<F>,
+      >(this: R, context: C, data: V, key: keyof M, model: M) {
         const currentDate: Date | undefined = (
           model as { [indexer: string]: any }
         )[key as string];
         if (!currentDate) throw new InternalError("date not provided");
         (model as { [indexer: string]: any })[key as string] =
-          currentDate.setFullYear(currentDate.getFullYear() + data);
+          currentDate.setFullYear(currentDate.getFullYear() + data.date);
       }
     }
 
@@ -312,7 +315,7 @@ describe("Operations decorators", () => {
       }
 
       class OverriddenOrderBaseModel extends OrderBaseModel {
-        @onCreate(Handler.anotherArgHandler, yearDiff)
+        @onCreate(Handler.anotherArgHandler, { date: yearDiff })
         override updatedOn!: Date;
 
         constructor(

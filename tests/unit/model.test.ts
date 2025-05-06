@@ -145,7 +145,7 @@ describe(`DB extended Model`, function () {
       );
     });
 
-    let manager: IRepository<OuterTestModel>;
+    let manager: IRepository<OuterTestModel, any>;
 
     let created: OuterTestModel;
 

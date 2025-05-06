@@ -16,7 +16,7 @@ import { InternalError } from "../repository/errors";
  *
  * @category managers
  */
-export function findPrimaryKey<T extends Model>(model: T) {
+export function findPrimaryKey<M extends Model>(model: M) {
   const decorators = getAllPropertyDecoratorsRecursive(
     model,
     undefined,
@@ -43,7 +43,7 @@ export function findPrimaryKey<T extends Model>(model: T) {
   const idProp = Object.keys(idDecorators)[0];
   if (!idProp) throw new InternalError("Could not find ID decorated Property");
   return {
-    id: idProp,
+    id: idProp as keyof M,
     props: idDecorators[idProp][0].props,
   };
 }

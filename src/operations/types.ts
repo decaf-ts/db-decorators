@@ -16,7 +16,7 @@ export type OperationMetadata<V> = {
  */
 export type OperationHandler<
   M extends Model,
-  R extends IRepository<M, C, F>,
+  R extends IRepository<M, F, C>,
   V extends object = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
@@ -31,7 +31,7 @@ export type OperationHandler<
  */
 export type StandardOperationHandler<
   M extends Model,
-  R extends IRepository<M, C, F>,
+  R extends IRepository<M, F, C>,
   V extends object = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
@@ -49,7 +49,7 @@ export type StandardOperationHandler<
  */
 export type IdOperationHandler<
   M extends Model,
-  R extends IRepository<M, C, F>,
+  R extends IRepository<M, F, C>,
   V extends object = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
@@ -67,7 +67,7 @@ export type IdOperationHandler<
  */
 export type UpdateOperationHandler<
   M extends Model,
-  R extends IRepository<M, C, F>,
+  R extends IRepository<M, F, C>,
   V extends object = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,

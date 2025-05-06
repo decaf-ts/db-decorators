@@ -9,8 +9,8 @@ import { Context, RepositoryFlags } from "../repository";
  */
 export interface IRepository<
   M extends Model,
-  C extends Context<F>,
   F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
 > extends BulkCrudOperator<M> {
   readonly class: Constructor<M>;
   readonly pk: keyof M;
