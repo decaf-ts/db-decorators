@@ -1,4 +1,5 @@
-import { Model, model, ModelArg } from "@decaf-ts/decorator-validation";
+import { Model, model } from "@decaf-ts/decorator-validation";
+import type { ModelArg } from "@decaf-ts/decorator-validation";
 import { after, on, onCreate } from "../../src/operations/decorators";
 import { DBOperations, OperationKeys } from "../../src/operations/constants";
 import { timestamp } from "../../src/validation/decorators";

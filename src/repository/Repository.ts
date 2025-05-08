@@ -11,7 +11,7 @@ export abstract class Repository<
   M extends Model,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
-> extends BaseRepository<M, C, F> {
+> extends BaseRepository<M, F, C> {
   protected constructor(clazz?: Constructor<M>) {
     super(clazz);
   }

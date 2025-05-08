@@ -4,10 +4,10 @@ import {
   minlength,
   Model,
   model,
-  ModelArg,
   ModelErrorDefinition,
   required,
 } from "@decaf-ts/decorator-validation";
+import type { ModelArg } from "@decaf-ts/decorator-validation";
 import { readonly } from "../../src/validation/decorators";
 import { RamRepository } from "./RamRepository";
 import { ValidationError } from "../../src/repository/errors";

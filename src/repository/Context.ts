@@ -21,7 +21,7 @@ export const DefaultContextFactory: ContextFactory<any> = <
   ) as C;
 };
 
-export class Context<F extends RepositoryFlags> {
+export class Context<F extends RepositoryFlags = RepositoryFlags> {
   static factory: ContextFactory<any> = DefaultContextFactory;
 
   private readonly cache: F & ObjectAccumulator<F> =

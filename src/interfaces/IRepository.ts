@@ -4,7 +4,7 @@ import { Context, RepositoryFlags } from "../repository";
 
 /**
  * @summary Interface holding basic CRUD APIs
- * @typedef T extends {@link Model}
+ * @typedef M extends {@link Model}
  * @interface IRepository
  */
 export interface IRepository<
