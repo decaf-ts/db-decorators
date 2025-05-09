@@ -45,9 +45,7 @@ export class Context<F extends RepositoryFlags = RepositoryFlags> {
     return this.cache.timestamp;
   }
 
-  async get<K extends keyof ObjectAccumulator<F>>(
-    key: K
-  ): Promise<ObjectAccumulator<F>[K]> {
+  get<K extends keyof F>(key: K): F[K] {
     try {
       return this.cache.get(key);
     } catch (e: unknown) {

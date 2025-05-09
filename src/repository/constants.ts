@@ -7,4 +7,5 @@ export const DefaultRepositoryFlags: Omit<RepositoryFlags, "timestamp"> = {
   writeOperation: false,
   affectedTables: [],
   operation: undefined,
+  breakOnHandlerError: true,
 };

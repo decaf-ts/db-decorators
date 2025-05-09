@@ -15,4 +15,5 @@ export type RepositoryFlags = {
   writeOperation: boolean;
   timestamp: Date;
   operation?: OperationKeys;
+  breakOnHandlerError: boolean;
 };

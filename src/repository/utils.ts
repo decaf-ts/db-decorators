@@ -12,6 +12,8 @@ import {
 } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
+import { ObjectAccumulator } from "typed-object-accumulator";
+import { DefaultRepositoryFlags } from "./constants";
 
 export type ContextArgs<
   C extends Context<F>,
@@ -112,10 +114,19 @@ export async function enforceDBDecorators<
             throw new InternalError("Missing old model for update operation");
           args.push(oldModel);
         }
-        await (handler as UpdateOperationHandler<M, R, V, F, C>).apply(
-          repo,
-          args as [C, V, keyof M, M, M]
-        );
+
+        try {
+          await (handler as UpdateOperationHandler<M, R, V, F, C>).apply(
+            repo,
+            args as [C, V, keyof M, M, M]
+          );
+        } catch (e: unknown) {
+          const msg = `Failed to execute handler ${handler.name} for ${prop} of model ${model.constructor.name}: ${e}`;
+          if (context.get("breakOnHandlerError")) {
+            throw new Error(msg);
+          }
+          console.log(msg);
+        }
       }
     }
   }
