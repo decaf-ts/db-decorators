@@ -1,4 +1,5 @@
-import { Model, model, ModelArg } from "@decaf-ts/decorator-validation";
+import type { ModelArg } from "@decaf-ts/decorator-validation";
+import { Model, model } from "@decaf-ts/decorator-validation";
 import { after, on, onCreate } from "../../src/operations/decorators";
 import { DBOperations, OperationKeys } from "../../src/operations/constants";
 import { timestamp } from "../../src/validation/decorators";
@@ -50,18 +51,17 @@ describe("Operations decorators", () => {
       static async argHandler<
         M extends Model,
         R extends IRepository<M, F, C>,
-        V extends object,
+        V extends { arg1: string; arg2: string },
         F extends RepositoryFlags = RepositoryFlags,
         C extends Context<F> = Context<F>,
       >(this: R, context: C, data: V, key: keyof M, model: M) {
-        (model as { [indexer: string]: any })[key as string] =
-          data.arg1 + data.arg2;
+        model[key] = (data.arg1 + data.arg2) as M[keyof M];
       }
 
       static async anotherArgHandler<
         M extends Model,
         R extends IRepository<M, F, C>,
-        V extends object,
+        V extends number,
         F extends RepositoryFlags = RepositoryFlags,
         C extends Context<F> = Context<F>,
       >(this: R, context: C, data: V, key: keyof M, model: M) {

@@ -1,4 +1,5 @@
-import { ModelArg, Model, model } from "@decaf-ts/decorator-validation";
+import { Model, model } from "@decaf-ts/decorator-validation";
+import type { ModelArg } from "@decaf-ts/decorator-validation";
 import { id, readonly } from "../../src";
 
 Model.setBuilder(Model.fromObject);
