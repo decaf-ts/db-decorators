@@ -26,9 +26,9 @@ import { findModelId } from "../identity";
  *
  * @memberOf module:db-decorators.Model
  */
-export function validateCompare<T extends Model>(
-  oldModel: T,
-  newModel: T,
+export function validateCompare<M extends Model>(
+  oldModel: M,
+  newModel: M,
   ...exceptions: string[]
 ): ModelErrorDefinition | undefined {
   const decoratedProperties: ValidationPropertyDecoratorDefinition[] = [];

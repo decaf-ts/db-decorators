@@ -2,6 +2,7 @@ import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 import { Model } from "@decaf-ts/decorator-validation";
 import { Context } from "../repository/Context";
+import { RepositoryFlags } from "../repository/types";
 
 export type OperationMetadata<V> = {
   operation: OperationKeys;
@@ -15,13 +16,14 @@ export type OperationMetadata<V> = {
  */
 export type OperationHandler<
   M extends Model,
-  R extends IRepository<M>,
-  V,
-  C extends Context<M> = Context<M>,
+  R extends IRepository<M, F, C>,
+  V = object,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
 > =
-  | StandardOperationHandler<M, R, V, C>
-  | UpdateOperationHandler<M, R, V, C>
-  | IdOperationHandler<M, R, V, C>;
+  | StandardOperationHandler<M, R, V, F, C>
+  | UpdateOperationHandler<M, R, V, F, C>
+  | IdOperationHandler<M, R, V, F, C>;
 
 /**
  * @typedef OnOperationHandler
@@ -29,14 +31,15 @@ export type OperationHandler<
  */
 export type StandardOperationHandler<
   M extends Model,
-  R extends IRepository<M>,
-  V,
-  C extends Context<M> = Context<M>,
+  R extends IRepository<M, F, C>,
+  V = object,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
 > = (
   this: R,
   context: C,
   metadata: V,
-  key: any,
+  key: keyof M,
   model: M
 ) => Promise<void> | void;
 
@@ -46,14 +49,15 @@ export type StandardOperationHandler<
  */
 export type IdOperationHandler<
   M extends Model,
-  R extends IRepository<M>,
-  V,
-  C extends Context<M> = Context<M>,
+  R extends IRepository<M, F, C>,
+  V = object,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
 > = (
   this: R,
   context: C,
   decorator: V,
-  key: any,
+  key: keyof M,
   id: string
 ) => Promise<void> | void;
 
@@ -63,14 +67,15 @@ export type IdOperationHandler<
  */
 export type UpdateOperationHandler<
   M extends Model,
-  R extends IRepository<M>,
-  V,
-  C extends Context<M> = Context<M>,
+  R extends IRepository<M, F, C>,
+  V = object,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
 > = (
   this: R,
   context: C,
   decorator: V,
-  key: any,
+  key: keyof M,
   model: M,
   oldModel: M
 ) => Promise<void> | void;

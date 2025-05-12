@@ -80,10 +80,10 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     const pk = (model as any)[this.pk];
     if (!pk)
       throw new InternalError(
-        `No value for the Id is defined under the property ${this.pk}`
+        `No value for the Id is defined under the property ${this.pk as string}`
       );
 
-    const oldModel = await this.read(pk);
+    const oldModel: M = await this.read(pk);
 
     model = this.merge(oldModel, model);
 
@@ -96,7 +96,7 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
       oldModel
     );
 
-    const errors = model.hasErrors(oldModel);
+    const errors = model.hasErrors(oldModel as any);
     if (errors) throw new ValidationError(errors.toString());
     return [model, ...contextArgs.args];
   }
@@ -108,14 +108,14 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
       args
     );
     const ids = models.map((m) => {
-      const id = (m as any)[this.pk];
-      if (!id)
+      const id = m[this.pk];
+      if (typeof id === "undefined")
         throw new InternalError(
-          `No value for the Id is defined under the property ${this.pk}`
+          `No value for the Id is defined under the property ${this.pk as string}`
         );
-      return id;
+      return id as string;
     });
-    const oldModels = await this.readAll(ids, ...contextArgs.args);
+    const oldModels: M[] = await this.readAll(ids, ...contextArgs.args);
     models = models.map((m, i) => this.merge(oldModels[i], m));
     await Promise.all(
       models.map((m, i) =>
@@ -131,7 +131,7 @@ export abstract class Repository<M extends Model> extends BaseRepository<M> {
     );
 
     const errors = models
-      .map((m, i) => m.hasErrors(oldModels[i], m))
+      .map((m, i) => m.hasErrors(oldModels[i] as any))
       .reduce((accum: string | undefined, e, i) => {
         if (e)
           accum =

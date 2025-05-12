@@ -16,7 +16,7 @@ import { InternalError } from "../repository/errors";
  *
  * @category managers
  */
-export function findPrimaryKey<T extends Model>(model: T) {
+export function findPrimaryKey<M extends Model>(model: M) {
   const decorators = getAllPropertyDecoratorsRecursive(
     model,
     undefined,
@@ -43,7 +43,7 @@ export function findPrimaryKey<T extends Model>(model: T) {
   const idProp = Object.keys(idDecorators)[0];
   if (!idProp) throw new InternalError("Could not find ID decorated Property");
   return {
-    id: idProp,
+    id: idProp as keyof M,
     props: idDecorators[idProp][0].props,
   };
 }
@@ -54,7 +54,7 @@ export function findPrimaryKey<T extends Model>(model: T) {
  *
  * @param {Model} model
  * @param {boolean} [returnEmpty]
- * @return {string} primary key
+ * @return {string | number | bigint} primary key
  *
  * @throws {InternalError} if no property or more than one properties are {@link pk} decorated
  * @throws {NotFoundError} returnEmpty is false and no value is set on the {@link pk} decorated property
@@ -63,12 +63,15 @@ export function findPrimaryKey<T extends Model>(model: T) {
  *
  * @category managers
  */
-export function findModelId(model: Model, returnEmpty = false) {
+export function findModelId<M extends Model>(
+  model: M,
+  returnEmpty = false
+): string | number | bigint {
   const idProp = findPrimaryKey(model).id;
-  const modelId = (model as any)[idProp];
-  if (!modelId && !returnEmpty)
+  const modelId = model[idProp];
+  if (typeof modelId === "undefined" && !returnEmpty)
     throw new InternalError(
-      sf("No value for the Id is defined under the property {0}", idProp)
+      `No value for the Id is defined under the property ${idProp as string}`
     );
-  return modelId;
+  return modelId as string | number | bigint;
 }

@@ -1,46 +1,86 @@
-import { DataCache } from "./DataCache";
 import { ContextArgs } from "./utils";
 import { Contextual } from "../interfaces/Contextual";
-import { NotFoundError } from "./errors";
 import { OperationKeys } from "../operations/constants";
 import { Constructor, Model } from "@decaf-ts/decorator-validation";
+import { DefaultRepositoryFlags } from "./constants";
+import { ObjectAccumulator } from "typed-object-accumulator";
+import { RepositoryFlags } from "./types";
 
-export class Context<M extends Model> extends DataCache {
-  protected constructor(
-    protected operation: OperationKeys,
-    protected model?: Constructor<M>,
-    protected parent?: Context<any>
-  ) {
-    super();
+export type ContextFactory<F extends RepositoryFlags> = <C extends Context<F>>(
+  arg: Omit<F, "timestamp">
+) => C;
+
+export const DefaultContextFactory: ContextFactory<any> = <
+  F extends RepositoryFlags,
+  C extends Context<F>,
+>(
+  arg: Omit<F, "timestamp">
+) => {
+  return new Context<F>().accumulate(
+    Object.assign({}, arg, { timestamp: new Date() }) as F
+  ) as C;
+};
+
+export class Context<F extends RepositoryFlags = RepositoryFlags> {
+  static factory: ContextFactory<any> = DefaultContextFactory;
+
+  private readonly cache: F & ObjectAccumulator<F> =
+    new ObjectAccumulator() as F & ObjectAccumulator<F>;
+
+  constructor(obj?: F) {
+    if (obj) return this.accumulate(obj);
+  }
+
+  accumulate<V extends object>(value: V) {
+    Object.defineProperty(this, "cache", {
+      value: this.cache.accumulate(value),
+      writable: false,
+      enumerable: false,
+      configurable: true,
+    });
+    return this as unknown as Context<F & V>;
   }
 
   get timestamp() {
-    return new Date();
+    return this.cache.timestamp;
   }
 
-  async get(key: string): Promise<any> {
+  get<K extends keyof F>(key: K): F[K] {
     try {
-      return super.get(key);
-    } catch (e: any) {
-      if (this.parent) return this.parent.get(key);
+      return this.cache.get(key);
+    } catch (e: unknown) {
+      if (this.cache.parentContext) return this.cache.parentContext.get(key);
       throw e;
     }
   }
 
-  async pop(key: string): Promise<any> {
-    if (key in this.cache) return super.pop(key);
-    if (!this.parent) throw new NotFoundError(`Key ${key} not in dataStore`);
-    return this.parent.pop(key);
-  }
-
-  child<N extends Model>(
+  child<M extends Model, C extends Context<F>>(
     operation: OperationKeys,
-    model?: Constructor<N>
-  ): Context<N> {
-    return this.constructor(operation, model, this);
+    model?: Constructor<M>
+  ): C {
+    return Context.childFrom<F, C>(
+      this as unknown as C,
+      {
+        operation: operation,
+        affectedTables: model ? [model] : [],
+      } as unknown as Partial<F>
+    );
   }
 
-  static async from<M extends Model, C extends Context<M>>(
+  static childFrom<F extends RepositoryFlags, C extends Context<F>>(
+    context: C,
+    overrides?: Partial<F>
+  ): C {
+    return Context.factory(
+      Object.assign({}, context.cache, overrides || {})
+    ) as unknown as C;
+  }
+
+  static async from<
+    M extends Model,
+    F extends RepositoryFlags,
+    C extends Context<F>,
+  >(
     operation:
       | OperationKeys.CREATE
       | OperationKeys.READ
@@ -50,10 +90,19 @@ export class Context<M extends Model> extends DataCache {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...args: any[]
   ): Promise<C> {
-    return new Context(operation, model) as C;
+    return Context.factory(
+      Object.assign({}, DefaultRepositoryFlags, {
+        operation: operation,
+        model: model,
+      })
+    ) as C;
   }
 
-  static async args<M extends Model>(
+  static async args<
+    M extends Model,
+    C extends Context<F>,
+    F extends RepositoryFlags,
+  >(
     operation:
       | OperationKeys.CREATE
       | OperationKeys.READ
@@ -61,26 +110,26 @@ export class Context<M extends Model> extends DataCache {
       | OperationKeys.DELETE,
     model: Constructor<M>,
     args: any[],
-    contextual?: Contextual<M>
-  ): Promise<ContextArgs<M>> {
+    contextual?: Contextual<F>
+  ): Promise<ContextArgs<F, C>> {
     const last = args.pop();
 
     async function getContext() {
       if (contextual) return contextual.context(operation, model, ...args);
-      return new Context(operation, model);
+      return Context.from(operation, model, ...args);
     }
 
-    let c: Context<M>;
+    let c: C;
     if (last) {
       if (last instanceof Context) {
-        c = last;
+        c = last as C;
         args.push(last);
       } else {
-        c = await getContext();
+        c = (await getContext()) as C;
         args.push(last, c);
       }
     } else {
-      c = await getContext();
+      c = (await getContext()) as C;
       args.push(c);
     }
 

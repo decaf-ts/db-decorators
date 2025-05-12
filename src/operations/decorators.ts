@@ -11,7 +11,7 @@ import { propMetadata } from "@decaf-ts/decorator-validation";
 
 function handle(
   op: OperationKeys,
-  handler: OperationHandler<any, any, any, any>
+  handler: OperationHandler<any, any, any, any, any>
 ) {
   return (target: any, propertyKey: string) => {
     Operations.register(handler, op, target, propertyKey);
@@ -31,11 +31,11 @@ function handle(
  *
  * @category Decorators
  */
-export function onCreateUpdate<T>(
+export function onCreateUpdate<V = object>(
   handler:
-    | StandardOperationHandler<any, any, T, any>
-    | UpdateOperationHandler<any, any, T, any>,
-  data?: T
+    | StandardOperationHandler<any, any, V, any, any>
+    | UpdateOperationHandler<any, any, V, any, any>,
+  data?: V
 ) {
   return on(DBOperations.CREATE_UPDATE, handler, data);
 }
@@ -52,9 +52,9 @@ export function onCreateUpdate<T>(
  *
  * @category Decorators
  */
-export function onUpdate<T>(
-  handler: UpdateOperationHandler<any, any, T, any>,
-  data?: T
+export function onUpdate<V = object>(
+  handler: UpdateOperationHandler<any, any, V, any>,
+  data?: V
 ) {
   return on(DBOperations.UPDATE, handler, data);
 }
@@ -70,9 +70,9 @@ export function onUpdate<T>(
  *
  * @category Decorators
  */
-export function onCreate<T>(
-  handler: StandardOperationHandler<any, any, T, any>,
-  data?: T
+export function onCreate<V = object>(
+  handler: StandardOperationHandler<any, any, V, any, any>,
+  data?: V
 ) {
   return on(DBOperations.CREATE, handler, data);
 }
@@ -89,9 +89,9 @@ export function onCreate<T>(
  *
  * @category Decorators
  */
-export function onRead<T>(
-  handler: IdOperationHandler<any, any, T, any>,
-  data: T
+export function onRead<V = object>(
+  handler: IdOperationHandler<any, any, V, any, any>,
+  data: V
 ) {
   return on(DBOperations.READ, handler, data);
 }
@@ -108,9 +108,9 @@ export function onRead<T>(
  *
  * @category Decorators
  */
-export function onDelete<T>(
-  handler: OperationHandler<any, any, T, any>,
-  data: T
+export function onDelete<V = object>(
+  handler: OperationHandler<any, any, V, any, any>,
+  data: V
 ) {
   return on(DBOperations.DELETE, handler, data);
 }
@@ -127,7 +127,10 @@ export function onDelete<T>(
  *
  * @category Decorators
  */
-export function onAny<T>(handler: OperationHandler<any, any, T, any>, data: T) {
+export function onAny<V = object>(
+  handler: OperationHandler<any, any, V, any, any>,
+  data: V
+) {
   return on(DBOperations.ALL, handler, data);
 }
 
@@ -144,10 +147,10 @@ export function onAny<T>(handler: OperationHandler<any, any, T, any>, data: T) {
  *
  * @category Decorators
  */
-export function on<T>(
+export function on<V = object>(
   op: OperationKeys[] = DBOperations.ALL,
-  handler: OperationHandler<any, any, T, any>,
-  data?: T
+  handler: OperationHandler<any, any, V, any, any>,
+  data?: V
 ) {
   return operation(OperationKeys.ON, op, handler, data);
 }
@@ -163,11 +166,11 @@ export function on<T>(
  *
  * @category Decorators
  */
-export function afterCreateUpdate<T>(
+export function afterCreateUpdate<V = object>(
   handler:
-    | StandardOperationHandler<any, any, T, any>
-    | UpdateOperationHandler<any, any, T, any>,
-  data: T
+    | StandardOperationHandler<any, any, V, any, any>
+    | UpdateOperationHandler<any, any, V, any, any>,
+  data: V
 ) {
   return after(DBOperations.CREATE_UPDATE, handler, data);
 }
@@ -184,9 +187,9 @@ export function afterCreateUpdate<T>(
  *
  * @category Decorators
  */
-export function afterUpdate<T>(
-  handler: UpdateOperationHandler<any, any, T, any>,
-  data: T
+export function afterUpdate<V = object>(
+  handler: UpdateOperationHandler<any, any, V, any, any>,
+  data: V
 ) {
   return after(DBOperations.UPDATE, handler, data);
 }
@@ -203,9 +206,9 @@ export function afterUpdate<T>(
  *
  * @category Decorators
  */
-export function afterCreate<T>(
-  handler: StandardOperationHandler<any, any, T, any>,
-  data: T
+export function afterCreate<V = object>(
+  handler: StandardOperationHandler<any, any, V, any, any>,
+  data: V
 ) {
   return after(DBOperations.CREATE, handler, data);
 }
@@ -223,9 +226,9 @@ export function afterCreate<T>(
  *
  * @category Decorators
  */
-export function afterRead<T>(
-  handler: StandardOperationHandler<any, any, T, any>,
-  data?: T
+export function afterRead<V = object>(
+  handler: StandardOperationHandler<any, any, V, any, any>,
+  data?: V
 ) {
   return after(DBOperations.READ, handler, data);
 }
@@ -242,9 +245,9 @@ export function afterRead<T>(
  *
  * @category Decorators
  */
-export function afterDelete<T>(
-  handler: StandardOperationHandler<any, any, T, any>,
-  data?: T
+export function afterDelete<V = object>(
+  handler: StandardOperationHandler<any, any, V, any, any>,
+  data?: V
 ) {
   return after(DBOperations.DELETE, handler, data);
 }
@@ -262,9 +265,9 @@ export function afterDelete<T>(
  *
  * @category Decorators
  */
-export function afterAny<T>(
-  handler: StandardOperationHandler<any, any, T, any>,
-  data?: T
+export function afterAny<V = object>(
+  handler: StandardOperationHandler<any, any, V, any, any>,
+  data?: V
 ) {
   return after(DBOperations.ALL, handler, data);
 }
@@ -283,19 +286,19 @@ export function afterAny<T>(
  *
  * @category Decorators
  */
-export function after<T>(
+export function after<V = object>(
   op: OperationKeys[] = DBOperations.ALL,
-  handler: OperationHandler<any, any, T, any>,
-  data?: T
+  handler: OperationHandler<any, any, V, any, any>,
+  data?: V
 ) {
   return operation(OperationKeys.AFTER, op, handler, data);
 }
 
-export function operation<T>(
+export function operation<V = object>(
   baseOp: OperationKeys.ON | OperationKeys.AFTER,
   operation: OperationKeys[] = DBOperations.ALL,
-  handler: OperationHandler<any, any, T, any>,
-  dataToAdd?: T
+  handler: OperationHandler<any, any, V, any, any>,
+  dataToAdd?: V
 ) {
   return (target: object, propertyKey?: any) => {
     const name = target.constructor.name;

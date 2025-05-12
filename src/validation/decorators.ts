@@ -1,9 +1,10 @@
+import "./validation";
 import {
   date,
+  Decoration,
   Model,
   propMetadata,
   required,
-  sf,
   type,
   Validation,
 } from "@decaf-ts/decorator-validation";
@@ -16,6 +17,7 @@ import { SerializationError } from "../repository/errors";
 import { apply, metadata } from "@decaf-ts/reflection";
 import { Repository } from "../repository";
 import { Context } from "../repository/Context";
+import { RepositoryFlags } from "../repository/types";
 
 /**
  * Marks the property as readonly.
@@ -29,16 +31,23 @@ import { Context } from "../repository/Context";
 export function readonly(
   message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID
 ) {
-  return propMetadata(Validation.updateKey(DBKeys.READONLY), {
-    message: message,
-  });
+  const key = Validation.updateKey(DBKeys.READONLY);
+  return Decoration.for(key)
+    .define(
+      propMetadata(key, {
+        message: message,
+      })
+    )
+    .apply();
 }
 
 export async function timestampHandler<
   M extends Model,
-  V extends IRepository<M>,
-  Y = any,
->(this: V, context: Context<M>, data: Y, key: string, model: M): Promise<void> {
+  R extends IRepository<M, F, C>,
+  V,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
+>(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {
   (model as any)[key] = context.timestamp;
 }
 
@@ -77,6 +86,8 @@ export function timestamp(
   operation: OperationKeys[] = DBOperations.CREATE_UPDATE as unknown as OperationKeys[],
   format: string = DEFAULT_TIMESTAMP_FORMAT
 ) {
+  const key = Validation.updateKey(DBKeys.TIMESTAMP);
+
   const decorators: any[] = [
     date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE),
     required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED),
@@ -90,48 +101,44 @@ export function timestamp(
       })
     );
 
-  return apply(...decorators);
+  return Decoration.for(key)
+    .define(...decorators)
+    .apply();
 }
 
 export async function serializeOnCreateUpdate<
-  T extends Model,
-  V extends IRepository<T>,
-  Y = any,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
->(this: V, data: Y, key: string, model: T, oldModel: T): Promise<void> {
-  if (!(model as any)[key]) return;
+  M extends Model,
+  R extends IRepository<M, F, C>,
+  V,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
+>(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {
+  if (!model[key]) return;
   try {
-    (model as any)[key] = JSON.stringify((model as any)[key]);
-  } catch (e: any) {
+    model[key] = JSON.stringify(model[key]) as M[keyof M];
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (e: unknown) {
     throw new SerializationError(
-      sf(
-        "Failed to serialize {0} property on {1} model: {2}",
-        key,
-        model.constructor.name,
-        e.message
-      )
+      `Failed to serialize ${key.toString()} property of model ${model.constructor.name}: e`
     );
   }
 }
 
 export async function serializeAfterAll<
-  T extends Model,
-  V extends IRepository<T>,
-  Y = any,
->(this: V, data: Y, key: string, model: T): Promise<void> {
-  if (!(model as any)[key]) return;
-  if (typeof (model as any)[key] !== "string") return;
+  M extends Model,
+  R extends IRepository<M, F, C>,
+  V,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
+>(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {
+  if (!model[key]) return;
+  if (typeof model[key] !== "string") return;
 
   try {
-    (model as any)[key] = JSON.parse((model as any)[key]);
-  } catch (e: any) {
+    model[key] = JSON.parse(model[key]);
+  } catch (e: unknown) {
     throw new SerializationError(
-      sf(
-        "Failed to deserialize {0} property on {1} model: {2}",
-        key,
-        model.constructor.name,
-        e.message
-      )
+      `Failed to deserialize ${key.toString()} property of model ${model.constructor.name}: ${e}`
     );
   }
 }
@@ -152,121 +159,3 @@ export function serialize() {
     metadata(Repository.key(DBKeys.SERIALIZE), {})
   );
 }
-
-//
-// /**
-//  * @summary One To One relation Decorators
-//  *
-//  * @param {Constructor<any>} clazz the {@link Sequence} to use. Defaults to {@link NoneSequence}
-//  * @param {CascadeMetadata} [cascadeOptions]
-//  * @param {boolean} _populate If true, replaces the specified key in the document with the corresponding record from the database
-//  *
-//  * @function onToOne
-//  *
-//  * @memberOf module:wallet-db.Decorators
-//  *
-//  * @see oneToMany
-//  * @see manyToOne
-//  */
-// export function oneToOne(
-//   clazz: Constructor<any>,
-//   cascadeOptions: CascadeMetadata = DefaultCascade,
-//   _populate: boolean = true,
-// ) {
-//   Model.register(clazz);
-//   return (target: any, propertyKey: string) => {
-//     type([clazz.name, String.name])(target, propertyKey);
-//     onCreate(oneToOneOnCreate)(target, propertyKey);
-//     onUpdate(oneToOneOnUpdate, cascadeOptions as any)(target, propertyKey);
-//     onDelete(oneToOneOnDelete, cascadeOptions)(target, propertyKey);
-//
-//     afterCreate(populate, _populate)(target, propertyKey);
-//     afterUpdate(populate, _populate)(target, propertyKey);
-//     afterRead(populate, _populate)(target, propertyKey);
-//     afterDelete(populate, _populate)(target, propertyKey);
-//
-//     Reflect.defineMetadata(
-//       getDBKey(WalletDbKeys.ONE_TO_ONE),
-//       {
-//         constructor: clazz.name,
-//         cascade: cascadeOptions,
-//         populate: _populate,
-//       },
-//       target,
-//       propertyKey,
-//     );
-//   };
-// }
-//
-// /**
-//  * @summary One To Many relation Decorators
-//  *
-//  * @param {Constructor<any>} clazz the {@link Sequence} to use. Defaults to {@link NoneSequence}
-//  * @param {CascadeMetadata} [cascadeOptions]
-//  *
-//  * @function onToMany
-//  *
-//  * @memberOf module:wallet-db.Decorators
-//  *
-//  * @see oneToOne
-//  * @see manyToOne
-//  */
-// export function oneToMany(
-//   clazz: Constructor<any>,
-//   cascadeOptions: CascadeMetadata = DefaultCascade,
-//   _populate: boolean = true,
-// ) {
-//   Model.register(clazz);
-//   return (target: any, propertyKey: string) => {
-//     list([clazz, String])(target, propertyKey);
-//     onCreate(oneToManyOnCreate)(target, propertyKey);
-//     onUpdate(oneToManyOnUpdate, cascadeOptions)(target, propertyKey);
-//     onDelete(oneToManyOnDelete, cascadeOptions)(target, propertyKey);
-//
-//     afterCreate(populate, _populate)(target, propertyKey);
-//     afterUpdate(populate, _populate)(target, propertyKey);
-//     afterRead(populate, _populate)(target, propertyKey);
-//     afterDelete(populate, _populate)(target, propertyKey);
-//
-//     Reflect.defineMetadata(
-//       getDBKey(WalletDbKeys.ONE_TO_MANY),
-//       {
-//         constructor: clazz.name,
-//         cascade: cascadeOptions,
-//       },
-//       target,
-//       propertyKey,
-//     );
-//   };
-// }
-//
-// /**
-//  * @summary Many To One relation Decorators
-//  *
-//  * @param {Constructor<any>} clazz the {@link Sequence} to use. Defaults to {@link NoneSequence}
-//  * @param {CascadeMetadata} [cascadeOptions]
-//  *
-//  * @function manyToOne
-//  *
-//  * @memberOf module:wallet-db.Decorators
-//  *
-//  * @see oneToMany
-//  * @see oneToOne
-//  */
-// export function manyToOne(
-//   clazz: Constructor<any>,
-//   cascadeOptions: CascadeMetadata = DefaultCascade,
-// ) {
-//   Model.register(clazz);
-//   return (target: any, propertyKey: string) => {
-//     Reflect.defineMetadata(
-//       getDBKey(WalletDbKeys.MANY_TO_ONE),
-//       {
-//         constructor: clazz.name,
-//         cascade: cascadeOptions,
-//       },
-//       target,
-//       propertyKey,
-//     );
-//   };
-// }
