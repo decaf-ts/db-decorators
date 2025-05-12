@@ -5,8 +5,13 @@ import { BaseRepository } from "./BaseRepository";
 import { Constructor, Model } from "@decaf-ts/decorator-validation";
 import { DBKeys } from "../model/constants";
 import { Context } from "./Context";
+import { RepositoryFlags } from "./types";
 
-export abstract class Repository<M extends Model> extends BaseRepository<M> {
+export abstract class Repository<
+  M extends Model,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
+> extends BaseRepository<M, F, C> {
   protected constructor(clazz?: Constructor<M>) {
     super(clazz);
   }
