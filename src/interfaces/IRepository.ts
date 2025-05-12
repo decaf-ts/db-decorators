@@ -11,6 +11,7 @@ import { Context } from "../repository";
 export interface IRepository<
   M extends Model,
   F extends RepositoryFlags = RepositoryFlags,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   C extends Context<F> = Context<F>,
 > extends BulkCrudOperator<M> {
   readonly class: ModelConstructor<M>;
