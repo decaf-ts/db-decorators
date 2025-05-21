@@ -31,7 +31,7 @@ function handle(
  *
  * @category Decorators
  */
-export function onCreateUpdate<V extends object = object>(
+export function onCreateUpdate<V = object>(
   handler:
     | StandardOperationHandler<any, any, V, any, any>
     | UpdateOperationHandler<any, any, V, any, any>,
@@ -52,7 +52,7 @@ export function onCreateUpdate<V extends object = object>(
  *
  * @category Decorators
  */
-export function onUpdate<V extends object = object>(
+export function onUpdate<V = object>(
   handler: UpdateOperationHandler<any, any, V, any>,
   data?: V
 ) {
@@ -70,7 +70,7 @@ export function onUpdate<V extends object = object>(
  *
  * @category Decorators
  */
-export function onCreate<V extends object = object>(
+export function onCreate<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
   data?: V
 ) {
@@ -89,7 +89,7 @@ export function onCreate<V extends object = object>(
  *
  * @category Decorators
  */
-export function onRead<V extends object = object>(
+export function onRead<V = object>(
   handler: IdOperationHandler<any, any, V, any, any>,
   data: V
 ) {
@@ -108,7 +108,7 @@ export function onRead<V extends object = object>(
  *
  * @category Decorators
  */
-export function onDelete<V extends object = object>(
+export function onDelete<V = object>(
   handler: OperationHandler<any, any, V, any, any>,
   data: V
 ) {
@@ -127,7 +127,7 @@ export function onDelete<V extends object = object>(
  *
  * @category Decorators
  */
-export function onAny<V extends object = object>(
+export function onAny<V = object>(
   handler: OperationHandler<any, any, V, any, any>,
   data: V
 ) {
@@ -147,7 +147,7 @@ export function onAny<V extends object = object>(
  *
  * @category Decorators
  */
-export function on<V extends object = object>(
+export function on<V = object>(
   op: OperationKeys[] = DBOperations.ALL,
   handler: OperationHandler<any, any, V, any, any>,
   data?: V
@@ -166,7 +166,7 @@ export function on<V extends object = object>(
  *
  * @category Decorators
  */
-export function afterCreateUpdate<V extends object = object>(
+export function afterCreateUpdate<V = object>(
   handler:
     | StandardOperationHandler<any, any, V, any, any>
     | UpdateOperationHandler<any, any, V, any, any>,
@@ -187,7 +187,7 @@ export function afterCreateUpdate<V extends object = object>(
  *
  * @category Decorators
  */
-export function afterUpdate<V extends object = object>(
+export function afterUpdate<V = object>(
   handler: UpdateOperationHandler<any, any, V, any, any>,
   data: V
 ) {
@@ -206,7 +206,7 @@ export function afterUpdate<V extends object = object>(
  *
  * @category Decorators
  */
-export function afterCreate<V extends object = object>(
+export function afterCreate<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
   data: V
 ) {
@@ -226,7 +226,7 @@ export function afterCreate<V extends object = object>(
  *
  * @category Decorators
  */
-export function afterRead<V extends object = object>(
+export function afterRead<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
   data?: V
 ) {
@@ -245,7 +245,7 @@ export function afterRead<V extends object = object>(
  *
  * @category Decorators
  */
-export function afterDelete<V extends object = object>(
+export function afterDelete<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
   data?: V
 ) {
@@ -265,7 +265,7 @@ export function afterDelete<V extends object = object>(
  *
  * @category Decorators
  */
-export function afterAny<V extends object = object>(
+export function afterAny<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
   data?: V
 ) {
@@ -286,7 +286,7 @@ export function afterAny<V extends object = object>(
  *
  * @category Decorators
  */
-export function after<V extends object = object>(
+export function after<V = object>(
   op: OperationKeys[] = DBOperations.ALL,
   handler: OperationHandler<any, any, V, any, any>,
   data?: V
@@ -294,7 +294,7 @@ export function after<V extends object = object>(
   return operation(OperationKeys.AFTER, op, handler, data);
 }
 
-export function operation<V extends object = object>(
+export function operation<V = object>(
   baseOp: OperationKeys.ON | OperationKeys.AFTER,
   operation: OperationKeys[] = DBOperations.ALL,
   handler: OperationHandler<any, any, V, any, any>,

@@ -18,7 +18,7 @@ export class RamRepository<M extends Model> extends Repository<
 
   async create(model: M): Promise<M> {
     const pk = findModelId(model);
-    this.ram[pk] = model;
+    this.ram[pk as string] = model;
     return model;
   }
 
@@ -35,7 +35,7 @@ export class RamRepository<M extends Model> extends Repository<
 
   async update(model: M): Promise<M> {
     const pk = findModelId(model);
-    this.ram[pk] = model;
+    this.ram[pk as string] = model;
     return model;
   }
 }

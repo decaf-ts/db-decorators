@@ -85,26 +85,20 @@ export function wrapMethodWithContext(
   after: (...args: any[]) => any,
   methodName?: string
 ) {
-  async function wrapper(this: any, ...args: any[]) {
-    let transformedArgs = before.call(obj, ...args);
-    if (transformedArgs instanceof Promise)
-      transformedArgs = await transformedArgs;
-    const context = transformedArgs[transformedArgs.length - 1] as any;
-    if (!(context instanceof Context))
-      throw new InternalError("Missing a context");
-    let results = await method.call(obj, ...transformedArgs);
-    if (results instanceof Promise) results = await results;
-    results = after.call(this, results, context);
-    if (results instanceof Promise) results = await results;
-    return results;
-  }
-  const wrapped = wrapper.bind(obj);
   const name = methodName ? methodName : method.name;
-  Object.defineProperty(wrapped, "name", {
-    enumerable: true,
-    configurable: true,
-    writable: false,
-    value: name,
+  obj[name] = new Proxy(obj[name], {
+    apply: async (target, thisArg, argArray) => {
+      let transformedArgs = before.call(thisArg, ...argArray);
+      if (transformedArgs instanceof Promise)
+        transformedArgs = await transformedArgs;
+      const context = transformedArgs[transformedArgs.length - 1] as any;
+      if (!(context instanceof Context))
+        throw new InternalError("Missing a context");
+      let results = await target.call(thisArg, ...transformedArgs);
+      if (results instanceof Promise) results = await results;
+      results = after.call(thisArg, results, context);
+      if (results instanceof Promise) results = await results;
+      return results;
+    },
   });
-  obj[name] = wrapped;
 }

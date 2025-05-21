@@ -1,5 +1,5 @@
-import { Model, model } from "@decaf-ts/decorator-validation";
 import type { ModelArg } from "@decaf-ts/decorator-validation";
+import { Model, model } from "@decaf-ts/decorator-validation";
 import { after, on, onCreate } from "../../src/operations/decorators";
 import { DBOperations, OperationKeys } from "../../src/operations/constants";
 import { timestamp } from "../../src/validation/decorators";
@@ -7,8 +7,9 @@ import { IRepository } from "../../src/interfaces/IRepository";
 import { RamRepository } from "./RamRepository";
 import { InternalError } from "../../src/repository/errors";
 import { Injectables } from "@decaf-ts/injectable-decorators";
-import { id, RepositoryFlags } from "../../src";
+import { id } from "../../src";
 import { Context } from "../../src/repository/Context";
+import { RepositoryFlags } from "../../src/repository/types";
 
 describe("Operations decorators", () => {
   describe("on", () => {
@@ -20,7 +21,7 @@ describe("Operations decorators", () => {
       static async handler<
         M extends Model,
         R extends IRepository<M, F, C>,
-        V extends object = object,
+        V extends object,
         F extends RepositoryFlags = RepositoryFlags,
         C extends Context<F> = Context<F>,
       >(this: R, context: C, data: V, key: keyof M, model: M) {
@@ -30,50 +31,45 @@ describe("Operations decorators", () => {
       static async otherHandler<
         M extends Model,
         R extends IRepository<M, F, C>,
-        V extends object = object,
+        V extends object,
         F extends RepositoryFlags = RepositoryFlags,
         C extends Context<F> = Context<F>,
       >(this: R, context: C, data: V, key: keyof M, model: M) {
-        (model as { [indexer: string]: any })[key as string] = "test2";
+        model[key] = "test2" as M[keyof M];
       }
 
       static async yetAnotherHandler<
         M extends Model,
         R extends IRepository<M, F, C>,
-        V extends object = object,
+        V extends object,
         F extends RepositoryFlags = RepositoryFlags,
         C extends Context<F> = Context<F>,
       >(this: R, context: C, data: V, key: keyof M, model: M) {
-        (model as { [indexer: string]: any })[key as string] = new Date();
+        model[key] = new Date() as M[keyof M];
       }
 
       static async argHandler<
         M extends Model,
         R extends IRepository<M, F, C>,
-        V extends { arg1: string; arg2: string } = {
-          arg1: string;
-          arg2: string;
-        },
+        V extends { arg1: string; arg2: string },
         F extends RepositoryFlags = RepositoryFlags,
         C extends Context<F> = Context<F>,
       >(this: R, context: C, data: V, key: keyof M, model: M) {
-        (model as { [indexer: string]: any })[key as string] =
-          data.arg1 + data.arg2;
+        model[key] = (data.arg1 + data.arg2) as M[keyof M];
       }
 
       static async anotherArgHandler<
         M extends Model,
         R extends IRepository<M, F, C>,
-        V extends { date: number } = { date: number },
+        V extends number,
         F extends RepositoryFlags = RepositoryFlags,
         C extends Context<F> = Context<F>,
       >(this: R, context: C, data: V, key: keyof M, model: M) {
-        const currentDate: Date | undefined = (
-          model as { [indexer: string]: any }
-        )[key as string];
+        const currentDate: Date | undefined = model[key] as Date | undefined;
         if (!currentDate) throw new InternalError("date not provided");
-        (model as { [indexer: string]: any })[key as string] =
-          currentDate.setFullYear(currentDate.getFullYear() + data.date);
+        model[key] = currentDate.setFullYear(
+          currentDate.getFullYear() + (data as any)
+        ) as M[keyof M];
       }
     }
 
@@ -316,7 +312,7 @@ describe("Operations decorators", () => {
       }
 
       class OverriddenOrderBaseModel extends OrderBaseModel {
-        @onCreate(Handler.anotherArgHandler, { date: yearDiff })
+        @onCreate(Handler.anotherArgHandler, yearDiff)
         override updatedOn!: Date;
 
         constructor(

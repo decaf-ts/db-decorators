@@ -3,7 +3,8 @@ import { OperationHandler } from "./types";
 import { OperationsRegistry } from "./OperationsRegistry";
 import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces";
-import { Context, RepositoryFlags } from "../repository";
+import { Context } from "../repository";
+import { RepositoryFlags } from "../repository/types";
 
 /**
  * @summary Static class holding common Operation Functionality
@@ -33,9 +34,9 @@ export class Operations {
   static get<
     M extends Model,
     R extends IRepository<M, F, C>,
-    V extends object,
-    F extends RepositoryFlags,
-    C extends Context<F>,
+    V = object,
+    F extends RepositoryFlags = RepositoryFlags,
+    C extends Context<F> = Context<F>,
   >(
     targetName: string | Record<string, any>,
     propKey: string,

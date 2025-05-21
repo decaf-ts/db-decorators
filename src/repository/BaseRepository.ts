@@ -10,8 +10,8 @@ import { RepositoryFlags } from "./types";
 
 export abstract class BaseRepository<
   M extends Model,
-  F extends RepositoryFlags,
-  C extends Context<F>,
+  F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
 > implements IRepository<M, F, C>
 {
   private readonly _class!: Constructor<M>;
@@ -25,7 +25,7 @@ export abstract class BaseRepository<
 
   get pk(): keyof M {
     if (!this._pk) this._pk = findPrimaryKey(new this.class()).id;
-    return this._pk as keyof M;
+    return this._pk;
   }
 
   protected constructor(clazz?: Constructor<M>) {
@@ -50,13 +50,13 @@ export abstract class BaseRepository<
   }
 
   protected async createPrefix(model: M, ...args: any[]) {
-    const contextArgs = await Context.args(
+    const contextArgs = await Context.args<M, C, F>(
       OperationKeys.CREATE,
       this.class,
       args
     );
     model = new this.class(model);
-    await enforceDBDecorators(
+    await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       contextArgs.context,
       model,
@@ -138,7 +138,7 @@ export abstract class BaseRepository<
       args
     );
     const model: M = new this.class();
-    (model as any)[this.pk] = key;
+    model[this.pk] = key as any;
     await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       contextArgs.context,
@@ -158,7 +158,7 @@ export abstract class BaseRepository<
     await Promise.all(
       keys.map(async (k) => {
         const m = new this.class();
-        (m as any)[this.pk] = k;
+        m[this.pk] = k as any;
         return enforceDBDecorators<M, typeof this, any, F, C>(
           this,
           contextArgs.context,
@@ -209,12 +209,12 @@ export abstract class BaseRepository<
       this.class,
       args
     );
-    const id = (model as any)[this.pk];
+    const id = model[this.pk];
     if (!id)
       throw new InternalError(
         `No value for the Id is defined under the property ${this.pk as string}`
       );
-    const oldModel = await this.read(id);
+    const oldModel = await this.read(id as string);
     await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
       contextArgs.context,
@@ -344,6 +344,6 @@ export abstract class BaseRepository<
   }
 
   toString() {
-    return `[${this.class.name} Repository]`;
+    return `${this.class.name} Repository`;
   }
 }

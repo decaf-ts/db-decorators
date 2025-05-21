@@ -88,7 +88,7 @@ export abstract class Repository<
         `No value for the Id is defined under the property ${this.pk as string}`
       );
 
-    const oldModel = await this.read(pk);
+    const oldModel: M = await this.read(pk);
 
     model = this.merge(oldModel, model);
 
@@ -101,7 +101,7 @@ export abstract class Repository<
       oldModel
     );
 
-    const errors = model.hasErrors(oldModel);
+    const errors = model.hasErrors(oldModel as any);
     if (errors) throw new ValidationError(errors.toString());
     return [model, ...contextArgs.args];
   }
@@ -114,13 +114,13 @@ export abstract class Repository<
     );
     const ids = models.map((m) => {
       const id = m[this.pk];
-      if (!id)
+      if (typeof id === "undefined")
         throw new InternalError(
           `No value for the Id is defined under the property ${this.pk as string}`
         );
       return id as string;
     });
-    const oldModels = await this.readAll(ids, ...contextArgs.args);
+    const oldModels: M[] = await this.readAll(ids, ...contextArgs.args);
     models = models.map((m, i) => this.merge(oldModels[i], m));
     await Promise.all(
       models.map((m, i) =>
@@ -136,7 +136,7 @@ export abstract class Repository<
     );
 
     const errors = models
-      .map((m, i) => m.hasErrors(oldModels[i], m))
+      .map((m, i) => m.hasErrors(oldModels[i] as any))
       .reduce((accum: string | undefined, e, i) => {
         if (e)
           accum =

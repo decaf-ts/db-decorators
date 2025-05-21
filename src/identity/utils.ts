@@ -54,7 +54,7 @@ export function findPrimaryKey<M extends Model>(model: M) {
  *
  * @param {Model} model
  * @param {boolean} [returnEmpty]
- * @return {string} primary key
+ * @return {string | number | bigint} primary key
  *
  * @throws {InternalError} if no property or more than one properties are {@link pk} decorated
  * @throws {NotFoundError} returnEmpty is false and no value is set on the {@link pk} decorated property
@@ -63,12 +63,15 @@ export function findPrimaryKey<M extends Model>(model: M) {
  *
  * @category managers
  */
-export function findModelId(model: Model, returnEmpty = false) {
+export function findModelId<M extends Model>(
+  model: M,
+  returnEmpty = false
+): string | number | bigint {
   const idProp = findPrimaryKey(model).id;
-  const modelId = (model as any)[idProp];
-  if (!modelId && !returnEmpty)
+  const modelId = model[idProp];
+  if (typeof modelId === "undefined" && !returnEmpty)
     throw new InternalError(
-      sf("No value for the Id is defined under the property {0}", idProp)
+      `No value for the Id is defined under the property ${idProp as string}`
     );
-  return modelId;
+  return modelId as string | number | bigint;
 }

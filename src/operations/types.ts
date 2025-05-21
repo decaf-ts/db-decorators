@@ -2,7 +2,7 @@ import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 import { Model } from "@decaf-ts/decorator-validation";
 import { Context } from "../repository/Context";
-import { RepositoryFlags } from "../repository";
+import { RepositoryFlags } from "../repository/types";
 
 export type OperationMetadata<V> = {
   operation: OperationKeys;
@@ -17,7 +17,7 @@ export type OperationMetadata<V> = {
 export type OperationHandler<
   M extends Model,
   R extends IRepository<M, F, C>,
-  V extends object = object,
+  V = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
 > =
@@ -32,7 +32,7 @@ export type OperationHandler<
 export type StandardOperationHandler<
   M extends Model,
   R extends IRepository<M, F, C>,
-  V extends object = object,
+  V = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
 > = (
@@ -50,7 +50,7 @@ export type StandardOperationHandler<
 export type IdOperationHandler<
   M extends Model,
   R extends IRepository<M, F, C>,
-  V extends object = object,
+  V = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
 > = (
@@ -68,7 +68,7 @@ export type IdOperationHandler<
 export type UpdateOperationHandler<
   M extends Model,
   R extends IRepository<M, F, C>,
-  V extends object = object,
+  V = object,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
 > = (

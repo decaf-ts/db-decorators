@@ -12,12 +12,10 @@ import {
 } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
-import { ObjectAccumulator } from "typed-object-accumulator";
-import { DefaultRepositoryFlags } from "./constants";
 
 export type ContextArgs<
-  C extends Context<F>,
   F extends RepositoryFlags = RepositoryFlags,
+  C extends Context<F> = Context<F>,
 > = {
   context: C;
   args: any[];
@@ -62,7 +60,7 @@ export const getHandlerArgs = function (
  * @param prefix
  *
  * @param oldModel
- * @function enforceDBDecorators
+ * @function enforceDBPropertyDecoratorsAsync
  *
  * @memberOf db-decorators.utils
  */
@@ -90,7 +88,7 @@ export async function enforceDBDecorators<
     for (const dec of decs) {
       const { key } = dec;
       const handlers: OperationHandler<M, R, V, F, C>[] | undefined =
-        Operations.get(model, prop, prefix + key);
+        Operations.get<M, R, V, F, C>(model, prop, prefix + key);
       if (!handlers || !handlers.length)
         throw new InternalError(
           `Could not find registered handler for the operation ${prefix + key} under property ${prop}`
@@ -114,18 +112,15 @@ export async function enforceDBDecorators<
             throw new InternalError("Missing old model for update operation");
           args.push(oldModel);
         }
-
         try {
           await (handler as UpdateOperationHandler<M, R, V, F, C>).apply(
             repo,
             args as [C, V, keyof M, M, M]
           );
         } catch (e: unknown) {
-          const msg = `Failed to execute handler ${handler.name} for ${prop} of model ${model.constructor.name}: ${e}`;
+          const msg = `Failed to execute handler ${handler.name} for ${prop} on ${model.constructor.name} due to error: ${e}`;
+          if (context.get("breakOnHandlerError")) throw new InternalError(msg);
           console.log(msg);
-          if (context.get("breakOnHandlerError")) {
-            throw new Error(msg);
-          }
         }
       }
     }

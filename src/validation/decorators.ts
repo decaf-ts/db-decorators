@@ -1,3 +1,4 @@
+import "./validation";
 import {
   date,
   Decoration,
@@ -14,8 +15,9 @@ import { after, on, onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { SerializationError } from "../repository/errors";
 import { apply, metadata } from "@decaf-ts/reflection";
-import { Repository, RepositoryFlags } from "../repository";
+import { Repository } from "../repository";
 import { Context } from "../repository/Context";
+import { RepositoryFlags } from "../repository/types";
 
 /**
  * Marks the property as readonly.
@@ -42,7 +44,7 @@ export function readonly(
 export async function timestampHandler<
   M extends Model,
   R extends IRepository<M, F, C>,
-  V extends object = object,
+  V,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
 >(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {
@@ -98,7 +100,6 @@ export function timestamp(
         message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
       })
     );
-
   return Decoration.for(key)
     .define(...decorators)
     .apply();
@@ -107,17 +108,10 @@ export function timestamp(
 export async function serializeOnCreateUpdate<
   M extends Model,
   R extends IRepository<M, F, C>,
-  V extends object = object,
+  V,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
->(
-  this: R,
-  context: C,
-  data: V,
-  key: keyof M,
-  model: M,
-  oldModel: M
-): Promise<void> {
+>(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {
   if (!model[key]) return;
   try {
     model[key] = JSON.stringify(model[key]) as M[keyof M];
@@ -132,7 +126,7 @@ export async function serializeOnCreateUpdate<
 export async function serializeAfterAll<
   M extends Model,
   R extends IRepository<M, F, C>,
-  V extends object = object,
+  V,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
 >(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {

@@ -3,7 +3,8 @@ import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 import { Operations } from "./Operations";
 import { Model } from "@decaf-ts/decorator-validation";
-import { Context, RepositoryFlags } from "../repository";
+import { Context } from "../repository";
+import { RepositoryFlags } from "../repository/types";
 
 /**
  * @summary Holds the registered operation handlers
@@ -35,7 +36,7 @@ export class OperationsRegistry {
   get<
     M extends Model,
     R extends IRepository<M, F, C>,
-    V extends object,
+    V,
     F extends RepositoryFlags,
     C extends Context<F>,
   >(
@@ -77,7 +78,7 @@ export class OperationsRegistry {
   register<
     M extends Model,
     R extends IRepository<M, F, C>,
-    V extends object,
+    V,
     F extends RepositoryFlags,
     C extends Context<F>,
   >(

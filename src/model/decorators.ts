@@ -1,7 +1,6 @@
 import { DBKeys, DefaultSeparator } from "./constants";
 import { apply } from "@decaf-ts/reflection";
 import {
-  Decoration,
   Hashing,
   Model,
   propMetadata,
@@ -13,7 +12,7 @@ import { InternalError } from "../repository/errors";
 import { Repository } from "../repository/Repository";
 import { Context } from "../repository/Context";
 import { CrudOperations, OperationKeys } from "../operations";
-import { RepositoryFlags } from "../repository";
+import { RepositoryFlags } from "../repository/types";
 
 /**
  *
@@ -28,10 +27,10 @@ export function hashOnCreateUpdate<
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
 >(this: R, context: C, data: V, key: keyof M, model: M, oldModel?: M): void {
-  if (!(model as any)[key]) return;
+  if (typeof model[key] === "undefined") return;
   const hash = Hashing.hash((model as any)[key]);
   if (oldModel && (model as any)[key] === hash) return;
-  (model as any)[key] = hash;
+  model[key] = hash;
 }
 
 export function hash() {
@@ -176,22 +175,17 @@ export function versionCreateUpdate(operation: CrudOperations) {
  *   - Adds metadata indicating this property is used for versioning
  */
 export function version() {
-  const key = Repository.key(DBKeys.VERSION);
-  return Decoration.for(key)
-    .define(
-      type(Number.name),
-      onCreate(versionCreateUpdate(OperationKeys.CREATE)),
-      onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
-      propMetadata(key, true)
-    )
-    .apply();
+  return apply(
+    type(Number.name),
+    onCreate(versionCreateUpdate(OperationKeys.CREATE)),
+    onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
+    propMetadata(Repository.key(DBKeys.VERSION), true)
+  );
 }
 
 export function transient() {
-  const key = Repository.key(DBKeys.TRANSIENT);
-  function transientDec(model: any, attribute: any) {
-    propMetadata(key, true)(model, attribute);
-    propMetadata(key, true)(model.constructor);
-  }
-  return Decoration.for(key).define(transientDec).apply();
+  return function transient(model: any, attribute: string) {
+    propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model, attribute);
+    propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model.constructor);
+  };
 }
