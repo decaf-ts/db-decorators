@@ -86,12 +86,13 @@ export class Context<F extends RepositoryFlags = RepositoryFlags> {
       | OperationKeys.READ
       | OperationKeys.UPDATE
       | OperationKeys.DELETE,
+    overrides: Partial<F>,
     model: Constructor<M>,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...args: any[]
   ): Promise<C> {
     return Context.factory(
-      Object.assign({}, DefaultRepositoryFlags, {
+      Object.assign({}, DefaultRepositoryFlags, overrides, {
         operation: operation,
         model: model,
       })
@@ -110,13 +111,15 @@ export class Context<F extends RepositoryFlags = RepositoryFlags> {
       | OperationKeys.DELETE,
     model: Constructor<M>,
     args: any[],
-    contextual?: Contextual<F>
+    contextual?: Contextual<F>,
+    overrides?: Partial<F>
   ): Promise<ContextArgs<F, C>> {
     const last = args.pop();
 
     async function getContext() {
-      if (contextual) return contextual.context(operation, model, ...args);
-      return Context.from(operation, model, ...args);
+      if (contextual)
+        return contextual.context(operation, overrides || {}, model, ...args);
+      return Context.from(operation, overrides || {}, model, ...args);
     }
 
     let c: C;

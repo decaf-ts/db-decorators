@@ -1,6 +1,7 @@
 import "./validation";
 import {
   date,
+  Decoration,
   Model,
   propMetadata,
   required,
@@ -31,13 +32,13 @@ export function readonly(
   message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID
 ) {
   const key = Validation.updateKey(DBKeys.READONLY);
-  // return Decoration.for(key)
-  //   .define(
-  return propMetadata(key, {
-    message: message,
-  });
-  // )
-  // .apply();
+  return Decoration.for(key)
+    .define(
+      propMetadata(key, {
+        message: message,
+      })
+    )
+    .apply();
 }
 
 export async function timestampHandler<
@@ -99,10 +100,9 @@ export function timestamp(
         message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
       })
     );
-  return apply(...decorators);
-  // return Decoration.for(key)
-  //   .define(...decorators)
-  //   .apply();
+  return Decoration.for(key)
+    .define(...decorators)
+    .apply();
 }
 
 export async function serializeOnCreateUpdate<

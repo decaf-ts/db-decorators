@@ -8,6 +8,7 @@ export type RepositoryFlags = {
   parentContext?: Context<any>;
   childContexts?: Context<any>[];
   callArgs?: any[];
+  ignoredValidationProperties: string[];
   affectedTables:
     | (string | Constructor<ModelExtension>)[]
     | string
