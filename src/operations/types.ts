@@ -10,10 +10,6 @@ export type OperationMetadata<V> = {
   metadata?: V;
 };
 
-/**
- * @typedef OperationHandler
- * @memberOf db-decorators.operations
- */
 export type OperationHandler<
   M extends Model,
   R extends IRepository<M, F, C>,
@@ -25,10 +21,6 @@ export type OperationHandler<
   | UpdateOperationHandler<M, R, V, F, C>
   | IdOperationHandler<M, R, V, F, C>;
 
-/**
- * @typedef OnOperationHandler
- * @memberOf db-decorators.operations
- */
 export type StandardOperationHandler<
   M extends Model,
   R extends IRepository<M, F, C>,
@@ -43,10 +35,6 @@ export type StandardOperationHandler<
   model: M
 ) => Promise<void> | void;
 
-/**
- * @typedef IdOperationHandler
- * @memberOf db-decorators.operations
- */
 export type IdOperationHandler<
   M extends Model,
   R extends IRepository<M, F, C>,
@@ -61,10 +49,6 @@ export type IdOperationHandler<
   id: string
 ) => Promise<void> | void;
 
-/**
- * @typedef AfterOperationHandler
- * @memberOf db-decorators.operations
- */
 export type UpdateOperationHandler<
   M extends Model,
   R extends IRepository<M, F, C>,
