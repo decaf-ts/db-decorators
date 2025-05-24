@@ -40,7 +40,10 @@ export abstract class Repository<
     return [model, ...contextArgs.args];
   }
 
-  protected async createAllPrefix(models: M[], ...args: any[]): Promise<any[]> {
+  protected override async createAllPrefix(
+    models: M[],
+    ...args: any[]
+  ): Promise<any[]> {
     const contextArgs = await Context.args(
       OperationKeys.CREATE,
       this.class,
@@ -73,7 +76,7 @@ export abstract class Repository<
     return [models, ...contextArgs.args];
   }
 
-  protected async updatePrefix(
+  protected override async updatePrefix(
     model: M,
     ...args: any[]
   ): Promise<[M, ...args: any[]]> {
@@ -106,7 +109,7 @@ export abstract class Repository<
     return [model, ...contextArgs.args];
   }
 
-  protected async updateAllPrefix(models: M[], ...args: any[]) {
+  protected override async updateAllPrefix(models: M[], ...args: any[]) {
     const contextArgs = await Context.args(
       OperationKeys.UPDATE,
       this.class,

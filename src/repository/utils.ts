@@ -4,12 +4,7 @@ import { IRepository } from "../interfaces/IRepository";
 import { OperationKeys } from "../operations/constants";
 import { DecoratorMetadata, Reflection } from "@decaf-ts/reflection";
 import { InternalError } from "./errors";
-import {
-  Constructor,
-  Model,
-  ModelKeys,
-  sf,
-} from "@decaf-ts/decorator-validation";
+import { Constructor, Model, ModelKeys } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
 
@@ -97,7 +92,7 @@ export async function enforceDBDecorators<
       const handlerArgs = getHandlerArgs(dec, prop, model as any);
 
       if (!handlerArgs || Object.values(handlerArgs).length !== handlers.length)
-        throw new InternalError(sf("Args and handlers length do not match"));
+        throw new InternalError("Args and handlers length do not match");
 
       let handler: OperationHandler<M, R, V, F, C>;
       let data: any;
@@ -227,11 +222,7 @@ export const getAllPropertyDecoratorsRecursive = function <T extends Model>(
                     return;
                   }
                   console.warn(
-                    sf(
-                      "Skipping handler registration for {0} under prop {0} because handler is the same",
-                      clazz,
-                      handlerProp
-                    )
+                    `Skipping handler registration for ${clazz} under prop ${handlerProp} because handler is the same`
                   );
                 }
               );
