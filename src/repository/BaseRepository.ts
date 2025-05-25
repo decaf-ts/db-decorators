@@ -16,6 +16,7 @@ export abstract class BaseRepository<
 {
   private readonly _class!: Constructor<M>;
   private _pk!: keyof M;
+  private _pkProps!: any;
 
   get class() {
     if (!this._class)
@@ -24,8 +25,20 @@ export abstract class BaseRepository<
   }
 
   get pk(): keyof M {
-    if (!this._pk) this._pk = findPrimaryKey(new this.class()).id;
+    if (!this._pk) {
+      const { id, props } = findPrimaryKey(new this.class());
+      this._pk = id;
+      this._pkProps = props;
+    }
     return this._pk;
+  }
+
+  protected get pkProps(): any {
+    if (!this._pkProps) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const pk = this.pk;
+    }
+    return this._pkProps;
   }
 
   protected constructor(clazz?: Constructor<M>) {

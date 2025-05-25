@@ -20,6 +20,19 @@ export type CrudOperations =
   | OperationKeys.UPDATE
   | OperationKeys.DELETE;
 
+export enum BulkCrudOperationKeys {
+  CREATE_ALL = "createAll",
+  READ_ALL = "readAll",
+  UPDATE_ALL = "updateAll",
+  DELETE_ALL = "deleteAll",
+}
+
+export type BulkCrudOperations =
+  | BulkCrudOperationKeys.CREATE_ALL
+  | BulkCrudOperationKeys.READ_ALL
+  | BulkCrudOperationKeys.UPDATE_ALL
+  | BulkCrudOperationKeys.DELETE_ALL;
+
 /**
  * @summary Maps out groups of CRUD operations for easier mapping of decorators
  *
