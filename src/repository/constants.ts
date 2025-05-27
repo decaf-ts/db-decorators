@@ -9,4 +9,5 @@ export const DefaultRepositoryFlags: Omit<RepositoryFlags, "timestamp"> = {
   affectedTables: [],
   operation: undefined,
   breakOnHandlerError: true,
+  rebuildWithTransient: true,
 };

@@ -17,4 +17,5 @@ export type RepositoryFlags = {
   timestamp: Date;
   operation?: OperationKeys;
   breakOnHandlerError: boolean;
+  rebuildWithTransient: boolean;
 };

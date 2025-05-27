@@ -35,9 +35,7 @@ export function modelToTransient<M extends Model>(
       if (transient) {
         accum.transient = accum.transient || {};
         try {
-          accum.transient[k] = JSON.stringify(
-            (model as Record<string, any>)[k]
-          );
+          accum.transient[k] = model[k as keyof M];
         } catch (e: unknown) {
           throw new SerializationError(
             `Failed to serialize transient property ${k}: ${e}`
