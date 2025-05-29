@@ -10,7 +10,7 @@ import { InternalError } from "./errors";
  *
  * @function prefixMethod
  *
- * @memberOf module:db-decorators.Repository
+ * @memberOf module:db-decorators
  */
 export function prefixMethod(
   obj: any,
@@ -76,7 +76,7 @@ export function suffixMethod(
  *
  * @function wrapMethodWithContext
  *
- * @memberOf module:db-decorators.Repository
+ * @memberOf module:db-decorators
  */
 export function wrapMethodWithContext(
   obj: any,

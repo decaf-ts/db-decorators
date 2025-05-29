@@ -24,7 +24,7 @@ import { RepositoryFlags } from "../repository/types";
  * @template C - Type extending Context
  * @param {C} context - The operation context
  * @param {V} data - Metadata for the operation
- * @param {keyof M} key - The property key to hash
+ * @param key - The property key to hash
  * @param {M} model - The model being processed
  * @param {M} [oldModel] - The previous model state (for updates)
  * @return {void}
@@ -89,7 +89,7 @@ export type ComposedFromMetadata = {
  * @template C - Type extending Context
  * @param {C} context - The operation context
  * @param {V} data - Metadata for the composition
- * @param {keyof M} key - The property key to set the composed value on
+ * @param key - The property key to set the composed value on
  * @param {M} model - The model being processed
  * @return {void}
  * @function composedFromCreateUpdate

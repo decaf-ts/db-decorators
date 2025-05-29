@@ -19,10 +19,10 @@ import { RepositoryFlags } from "../repository/types";
  * // Create a registry and register a handler
  * const registry = new OperationsRegistry();
  * registry.register(myHandler, OperationKeys.CREATE, targetModel, 'propertyName');
- * 
+ *
  * // Get handlers for a specific operation
  * const handlers = registry.get(targetModel.constructor.name, 'propertyName', 'onCreate');
- * 
+ *
  * @mermaid
  * classDiagram
  *   class OperationsRegistry {
@@ -51,8 +51,8 @@ export class OperationsRegistry {
    * @param {string | Record<string, any>} target - The target class name or object
    * @param {string} propKey - The property key to get handlers for
    * @param {string} operation - The operation key to get handlers for
-   * @param {OperationHandler<M, R, V, F, C>[]} [accum] - Accumulator for recursive calls
-   * @return {OperationHandler<M, R, V, F, C>[] | undefined} Array of handlers or undefined if none found
+   * @param {OperationHandler[]} [accum] - Accumulator for recursive calls
+   * @return {OperationHandler[] | undefined} Array of handlers or undefined if none found
    */
   get<
     M extends Model,
@@ -97,7 +97,7 @@ export class OperationsRegistry {
    * @template V - Metadata type
    * @template F - Repository flags extending RepositoryFlags
    * @template C - Context type extending Context<F>
-   * @param {OperationHandler<M, R, V, F, C>} handler - The handler function to register
+   * @param {OperationHandler} handler - The handler function to register
    * @param {OperationKeys} operation - The operation key to register the handler for
    * @param {M} target - The target model instance
    * @param {string | symbol} propKey - The property key to register the handler for

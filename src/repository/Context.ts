@@ -17,6 +17,13 @@ export type ContextFactory<F extends RepositoryFlags> = <C extends Context<F>>(
   arg: Omit<F, "timestamp">
 ) => C;
 
+/**
+ * @description Default factory for creating context instances.
+ * @summary A factory function that creates new Context instances with the provided repository flags.
+ * It automatically adds a timestamp to the context and returns a properly typed context instance.
+ * @const DefaultContextFactory
+ * @memberOf module:db-decorators
+ */
 export const DefaultContextFactory: ContextFactory<any> = <
   F extends RepositoryFlags,
   C extends Context<F>,
@@ -109,7 +116,7 @@ export class Context<F extends RepositoryFlags> {
    * @template F - current accumulator type
    * @template V - Type extending object for the values to accumulate
    * @param {V} value - The object containing values to accumulate
-   * @returns {Context<F & V>} A new context instance with accumulated values
+   * @returns A new context instance with accumulated values
    */
   accumulate<V extends object>(value: V) {
     Object.defineProperty(this, "cache", {
@@ -133,7 +140,7 @@ export class Context<F extends RepositoryFlags> {
    * @template K - Type extending keyof F for the key to retrieve
    * @template F - Accumulator type
    * @param {K} key - The key to retrieve from the context
-   * @returns {F[K]} The value associated with the key
+   * @returns The value associated with the key
    * @throws {Error} If the key is not found in the context chain
    */
   get<K extends keyof F>(key: K): F[K] {
@@ -171,6 +178,7 @@ export class Context<F extends RepositoryFlags> {
    * @description Creates a child context from another context
    * @summary Generates a new context instance with parent reference
    *
+   * @template F - Type extending Repository Flags
    * @template C - Type extending Context<F>
    * @param {C} context - The parent context
    * @param {Partial<F>} [overrides] - Optional flag overrides
@@ -189,6 +197,7 @@ export class Context<F extends RepositoryFlags> {
    * @description Creates a new context from operation parameters
    * @summary Generates a context instance for specific operation
    *
+   * @template F - Type extending Repository Flags
    * @template M - Type extending Model
    * @param {OperationKeys.DELETE} operation - The operation type
    * @param {Partial<F>} overrides - Flag overrides
@@ -223,13 +232,14 @@ export class Context<F extends RepositoryFlags> {
    * @description Prepares arguments for context operations
    * @summary Creates a context args object with the specified operation parameters
    *
-   * @template M - Type extending Model
+   * @template F - Type extending {@link RepositoryFlags}
+   * @template M - Type extending {@link Model}
    * @param {OperationKeys.DELETE} operation - The operation type
    * @param {Constructor<M>} model - The model constructor
    * @param {any[]} args - Operation arguments
    * @param {Contextual<F>} [contextual] - Optional contextual object
    * @param {Partial<F>} [overrides] - Optional flag overrides
-   * @returns {Promise<ContextArgs<F, C>>} Promise resolving to context arguments
+   * @returns {Promise<ContextArgs>} Promise resolving to context arguments
    *
    * @mermaid
    * sequenceDiagram

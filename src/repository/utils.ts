@@ -8,6 +8,17 @@ import { Constructor, Model, ModelKeys } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
 
+/**
+ * @description Context arguments for repository operations.
+ * @summary Represents the context and arguments for repository operations.
+ * This type is used to pass context and arguments between repository methods.
+ * @template F - The repository flags type, defaults to RepositoryFlags
+ * @template C - The context type, defaults to Context<F>
+ * @typedef {Object} ContextArgs
+ * @property {C} context - The operation context
+ * @property {any[]} args - The operation arguments
+ * @memberOf module:db-decorators
+ */
 export type ContextArgs<
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,

@@ -1,10 +1,14 @@
 /**
- * @summary Base Error
- *
- * @param {string} msg the error message
- *
- * @class BaseDLTError
- * @extends Error
+ * @description Base error class for the repository module
+ * @summary Abstract base error class that all other error types extend from. Provides common error handling functionality.
+ * @param {string} name - The name of the error
+ * @param {string|Error} msg - The error message or Error object
+ * @param {number} code - The HTTP status code associated with this error
+ * @class BaseError
+ * @example
+ * // This is an abstract class and should not be instantiated directly
+ * // Instead, use one of the concrete error classes:
+ * throw new ValidationError('Invalid data provided');
  */
 export abstract class BaseError extends Error {
   readonly code!: number;
@@ -18,12 +22,16 @@ export abstract class BaseError extends Error {
 }
 
 /**
- * @summary Represents a failure in the Model details
- *
- * @param {string} msg the error message
- *
+ * @description Error thrown when validation fails
+ * @summary Represents a failure in the Model details, typically thrown when data validation fails
+ * @param {string|Error} msg - The error message or Error object
+ * @return {ValidationError} A new ValidationError instance
  * @class ValidationError
- * @extends BaseError
+ * @example
+ * // Throw a validation error when data is invalid
+ * if (!isValid(data)) {
+ *   throw new ValidationError('Invalid data format');
+ * }
  */
 export class ValidationError extends BaseError {
   constructor(msg: string | Error) {
@@ -31,12 +39,18 @@ export class ValidationError extends BaseError {
   }
 }
 /**
- * @summary Represents an internal failure (should mean an error in code)
- *
- * @param {string} msg the error message
- *
+ * @description Error thrown for internal system failures
+ * @summary Represents an internal failure (should mean an error in code) with HTTP 500 status code
+ * @param {string|Error} msg - The error message or Error object
+ * @return {InternalError} A new InternalError instance
  * @class InternalError
- * @extends BaseError
+ * @example
+ * // Throw an internal error when an unexpected condition occurs
+ * try {
+ *   // Some operation
+ * } catch (error) {
+ *   throw new InternalError('Unexpected internal error occurred');
+ * }
  */
 export class InternalError extends BaseError {
   constructor(msg: string | Error) {
@@ -44,13 +58,18 @@ export class InternalError extends BaseError {
   }
 }
 /**
- * @summary Represents a failure in the Model de/serialization
- *
- * @param {string} msg the error message
- *
+ * @description Error thrown when serialization or deserialization fails
+ * @summary Represents a failure in the Model de/serialization, typically when converting between data formats
+ * @param {string|Error} msg - The error message or Error object
+ * @return {SerializationError} A new SerializationError instance
  * @class SerializationError
- * @extends BaseError
- *
+ * @example
+ * // Throw a serialization error when JSON parsing fails
+ * try {
+ *   const data = JSON.parse(invalidJson);
+ * } catch (error) {
+ *   throw new SerializationError('Failed to parse JSON data');
+ * }
  */
 export class SerializationError extends BaseError {
   constructor(msg: string | Error) {
@@ -59,13 +78,17 @@ export class SerializationError extends BaseError {
 }
 
 /**
- * @summary Represents a failure in finding a model
- *
- * @param {string} msg the error message
- *
+ * @description Error thrown when a requested resource is not found
+ * @summary Represents a failure in finding a model, resulting in a 404 HTTP status code
+ * @param {string|Error} msg - The error message or Error object
+ * @return {NotFoundError} A new NotFoundError instance
  * @class NotFoundError
- * @extends BaseError
- *
+ * @example
+ * // Throw a not found error when a record doesn't exist
+ * const user = await repository.findById(id);
+ * if (!user) {
+ *   throw new NotFoundError(`User with ID ${id} not found`);
+ * }
  */
 export class NotFoundError extends BaseError {
   constructor(msg: string | Error) {
@@ -73,13 +96,17 @@ export class NotFoundError extends BaseError {
   }
 }
 /**
- * @summary Represents a conflict in the storage
- *
- * @param {string} msg the error message
- *
+ * @description Error thrown when a conflict occurs in the storage
+ * @summary Represents a conflict in the storage, typically when trying to create a duplicate resource
+ * @param {string|Error} msg - The error message or Error object
+ * @return {ConflictError} A new ConflictError instance
  * @class ConflictError
- * @extends BaseError
- *
+ * @example
+ * // Throw a conflict error when trying to create a duplicate record
+ * const existingUser = await repository.findByEmail(email);
+ * if (existingUser) {
+ *   throw new ConflictError(`User with email ${email} already exists`);
+ * }
  */
 export class ConflictError extends BaseError {
   constructor(msg: string | Error) {

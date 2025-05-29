@@ -22,38 +22,38 @@ import { RepositoryFlags } from "./types";
  * class UserModel extends Model {
  *   @id()
  *   id: string;
- *   
+ *
  *   @required()
  *   name: string;
  * }
- * 
+ *
  * class UserRepository extends BaseRepository<UserModel> {
  *   constructor() {
  *     super(UserModel);
  *   }
- *   
+ *
  *   async create(model: UserModel): Promise<UserModel> {
  *     // Implementation
  *     return model;
  *   }
- *   
+ *
  *   async read(key: string): Promise<UserModel> {
  *     // Implementation
  *     return new UserModel({ id: key, name: 'User' });
  *   }
- *   
+ *
  *   async update(model: UserModel): Promise<UserModel> {
  *     // Implementation
  *     return model;
  *   }
- *   
+ *
  *   async delete(key: string): Promise<UserModel> {
  *     // Implementation
  *     const model = await this.read(key);
  *     return model;
  *   }
  * }
- * 
+ *
  * @mermaid
  * sequenceDiagram
  *   participant C as Client
@@ -62,7 +62,7 @@ import { RepositoryFlags } from "./types";
  *   participant D as Database
  *   participant S as Suffix Methods
  *   participant V as Validators/Decorators
- *   
+ *
  *   Note over C,V: Create Operation
  *   C->>R: create(model)
  *   R->>P: createPrefix(model)
@@ -71,7 +71,7 @@ import { RepositoryFlags } from "./types";
  *   D->>S: createSuffix(model)
  *   S->>V: enforceDBDecorators(AFTER)
  *   S->>C: Return model
- *   
+ *
  *   Note over C,V: Read Operation
  *   C->>R: read(key)
  *   R->>P: readPrefix(key)
@@ -80,7 +80,7 @@ import { RepositoryFlags } from "./types";
  *   D->>S: readSuffix(model)
  *   S->>V: enforceDBDecorators(AFTER)
  *   S->>C: Return model
- *   
+ *
  *   Note over C,V: Update Operation
  *   C->>R: update(model)
  *   R->>P: updatePrefix(model)
@@ -89,7 +89,7 @@ import { RepositoryFlags } from "./types";
  *   D->>S: updateSuffix(model)
  *   S->>V: enforceDBDecorators(AFTER)
  *   S->>C: Return model
- *   
+ *
  *   Note over C,V: Delete Operation
  *   C->>R: delete(key)
  *   R->>P: deletePrefix(key)
@@ -125,7 +125,7 @@ export abstract class BaseRepository<
    * @description Gets the primary key property name of the model.
    * @summary Retrieves the name of the property that serves as the primary key for the model.
    * If not already determined, it finds the primary key using the model's decorators.
-   * @return {keyof M} The name of the primary key property
+   * @return The name of the primary key property
    */
   get pk(): keyof M {
     if (!this._pk) {
@@ -194,7 +194,7 @@ export abstract class BaseRepository<
    * that should be applied before creation.
    * @param {M} model - The model instance to prepare for creation
    * @param {any[]} args - Additional arguments for the create operation
-   * @return {Promise<[M, ...any[]]>} A promise that resolves to an array containing the prepared model and context arguments
+   * @return A promise that resolves to an array containing the prepared model and context arguments
    */
   protected async createPrefix(model: M, ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
@@ -239,7 +239,7 @@ export abstract class BaseRepository<
    * that should be applied before creation for each model.
    * @param {M[]} models - The array of model instances to prepare for creation
    * @param {any[]} args - Additional arguments for the create operation
-   * @return {Promise<[M[], ...any[]]>} A promise that resolves to an array containing the prepared models and context arguments
+   * @return  A promise that resolves to an array containing the prepared models and context arguments
    */
   protected async createAllPrefix(models: M[], ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
@@ -334,7 +334,7 @@ export abstract class BaseRepository<
    * that should be applied before reading.
    * @param {string} key - The primary key of the model to read
    * @param {any[]} args - Additional arguments for the read operation
-   * @return {Promise<[string, ...any[]]>} A promise that resolves to an array containing the key and context arguments
+   * @return A promise that resolves to an array containing the key and context arguments
    */
   protected async readPrefix(key: string, ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
@@ -361,7 +361,7 @@ export abstract class BaseRepository<
    * that should be applied before reading for each key.
    * @param {string[] | number[]} keys - The array of primary keys of the models to read
    * @param {any[]} args - Additional arguments for the read operation
-   * @return {Promise<[string[] | number[], ...any[]]>} A promise that resolves to an array containing the keys and context arguments
+   * @return A promise that resolves to an array containing the keys and context arguments
    */
   protected async readAllPrefix(keys: string[] | number[], ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
@@ -456,7 +456,7 @@ export abstract class BaseRepository<
    * and enforcing any decorators that should be applied before updating.
    * @param {M} model - The model instance to prepare for update
    * @param {any[]} args - Additional arguments for the update operation
-   * @return {Promise<[M, ...any[]]>} A promise that resolves to an array containing the prepared model and context arguments
+   * @return A promise that resolves to an array containing the prepared model and context arguments
    */
   protected async updatePrefix(model: M, ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
@@ -488,7 +488,7 @@ export abstract class BaseRepository<
    * that should be applied before updating for each model.
    * @param {M[]} models - The array of model instances to prepare for update
    * @param {any[]} args - Additional arguments for the update operation
-   * @return {Promise<[M[], ...any[]]>} A promise that resolves to an array containing the prepared models and context arguments
+   * @return A promise that resolves to an array containing the prepared models and context arguments
    */
   protected async updateAllPrefix(models: M[], ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
@@ -583,7 +583,7 @@ export abstract class BaseRepository<
    * that should be applied before deletion.
    * @param {any} key - The primary key of the model to delete
    * @param {any[]} args - Additional arguments for the delete operation
-   * @return {Promise<[any, ...any[]]>} A promise that resolves to an array containing the key and context arguments
+   * @return A promise that resolves to an array containing the key and context arguments
    */
   protected async deletePrefix(key: any, ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
@@ -609,7 +609,7 @@ export abstract class BaseRepository<
    * that should be applied before deletion for each model.
    * @param {string[] | number[]} keys - The array of primary keys of the models to delete
    * @param {any[]} args - Additional arguments for the delete operation
-   * @return {Promise<[string[] | number[], ...any[]]>} A promise that resolves to an array containing the keys and context arguments
+   * @return A promise that resolves to an array containing the keys and context arguments
    */
   protected async deleteAllPrefix(keys: string[] | number[], ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(

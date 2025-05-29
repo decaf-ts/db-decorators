@@ -50,7 +50,7 @@ export function readonly(
  * @template C - The context type
  * @param {C} context - The repository context containing the current timestamp
  * @param {V} data - The data being processed
- * @param {keyof M} key - The property key to update
+ * @param key - The property key to update
  * @param {M} model - The model instance being updated
  * @return {Promise<void>} A promise that resolves when the timestamp has been set
  * @function timestampHandler
@@ -146,7 +146,7 @@ export function timestamp(
  * @template C - The context type
  * @param {C} context - The repository context
  * @param {V} data - The data being processed
- * @param {keyof M} key - The property key to serialize
+ * @param key - The property key to serialize
  * @param {M} model - The model instance being processed
  * @return {Promise<void>} A promise that resolves when the property has been serialized
  * @function serializeOnCreateUpdate
@@ -180,7 +180,7 @@ export async function serializeOnCreateUpdate<
  * @template C - The context type
  * @param {C} context - The repository context
  * @param {V} data - The data being processed
- * @param {keyof M} key - The property key to deserialize
+ * @param key - The property key to deserialize
  * @param {M} model - The model instance being processed
  * @return {Promise<void>} A promise that resolves when the property has been deserialized
  * @function serializeAfterAll
