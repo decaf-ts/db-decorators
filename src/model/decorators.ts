@@ -15,11 +15,22 @@ import { CrudOperations, OperationKeys } from "../operations";
 import { RepositoryFlags } from "../repository/types";
 
 /**
- *
- * @param {str} str
- * @memberOf db-decorators.model
+ * @description Hashes a property value during create or update operations
+ * @summary Callback function used by the hash decorator to apply hashing to a property value
+ * @template M - Type extending Model
+ * @template R - Type extending IRepository
+ * @template V - Type for metadata
+ * @template F - Type extending RepositoryFlags
+ * @template C - Type extending Context
+ * @param {C} context - The operation context
+ * @param {V} data - Metadata for the operation
+ * @param {keyof M} key - The property key to hash
+ * @param {M} model - The model being processed
+ * @param {M} [oldModel] - The previous model state (for updates)
+ * @return {void}
+ * @function hashOnCreateUpdate
+ * @memberOf module:db-decorators
  */
-
 export function hashOnCreateUpdate<
   M extends Model,
   R extends IRepository<M, F, C>,
@@ -33,6 +44,13 @@ export function hashOnCreateUpdate<
   model[key] = hash;
 }
 
+/**
+ * @description Creates a decorator that hashes a property value
+ * @summary Decorator that automatically hashes a property value during create and update operations
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
+ * @function hash
+ * @category Property Decorators
+ */
 export function hash() {
   return apply(
     onCreateUpdate(hashOnCreateUpdate),
@@ -40,6 +58,18 @@ export function hash() {
   );
 }
 
+/**
+ * @description Metadata for composed property decorators
+ * @summary Configuration options for property composition from other properties
+ * @typedef {Object} ComposedFromMetadata
+ * @property {string[]} args - Property names to compose from
+ * @property {string} separator - Character used to join the composed values
+ * @property {boolean} hashResult - Whether to hash the composed result
+ * @property {"keys"|"values"} type - Whether to use property keys or values
+ * @property {string} [prefix] - Optional prefix to add to the composed value
+ * @property {string} [suffix] - Optional suffix to add to the composed value
+ * @memberOf module:db-decorators
+ */
 export type ComposedFromMetadata = {
   args: string[];
   separator: string;
@@ -49,6 +79,22 @@ export type ComposedFromMetadata = {
   suffix?: string;
 };
 
+/**
+ * @description Composes a property value from other properties during create or update operations
+ * @summary Callback function used by composed decorators to generate a property value from other properties
+ * @template M - Type extending Model
+ * @template R - Type extending IRepository
+ * @template V - Type extending ComposedFromMetadata
+ * @template F - Type extending RepositoryFlags
+ * @template C - Type extending Context
+ * @param {C} context - The operation context
+ * @param {V} data - Metadata for the composition
+ * @param {keyof M} key - The property key to set the composed value on
+ * @param {M} model - The model being processed
+ * @return {void}
+ * @function composedFromCreateUpdate
+ * @memberOf module:db-decorators
+ */
 export function composedFromCreateUpdate<
   M extends Model,
   R extends IRepository<M, F, C>,
@@ -78,6 +124,19 @@ export function composedFromCreateUpdate<
   }
 }
 
+/**
+ * @description Creates a decorator that composes a property value from other properties
+ * @summary Base function for creating property composition decorators
+ * @param {string[]} args - Property names to compose from
+ * @param {boolean} [hashResult=false] - Whether to hash the composed result
+ * @param {string} [separator=DefaultSeparator] - Character used to join the composed values
+ * @param {"keys"|"values"} [type="values"] - Whether to use property keys or values
+ * @param {string} [prefix=""] - Optional prefix to add to the composed value
+ * @param {string} [suffix=""] - Optional suffix to add to the composed value
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
+ * @function composedFrom
+ * @category PropertyDecorators
+ */
 function composedFrom(
   args: string[],
   hashResult: boolean = false,
@@ -103,6 +162,18 @@ function composedFrom(
   return apply(...decorators);
 }
 
+/**
+ * @description Creates a decorator that composes a property value from property keys
+ * @summary Decorator that generates a property value by joining the names of other properties
+ * @param {string[]} args - Property names to compose from
+ * @param {string} [separator=DefaultSeparator] - Character used to join the property names
+ * @param {boolean} [hash=false] - Whether to hash the composed result
+ * @param {string} [prefix=""] - Optional prefix to add to the composed value
+ * @param {string} [suffix=""] - Optional suffix to add to the composed value
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
+ * @function composedFromKeys
+ * @category PropertyDecorators
+ */
 export function composedFromKeys(
   args: string[],
   separator: string = DefaultSeparator,
@@ -113,6 +184,18 @@ export function composedFromKeys(
   return composedFrom(args, hash, separator, "keys", prefix, suffix);
 }
 
+/**
+ * @description Creates a decorator that composes a property value from property values
+ * @summary Decorator that generates a property value by joining the values of other properties
+ * @param {string[]} args - Property names whose values will be composed
+ * @param {string} [separator=DefaultSeparator] - Character used to join the property values
+ * @param {boolean} [hash=false] - Whether to hash the composed result
+ * @param {string} [prefix=""] - Optional prefix to add to the composed value
+ * @param {string} [suffix=""] - Optional suffix to add to the composed value
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
+ * @function composed
+ * @category PropertyDecorators
+ */
 export function composed(
   args: string[],
   separator: string = DefaultSeparator,
@@ -124,20 +207,34 @@ export function composed(
 }
 
 /**
- * Creates a decorator function that updates the version of a model during create or update operations.
- *
- * @param {CrudOperations} operation - The type of operation being performed (CREATE or UPDATE).
- * @returns {function} A function that updates the version of the model based on the operation type.
- *
+ * @description Creates a function that updates a version property during operations
+ * @summary Factory function that generates a callback for incrementing version numbers
+ * @param {CrudOperations} operation - The type of operation (CREATE or UPDATE)
+ * @return {Function} A callback function that updates the version property
  * @template M - Type extending Model
- * @template V - Type extending IRepository<M>
+ * @template R - Type extending IRepository
+ * @template V - Type for metadata
+ * @template F - Type extending RepositoryFlags
+ * @template C - Type extending Context
+ * @function versionCreateUpdate
+ * @memberOf module:db-decorators
+ * @mermaid
+ * sequenceDiagram
+ *   participant Caller
+ *   participant versionCreateUpdate
  *
- * @this {V} - The repository instance
- * @param {Context<M>} context - The context of the operation
- * @param {unknown} data - Additional data for the operation (not used in this function)
- * @param {string} key - The key of the version property in the model
- * @param {M} model - The model being updated
- * @throws {InternalError} If an invalid operation is provided or if version update fails
+ *   Caller->>versionCreateUpdate: operation
+ *   versionCreateUpdate-->>Caller: callback function
+ *   Note over Caller,versionCreateUpdate: When callback is executed:
+ *   Caller->>versionCreateUpdate: context, data, key, model
+ *   alt operation is CREATE
+ *     versionCreateUpdate->>versionCreateUpdate: set version to 1
+ *   else operation is UPDATE
+ *     versionCreateUpdate->>versionCreateUpdate: increment version
+ *   else invalid operation
+ *     versionCreateUpdate->>versionCreateUpdate: throw error
+ *   end
+ *   versionCreateUpdate-->>Caller: void
  */
 export function versionCreateUpdate(operation: CrudOperations) {
   return function versionCreateUpdate<
@@ -165,14 +262,11 @@ export function versionCreateUpdate(operation: CrudOperations) {
 }
 
 /**
- * @description Creates a decorator for versioning a property in a model.
- * @summary This decorator applies multiple sub-decorators to handle version management during create and update operations.
- *
- * @returns {Function} A composite decorator that:
- *   - Sets the type of the property to Number
- *   - Applies a version update on create operations
- *   - Applies a version update on update operations
- *   - Adds metadata indicating this property is used for versioning
+ * @description Creates a decorator for versioning a property in a model
+ * @summary This decorator applies multiple sub-decorators to handle version management during create and update operations
+ * @return {PropertyDecorator} A composite decorator that sets the type to Number, manages version updates, and adds versioning metadata
+ * @function version
+ * @category PropertyDecorators
  */
 export function version() {
   return apply(
@@ -183,6 +277,13 @@ export function version() {
   );
 }
 
+/**
+ * @description Creates a decorator that marks a property as transient
+ * @summary Decorator that indicates a property should not be persisted to the database
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
+ * @function transient
+ * @category PropertyDecorators
+ */
 export function transient() {
   return function transient(model: any, attribute: string) {
     propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model, attribute);

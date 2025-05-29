@@ -15,16 +15,34 @@ import { UpdateValidationKeys, UpdateValidator } from "../validation";
 import { findModelId } from "../identity";
 
 /**
- * @summary Validates the update of a model
- *
- * @param {T} oldModel
- * @param {T} newModel
- * @param {string[]} [exceptions]
- *
+ * @description Validates changes between two model versions
+ * @summary Compares an old and new model version to validate update operations
+ * @template M - Type extending Model
+ * @param {M} oldModel - The original model version
+ * @param {M} newModel - The updated model version
+ * @param {...string[]} exceptions - Properties to exclude from validation
+ * @return {ModelErrorDefinition|undefined} Error definition if validation fails, undefined otherwise
  * @function validateCompare
- * @return {ModelErrorDefinition | undefined}
+ * @memberOf module:db-decorators
+ * @mermaid
+ * sequenceDiagram
+ *   participant Caller
+ *   participant validateCompare
+ *   participant Reflection
+ *   participant Validation
  *
- * @memberOf module:db-decorators.Model
+ *   Caller->>validateCompare: oldModel, newModel, exceptions
+ *   validateCompare->>Reflection: get decorated properties
+ *   Reflection-->>validateCompare: property decorators
+ *   loop For each decorated property
+ *     validateCompare->>Validation: get validator
+ *     Validation-->>validateCompare: validator
+ *     validateCompare->>validateCompare: validate property update
+ *   end
+ *   loop For nested models
+ *     validateCompare->>validateCompare: validate nested models
+ *   end
+ *   validateCompare-->>Caller: validation errors or undefined
  */
 export function validateCompare<M extends Model>(
   oldModel: M,

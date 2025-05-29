@@ -14,6 +14,16 @@ import {
 } from "@decaf-ts/decorator-validation";
 import { validateCompare } from "./validation";
 
+/**
+ * @description Validates the model and checks for errors
+ * @summary Validates the current model state and optionally compares with a previous version
+ * @template M - Type extending Model
+ * @param {M|any} [previousVersion] - Optional previous version of the model for comparison
+ * @param {...any[]} exclusions - Properties to exclude from validation
+ * @return {ModelErrorDefinition|undefined} Error definition if validation fails, undefined otherwise
+ * @function hasErrors
+ * @memberOf module:db-decorators
+ */
 Model.prototype.hasErrors = function <M extends Model>(
   this: M,
   previousVersion?: M | any,
@@ -45,43 +55,52 @@ declare module "@decaf-ts/decorator-validation" {
     ): ModelErrorDefinition | undefined;
 
     /**
-     * @summary Compare object equality recursively
-     * @param {any} obj object to compare to
-     * @param {string} [exceptions] property names to be excluded from the comparison
+     * @description Compares this model with another object for equality
+     * @summary Compare object equality recursively, checking all properties
+     * @param {any} obj - Object to compare to
+     * @param {...string} exceptions - Property names to be excluded from the comparison
+     * @return {boolean} True if objects are equal, false otherwise
      */
     equals(obj: any, ...exceptions: string[]): boolean;
 
     /**
+     * @description Converts the model to a serialized string representation
      * @summary Returns the serialized model according to the currently defined {@link Serializer}
+     * @return {string} Serialized representation of the model
      */
     serialize(): string;
 
     /**
-     * @summary Override the implementation for js's 'toString()' which sucks...
+     * @description Provides a string representation of the model
+     * @summary Override the implementation for JavaScript's default toString() method
+     * @return {string} String representation of the model
      * @override
      */
     toString(): string;
 
     /**
-     * @summary Defines a default implementation for object hash. Relies on a very basic implementation based on Java's string hash;
+     * @description Generates a hash code for the model
+     * @summary Defines a default implementation for object hash based on Java's string hash algorithm
+     * @return {string} Hash code for the model
      */
     hash(): string;
 
     /**
-     * @summary Deserializes a Model
-     * @param {string} str
-     *
+     * @description Converts a serialized string back to a model instance
+     * @summary Deserializes a Model from its string representation
+     * @param {string} str - The serialized string to deserialize
+     * @return {any} The deserialized model instance
      * @throws {Error} If it fails to parse the string, or if it fails to build the model
      */
     static deserialize(str: string): any;
 
     /**
-     * @summary Repopulates the Object properties with the ones from the new object
      * @description Iterates all common properties of obj (if existing) and self, and copies them onto self
-     *
-     * @param {T} self
-     * @param {T | Record<string, any>} [obj]
-     *
+     * @summary Repopulates the Object properties with the ones from the new object
+     * @template T - Type extending Model
+     * @param {T} self - The target model instance to update
+     * @param {T|Record<string, any>} [obj] - The source object to copy properties from
+     * @return {T} The updated model instance
      */
     static fromObject<T extends Model>(
       self: T,
@@ -89,14 +108,12 @@ declare module "@decaf-ts/decorator-validation" {
     ): T;
 
     /**
-     * @summary Repopulates the instance with the ones from the new Model Object
-     * @description Iterates all common properties of obj (if existing) and self, and copies them onto self.
-     * Is aware of nested Model Objects and rebuilds them also.
-     * When List properties are decorated with {@link list}, they list items will also be rebuilt
-     *
-     * @param {T} self
-     * @param {T | Record<string, any>} [obj]
-     *
+     * @description Iterates all common properties of obj (if existing) and self, and copies them onto self. Is aware of nested Model Objects and rebuilds them also. When List properties are decorated with {@link list}, the list items will also be rebuilt
+     * @summary Repopulates the instance with properties from the new Model Object, handling nested models
+     * @template T - Type extending Model
+     * @param {T} self - The target model instance to update
+     * @param {T|Record<string, any>} [obj] - The source model or object to copy properties from
+     * @return {T} The updated model instance
      */
     static fromModel<T extends Model>(
       self: T,
@@ -104,35 +121,43 @@ declare module "@decaf-ts/decorator-validation" {
     ): T;
 
     /**
-     * @summary Sets the Global {@link ModelBuilderFunction}
-     * @param {ModelBuilderFunction} [builder]
+     * @description Configures the global model builder function used for creating model instances
+     * @summary Sets the Global {@link ModelBuilderFunction} used for model construction
+     * @param {ModelBuilderFunction} [builder] - The builder function to set, or undefined to reset
+     * @return {void}
      */
     static setBuilder(builder?: ModelBuilderFunction): void;
 
     /**
-     * @summary Retrieves the current global {@link ModelBuilderFunction}
+     * @description Returns the currently configured global model builder function
+     * @summary Retrieves the current global {@link ModelBuilderFunction} used for model construction
+     * @return {ModelBuilderFunction|undefined} The current builder function or undefined if not set
      */
     static getBuilder(): ModelBuilderFunction | undefined;
 
     /**
-     * Returns the current {@link ModelRegistryManager}
-     *
-     * @return ModelRegistry, defaults to {@link ModelRegistryManager}
+     * @description Retrieves the current model registry instance
+     * @summary Returns the current {@link ModelRegistryManager} used for model registration
+     * @return {BuilderRegistry<any>} ModelRegistry instance, defaults to {@link ModelRegistryManager}
+     * @private
      */
     private static getRegistry;
 
     /**
-     * Returns the current actingModelRegistry
-     *
-     * @param {BuilderRegistry} modelRegistry the new implementation of Registry
+     * @description Sets the model registry to be used for model registration and retrieval
+     * @summary Configures the current model registry implementation
+     * @param {BuilderRegistry<any>} modelRegistry - The new implementation of Registry to use
+     * @return {void}
      */
     static setRegistry(modelRegistry: BuilderRegistry<any>): void;
 
     /**
-     * @summary register new Models
-     * @param {any} constructor
-     * @param {string} [name] when not defined, the name of the constructor will be used
-     *
+     * @description Registers a model constructor with the model registry
+     * @summary Registers new Models for later retrieval and instantiation
+     * @template T - Type extending Model
+     * @param {ModelConstructor<T>} constructor - The model constructor to register
+     * @param {string} [name] - Optional name for registration, defaults to constructor name
+     * @return {void}
      * @see ModelRegistry
      */
     static register<T extends Model>(
@@ -141,46 +166,96 @@ declare module "@decaf-ts/decorator-validation" {
     ): void;
 
     /**
-     * @summary Gets a registered Model {@link ModelConstructor}
-     * @param {string} name
-     *
+     * @description Retrieves a previously registered model constructor by name
+     * @summary Gets a registered Model {@link ModelConstructor} from the registry
+     * @template T - Type extending Model
+     * @param {string} name - The name of the model to retrieve
+     * @return {ModelConstructor<T>|undefined} The model constructor or undefined if not found
      * @see ModelRegistry
      */
     static get<T extends Model>(name: string): ModelConstructor<T> | undefined;
 
     /**
-     * @param {Record<string, any>} obj
-     * @param {string} [clazz] when provided, it will attempt to find the matching constructor
-     *
-     * @throws Error If clazz is not found, or obj is not a {@link Model} meaning it has no {@link ModelKeys.ANCHOR} property
-     *
+     * @description Creates a new model instance from a plain object
+     * @summary Builds a model instance using the registered constructor
+     * @template T - Type extending Model
+     * @param {Record<string, any>} [obj] - The source object to build from
+     * @param {string} [clazz] - Optional class name to find the matching constructor
+     * @return {T} The built model instance
+     * @throws {Error} If clazz is not found, or obj is not a {@link Model} meaning it has no {@link ModelKeys.ANCHOR} property
      * @see ModelRegistry
      */
     static build<T extends Model>(obj?: Record<string, any>, clazz?: string): T;
 
+    /**
+     * @description Retrieves metadata associated with a model instance
+     * @summary Gets the metadata attached to a model
+     * @template V - Type extending Model
+     * @param {V} model - The model instance to get metadata from
+     * @return {any} The model's metadata
+     */
     static getMetadata<V extends Model>(model: V): any;
 
+    /**
+     * @description Retrieves all attribute names defined on a model
+     * @summary Gets the list of attributes for a model class or instance
+     * @template V - Type extending Model
+     * @param {(Constructor<V>|V)} model - The model constructor or instance
+     * @return {string[]} Array of attribute names
+     */
     static getAttributes<V extends Model>(model: Constructor<V> | V): string[];
 
+    /**
+     * @description Compares two model instances for equality
+     * @summary Static method to check if two model instances are equal
+     * @template M - Type extending Model
+     * @param {M} obj1 - First model instance to compare
+     * @param {M} obj2 - Second model instance to compare
+     * @param {...any[]} exceptions - Properties to exclude from comparison
+     * @return {boolean} True if models are equal, false otherwise
+     */
     static equals<M extends Model>(
       obj1: M,
       obj2: M,
       ...exceptions: any[]
     ): boolean;
 
+    /**
+     * @description Validates a model and checks for errors
+     * @summary Static method to validate a model instance
+     * @template M - Type extending Model
+     * @param {M} model - The model instance to validate
+     * @param {...string[]} propsToIgnore - Properties to exclude from validation
+     * @return {ModelErrorDefinition|undefined} Error definition if validation fails, undefined otherwise
+     */
     static hasErrors<M extends Model>(
       model: M,
       ...propsToIgnore: string[]
     ): ModelErrorDefinition | undefined;
 
+    /**
+     * @description Serializes a model instance to a string
+     * @summary Static method to convert a model to its serialized form
+     * @template M - Type extending Model
+     * @param {M} model - The model instance to serialize
+     * @return {string} The serialized representation of the model
+     */
     static serialize<M extends Model>(model: M): any;
 
+    /**
+     * @description Generates a hash code for a model instance
+     * @summary Static method to create a hash code for a model
+     * @template M - Type extending Model
+     * @param {M} model - The model instance to hash
+     * @return {string} The hash code for the model
+     */
     static hash<M extends Model>(model: M): any;
 
     /**
-     * @summary Builds the key to store as Metadata under Reflections
-     * @description concatenates {@link ModelKeys#REFLECT} with the provided key
-     * @param {string} str
+     * @description Builds a metadata key for reflection
+     * @summary Concatenates the model reflection prefix with the provided key string
+     * @param {string} str - The key string to append to the reflection prefix
+     * @return {string} The complete metadata key
      */
     static key(str: string): string;
 
