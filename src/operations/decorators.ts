@@ -9,6 +9,15 @@ import { Operations } from "./Operations";
 import { apply } from "@decaf-ts/reflection";
 import { propMetadata } from "@decaf-ts/decorator-validation";
 
+/**
+ * @description Internal function to register operation handlers
+ * @summary Registers an operation handler for a specific operation key on a target property
+ * @param {OperationKeys} op - The operation key to handle
+ * @param {OperationHandler<any, any, any, any, any>} handler - The handler function to register
+ * @return {PropertyDecorator} A decorator that registers the handler
+ * @function handle
+ * @category Property Decorators
+ */
 function handle(
   op: OperationKeys,
   handler: OperationHandler<any, any, any, any, any>
@@ -26,7 +35,7 @@ function handle(
  * @param {V} [data] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function onCreateUpdate
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function onCreateUpdate<V = object>(
   handler:
@@ -44,7 +53,7 @@ export function onCreateUpdate<V = object>(
  * @param {V} [data] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function onUpdate
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function onUpdate<V = object>(
   handler: UpdateOperationHandler<any, any, V, any>,
@@ -60,7 +69,7 @@ export function onUpdate<V = object>(
  * @param {V} [data] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function onCreate
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function onCreate<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
@@ -70,16 +79,14 @@ export function onCreate<V = object>(
 }
 
 /**
- * @summary Defines a behaviour to set on the defined {@link DBOperations.READ}
- *
- * @param {IdOperationHandler<any>} handler The method called upon the operation
- * @param data
- *
- * @see on
- *
+ * @description Decorator for handling read operations
+ * @summary Defines a behavior to execute during read operations
+ * @template V - Type for metadata, defaults to object
+ * @param {IdOperationHandler<any, any, V, any, any>} handler - The method called upon the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function onRead
- *
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function onRead<V = object>(
   handler: IdOperationHandler<any, any, V, any, any>,
@@ -89,16 +96,14 @@ export function onRead<V = object>(
 }
 
 /**
- * @summary Defines a behaviour to set on the defined {@link DBOperations.DELETE}
- *
- * @param {OperationHandler<any>} handler The method called upon the operation
- * @param data
- *
- * @see on
- *
+ * @description Decorator for handling delete operations
+ * @summary Defines a behavior to execute during delete operations
+ * @template V - Type for metadata, defaults to object
+ * @param {OperationHandler<any, any, V, any, any>} handler - The method called upon the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function onDelete
- *
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function onDelete<V = object>(
   handler: OperationHandler<any, any, V, any, any>,
@@ -108,16 +113,14 @@ export function onDelete<V = object>(
 }
 
 /**
- * @summary Defines a behaviour to set on the defined {@link DBOperations.DELETE}
- *
- * @param {OperationHandler<any>} handler The method called upon the operation
- * @param data
- *
- * @see on
- *
+ * @description Decorator for handling all operation types
+ * @summary Defines a behavior to execute during any database operation
+ * @template V - Type for metadata, defaults to object
+ * @param {OperationHandler<any, any, V, any, any>} handler - The method called upon the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function onAny
- *
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function onAny<V = object>(
   handler: OperationHandler<any, any, V, any, any>,
@@ -127,17 +130,21 @@ export function onAny<V = object>(
 }
 
 /**
- * @summary Defines a behaviour to set on the defined {@link DBOperations}
- *
- * @param {OperationKeys[] | DBOperations} op One of {@link DBOperations}
- * @param {OperationHandler<any>} handler The method called upon the operation
- * @param data
- *
- * ex: handler(...args, ...props.map(p => target[p]))
- *
+ * @description Base decorator for handling database operations
+ * @summary Defines a behavior to execute during specified database operations
+ * @template V - Type for metadata, defaults to object
+ * @param {OperationKeys[] | DBOperations} [op=DBOperations.ALL] - One or more operation types to handle
+ * @param {OperationHandler<any, any, V, any, any>} handler - The method called upon the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function on
- *
- * @category PropertyDecorators
+ * @category Property Decorators
+ * @example
+ * // Example usage:
+ * class MyModel {
+ *   @on(DBOperations.CREATE, myHandler)
+ *   myProperty: string;
+ * }
  */
 export function on<V = object>(
   op: OperationKeys[] = DBOperations.ALL,
@@ -147,16 +154,14 @@ export function on<V = object>(
   return operation(OperationKeys.ON, op, handler, data);
 }
 /**
- * @summary Defines a behaviour to set after the defined {@link DBOperations.CREATE_UPDATE}
- *
- * @param {StandardOperationHandler | UpdateOperationHandler} handler The method called upon the operation
- * @param data
- *
- * @see after
- *
+ * @description Decorator for handling post-create and post-update operations
+ * @summary Defines a behavior to execute after both create and update operations
+ * @template V - Type for metadata, defaults to object
+ * @param {StandardOperationHandler<any, any, V, any, any> | UpdateOperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function afterCreateUpdate
- *
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function afterCreateUpdate<V = object>(
   handler:
@@ -168,16 +173,14 @@ export function afterCreateUpdate<V = object>(
 }
 
 /**
- * @summary Defines a behaviour to set after the defined {@link DBOperations.UPDATE}
- *
- * @param {UpdateOperationHandler<any>} handler The method called upon the operation
- * @param data
- *
- * @see after
- *
+ * @description Decorator for handling post-update operations
+ * @summary Defines a behavior to execute after update operations
+ * @template V - Type for metadata, defaults to object
+ * @param {UpdateOperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function afterUpdate
- *
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function afterUpdate<V = object>(
   handler: UpdateOperationHandler<any, any, V, any, any>,
@@ -187,16 +190,14 @@ export function afterUpdate<V = object>(
 }
 
 /**
- * @summary Defines a behaviour to set after the defined {@link DBOperations.CREATE}
- *
- * @param {StandardOperationHandler} handler The method called upon the operation
- * @param data
- *
- * @see after
- *
+ * @description Decorator for handling post-create operations
+ * @summary Defines a behavior to execute after create operations
+ * @template V - Type for metadata, defaults to object
+ * @param {StandardOperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function afterCreate
- *
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function afterCreate<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
@@ -206,16 +207,14 @@ export function afterCreate<V = object>(
 }
 
 /**
- * @summary Defines a behaviour to set after the defined {@link DBOperations.READ}
- *
- * @param {StandardOperationHandler} handler The method called upon the operation
- * @param data
- *
- * @see after
- *
+ * @description Decorator for handling post-read operations
+ * @summary Defines a behavior to execute after read operations
+ * @template V - Type for metadata, defaults to object
+ * @param {StandardOperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function afterRead
- *
- * @category Decorators
+ * @category Property Decorators
  */
 export function afterRead<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
@@ -224,16 +223,14 @@ export function afterRead<V = object>(
   return after(DBOperations.READ, handler, data);
 }
 /**
- * @summary Defines a behaviour to set after the defined {@link DBOperations.DELETE}
- *
- * @param {StandardOperationHandler<any>} handler The method called upon the operation
- * @param data
- *
- * @see after
- *
+ * @description Decorator for handling post-delete operations
+ * @summary Defines a behavior to execute after delete operations
+ * @template V - Type for metadata, defaults to object
+ * @param {StandardOperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function afterDelete
- *
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function afterDelete<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
@@ -243,16 +240,14 @@ export function afterDelete<V = object>(
 }
 
 /**
- * @summary Defines a behaviour to set after the defined {@link DBOperations.DELETE}
- *
- * @param {StandardOperationHandler<any>} handler The method called upon the operation
- * @param data
- *
- * @see after
- *
+ * @description Decorator for handling post-operation for all operation types
+ * @summary Defines a behavior to execute after any database operation
+ * @template V - Type for metadata, defaults to object
+ * @param {StandardOperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function afterAny
- *
- * @category PropertyDecorators
+ * @category Property Decorators
  */
 export function afterAny<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
@@ -262,19 +257,21 @@ export function afterAny<V = object>(
 }
 
 /**
- * @summary Defines a behaviour to set on the defined {@link DBOperations}
- *
- * @param {OperationKeys[] | DBOperations} op One of {@link DBOperations}
- * @param {OperationHandler} handler The method called upon the operation
- *
- * ex: handler(...args, ...props.map(p => target[p]))
- *
- * @param op
- * @param handler
- * @param data
+ * @description Base decorator for handling post-operation behaviors
+ * @summary Defines a behavior to execute after specified database operations
+ * @template V - Type for metadata, defaults to object
+ * @param {OperationKeys[] | DBOperations} [op=DBOperations.ALL] - One or more operation types to handle
+ * @param {OperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {V} [data] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function after
- *
- * @category PropertyDecorators
+ * @category Property Decorators
+ * @example
+ * // Example usage:
+ * class MyModel {
+ *   @after(DBOperations.CREATE, myHandler)
+ *   myProperty: string;
+ * }
  */
 export function after<V = object>(
   op: OperationKeys[] = DBOperations.ALL,
@@ -284,6 +281,34 @@ export function after<V = object>(
   return operation(OperationKeys.AFTER, op, handler, data);
 }
 
+/**
+ * @description Core decorator factory for operation handlers
+ * @summary Creates decorators that register handlers for database operations
+ * @template V - Type for metadata, defaults to object
+ * @param {OperationKeys.ON | OperationKeys.AFTER} baseOp - Whether the handler runs during or after the operation
+ * @param {OperationKeys[]} [operation=DBOperations.ALL] - The specific operations to handle
+ * @param {OperationHandler<any, any, V, any, any>} handler - The handler function to execute
+ * @param {V} [dataToAdd] - Optional metadata to pass to the handler
+ * @return {PropertyDecorator} A decorator that can be applied to class properties
+ * @function operation
+ * @category Property Decorators
+ * @mermaid
+ * sequenceDiagram
+ *   participant Client
+ *   participant Decorator as @operation
+ *   participant Operations as Operations Registry
+ *   participant Handler
+ *
+ *   Client->>Decorator: Apply to property
+ *   Decorator->>Operations: Register handler
+ *   Decorator->>Decorator: Store metadata
+ *
+ *   Note over Client,Handler: Later, during operation execution
+ *   Client->>Operations: Execute operation
+ *   Operations->>Handler: Call registered handler
+ *   Handler-->>Operations: Return result
+ *   Operations-->>Client: Return final result
+ */
 export function operation<V = object>(
   baseOp: OperationKeys.ON | OperationKeys.AFTER,
   operation: OperationKeys[] = DBOperations.ALL,

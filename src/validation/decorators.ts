@@ -20,13 +20,12 @@ import { Context } from "../repository/Context";
 import { RepositoryFlags } from "../repository/types";
 
 /**
- * Marks the property as readonly.
- *
- * @param {string} [message] the error message. Defaults to {@link DEFAULT_ERROR_MESSAGES.READONLY.INVALID}
- *
- * @decorator readonly
- *
- * @category Decorators
+ * @description Prevents a property from being modified after initial creation.
+ * @summary Marks the property as readonly, causing validation errors if attempts are made to modify it during updates.
+ * @param {string} [message] - The error message to display when validation fails. Defaults to {@link DEFAULT_ERROR_MESSAGES.READONLY.INVALID}
+ * @return {PropertyDecorator} A decorator function that can be applied to class properties
+ * @function readonly
+ * @category Property Decorators
  */
 export function readonly(
   message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID
@@ -41,6 +40,22 @@ export function readonly(
     .apply();
 }
 
+/**
+ * @description Handler function that sets a timestamp property to the current timestamp.
+ * @summary Updates a model property with the current timestamp from the repository context.
+ * @template M - The model type extending Model
+ * @template R - The repository type extending IRepository
+ * @template V - The data type for the operation
+ * @template F - The repository flags type
+ * @template C - The context type
+ * @param {C} context - The repository context containing the current timestamp
+ * @param {V} data - The data being processed
+ * @param {keyof M} key - The property key to update
+ * @param {M} model - The model instance being updated
+ * @return {Promise<void>} A promise that resolves when the timestamp has been set
+ * @function timestampHandler
+ * @memberOf module:db-decorators
+ */
 export async function timestampHandler<
   M extends Model,
   R extends IRepository<M, F, C>,
@@ -52,9 +67,8 @@ export async function timestampHandler<
 }
 
 /**
- * Marks the property as timestamp.
- * Makes it {@link required}
- * Makes it a {@link date}
+ * @description Automatically manages timestamp properties for tracking creation and update times.
+ * @summary Marks the property as a timestamp, making it required and ensuring it's a valid date. The property will be automatically updated with the current timestamp during specified operations.
  *
  * Date Format:
  *
@@ -74,13 +88,30 @@ export async function timestampHandler<
  *      S = miliseconds
  * </pre>
  *
- * @param {string[]} operation The {@link DBOperations} to act on. Defaults to {@link DBOperations.CREATE_UPDATE}
- * @param {string} [format] The TimeStamp format. defaults to {@link DEFAULT_TIMESTAMP_FORMAT}
- * @param {{new: UpdateValidator}} [validator] defaults to {@link TimestampValidator}
+ * @param {OperationKeys[]} operation - The operations to act on. Defaults to {@link DBOperations.CREATE_UPDATE}
+ * @param {string} [format] - The timestamp format. Defaults to {@link DEFAULT_TIMESTAMP_FORMAT}
+ * @return {PropertyDecorator} A decorator function that can be applied to class properties
+ * @function timestamp
+ * @category Property Decorators
+ * @mermaid
+ * sequenceDiagram
+ *   participant C as Client
+ *   participant M as Model
+ *   participant T as TimestampDecorator
+ *   participant V as Validator
  *
- * @decorator timestamp
+ *   C->>M: Create/Update model
+ *   M->>T: Process timestamp property
+ *   T->>M: Apply required validation
+ *   T->>M: Apply date format validation
  *
- * @category Decorators
+ *   alt Update operation
+ *     T->>V: Register timestamp validator
+ *     V->>M: Validate timestamp is newer
+ *   end
+ *
+ *   T->>M: Set current timestamp
+ *   M->>C: Return updated model
  */
 export function timestamp(
   operation: OperationKeys[] = DBOperations.CREATE_UPDATE as unknown as OperationKeys[],
@@ -105,6 +136,22 @@ export function timestamp(
     .apply();
 }
 
+/**
+ * @description Handler function that serializes a property to JSON string during create and update operations.
+ * @summary Converts a complex object property to a JSON string before storing it in the database.
+ * @template M - The model type extending Model
+ * @template R - The repository type extending IRepository
+ * @template V - The data type for the operation
+ * @template F - The repository flags type
+ * @template C - The context type
+ * @param {C} context - The repository context
+ * @param {V} data - The data being processed
+ * @param {keyof M} key - The property key to serialize
+ * @param {M} model - The model instance being processed
+ * @return {Promise<void>} A promise that resolves when the property has been serialized
+ * @function serializeOnCreateUpdate
+ * @memberOf module:db-decorators
+ */
 export async function serializeOnCreateUpdate<
   M extends Model,
   R extends IRepository<M, F, C>,
@@ -123,6 +170,22 @@ export async function serializeOnCreateUpdate<
   }
 }
 
+/**
+ * @description Handler function that deserializes a property from JSON string after database operations.
+ * @summary Converts a JSON string property back to its original complex object form after retrieving it from the database.
+ * @template M - The model type extending Model
+ * @template R - The repository type extending IRepository
+ * @template V - The data type for the operation
+ * @template F - The repository flags type
+ * @template C - The context type
+ * @param {C} context - The repository context
+ * @param {V} data - The data being processed
+ * @param {keyof M} key - The property key to deserialize
+ * @param {M} model - The model instance being processed
+ * @return {Promise<void>} A promise that resolves when the property has been deserialized
+ * @function serializeAfterAll
+ * @memberOf module:db-decorators
+ */
 export async function serializeAfterAll<
   M extends Model,
   R extends IRepository<M, F, C>,
@@ -143,12 +206,31 @@ export async function serializeAfterAll<
 }
 
 /**
- * @summary Serialize Decorator
- * @description properties decorated will the serialized before stored in the db
- *
+ * @description Enables automatic JSON serialization and deserialization for complex object properties.
+ * @summary Decorator that automatically converts complex objects to JSON strings before storing in the database and back to objects when retrieving them.
+ * @return {PropertyDecorator} A decorator function that can be applied to class properties
  * @function serialize
+ * @category Property Decorators
+ * @mermaid
+ * sequenceDiagram
+ *   participant C as Client
+ *   participant M as Model
+ *   participant S as SerializeDecorator
+ *   participant DB as Database
  *
- * @memberOf module:wallet-db.Decorators
+ *   Note over C,DB: Create/Update Flow
+ *   C->>M: Set complex object property
+ *   M->>S: Process property (create/update)
+ *   S->>M: Convert to JSON string
+ *   M->>DB: Store serialized data
+ *
+ *   Note over C,DB: Retrieval Flow
+ *   C->>M: Request model
+ *   M->>DB: Fetch data
+ *   DB->>M: Return with serialized property
+ *   M->>S: Process property (after all ops)
+ *   S->>M: Parse JSON back to object
+ *   M->>C: Return model with deserialized property
  */
 export function serialize() {
   return apply(

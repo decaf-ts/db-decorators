@@ -7,14 +7,29 @@ import { Context } from "../repository";
 import { RepositoryFlags } from "../repository/types";
 
 /**
- * @summary Holds the registered operation handlers
- *
+ * @description Registry for database operation handlers
+ * @summary Manages and stores operation handlers for different model properties and operations
  * @class OperationsRegistry
- * @implements IRegistry<OperationHandler<any>>
- *
- * @see OperationHandler
- *
- * @category Operations
+ * @template M - Model type
+ * @template R - Repository type
+ * @template V - Metadata type
+ * @template F - Repository flags
+ * @template C - Context type
+ * @example
+ * // Create a registry and register a handler
+ * const registry = new OperationsRegistry();
+ * registry.register(myHandler, OperationKeys.CREATE, targetModel, 'propertyName');
+ * 
+ * // Get handlers for a specific operation
+ * const handlers = registry.get(targetModel.constructor.name, 'propertyName', 'onCreate');
+ * 
+ * @mermaid
+ * classDiagram
+ *   class OperationsRegistry {
+ *     -cache: Record~string, Record~string|symbol, Record~string, Record~string, OperationHandler~~~~
+ *     +get(target, propKey, operation, accum)
+ *     +register(handler, operation, target, propKey)
+ *   }
  */
 export class OperationsRegistry {
   private readonly cache: Record<
@@ -26,12 +41,18 @@ export class OperationsRegistry {
   > = {};
 
   /**
-   * @summary retrieves an {@link OperationHandler} if it exists
-   * @param {string} target
-   * @param {string} propKey
-   * @param {string} operation
-   * @param accum
-   * @return {OperationHandler | undefined}
+   * @description Retrieves operation handlers for a specific target and operation
+   * @summary Finds all registered handlers for a given target, property, and operation, including from parent classes
+   * @template M - Model type extending Model
+   * @template R - Repository type extending IRepository
+   * @template V - Metadata type
+   * @template F - Repository flags extending RepositoryFlags
+   * @template C - Context type extending Context<F>
+   * @param {string | Record<string, any>} target - The target class name or object
+   * @param {string} propKey - The property key to get handlers for
+   * @param {string} operation - The operation key to get handlers for
+   * @param {OperationHandler<M, R, V, F, C>[]} [accum] - Accumulator for recursive calls
+   * @return {OperationHandler<M, R, V, F, C>[] | undefined} Array of handlers or undefined if none found
    */
   get<
     M extends Model,
@@ -69,11 +90,18 @@ export class OperationsRegistry {
   }
 
   /**
-   * @summary Registers an {@link OperationHandler}
-   * @param {OperationHandler} handler
-   * @param {string} operation
-   * @param {{}} target
-   * @param {string | symbol} propKey
+   * @description Registers an operation handler for a specific target and operation
+   * @summary Stores a handler in the registry for a given target, property, and operation
+   * @template M - Model type extending Model
+   * @template R - Repository type extending IRepository
+   * @template V - Metadata type
+   * @template F - Repository flags extending RepositoryFlags
+   * @template C - Context type extending Context<F>
+   * @param {OperationHandler<M, R, V, F, C>} handler - The handler function to register
+   * @param {OperationKeys} operation - The operation key to register the handler for
+   * @param {M} target - The target model instance
+   * @param {string | symbol} propKey - The property key to register the handler for
+   * @return {void}
    */
   register<
     M extends Model,

@@ -6,6 +6,14 @@ import {
 } from "@decaf-ts/decorator-validation";
 import { UpdateValidationKeys } from "./constants";
 
+/**
+ * @description Generates a key for update validation metadata.
+ * @summary Builds the key to store as metadata under Reflections for update validation by prefixing the provided key with the update validation prefix.
+ * @param {string} key - The base key to be prefixed
+ * @return {string} The complete metadata key for update validation
+ * @function updateKey
+ * @memberOf module:db-decorators
+ */
 Validation.updateKey = function (key: string) {
   return UpdateValidationKeys.REFLECT + key;
 };
