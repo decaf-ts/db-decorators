@@ -8,6 +8,97 @@ import { findPrimaryKey } from "../identity/utils";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
 
+/**
+ * @description Base repository implementation providing CRUD operations for models.
+ * @summary The BaseRepository class serves as a foundation for repository implementations, providing
+ * abstract and concrete methods for creating, reading, updating, and deleting model instances.
+ * It handles operation lifecycles including prefix and suffix operations, and enforces decorators.
+ * @template M - The model type extending Model
+ * @template F - The repository flags type, defaults to RepositoryFlags
+ * @template C - The context type, defaults to Context<F>
+ * @param {Constructor<M>} clazz - The constructor for the model class
+ * @class BaseRepository
+ * @example
+ * class UserModel extends Model {
+ *   @id()
+ *   id: string;
+ *   
+ *   @required()
+ *   name: string;
+ * }
+ * 
+ * class UserRepository extends BaseRepository<UserModel> {
+ *   constructor() {
+ *     super(UserModel);
+ *   }
+ *   
+ *   async create(model: UserModel): Promise<UserModel> {
+ *     // Implementation
+ *     return model;
+ *   }
+ *   
+ *   async read(key: string): Promise<UserModel> {
+ *     // Implementation
+ *     return new UserModel({ id: key, name: 'User' });
+ *   }
+ *   
+ *   async update(model: UserModel): Promise<UserModel> {
+ *     // Implementation
+ *     return model;
+ *   }
+ *   
+ *   async delete(key: string): Promise<UserModel> {
+ *     // Implementation
+ *     const model = await this.read(key);
+ *     return model;
+ *   }
+ * }
+ * 
+ * @mermaid
+ * sequenceDiagram
+ *   participant C as Client
+ *   participant R as Repository
+ *   participant P as Prefix Methods
+ *   participant D as Database
+ *   participant S as Suffix Methods
+ *   participant V as Validators/Decorators
+ *   
+ *   Note over C,V: Create Operation
+ *   C->>R: create(model)
+ *   R->>P: createPrefix(model)
+ *   P->>V: enforceDBDecorators(ON)
+ *   P->>D: Database operation
+ *   D->>S: createSuffix(model)
+ *   S->>V: enforceDBDecorators(AFTER)
+ *   S->>C: Return model
+ *   
+ *   Note over C,V: Read Operation
+ *   C->>R: read(key)
+ *   R->>P: readPrefix(key)
+ *   P->>V: enforceDBDecorators(ON)
+ *   P->>D: Database operation
+ *   D->>S: readSuffix(model)
+ *   S->>V: enforceDBDecorators(AFTER)
+ *   S->>C: Return model
+ *   
+ *   Note over C,V: Update Operation
+ *   C->>R: update(model)
+ *   R->>P: updatePrefix(model)
+ *   P->>V: enforceDBDecorators(ON)
+ *   P->>D: Database operation
+ *   D->>S: updateSuffix(model)
+ *   S->>V: enforceDBDecorators(AFTER)
+ *   S->>C: Return model
+ *   
+ *   Note over C,V: Delete Operation
+ *   C->>R: delete(key)
+ *   R->>P: deletePrefix(key)
+ *   P->>V: enforceDBDecorators(ON)
+ *   P->>D: Database operation
+ *   D->>S: deleteSuffix(model)
+ *   S->>V: enforceDBDecorators(AFTER)
+ *   S->>C: Return model
+ */
 export abstract class BaseRepository<
   M extends Model,
   F extends RepositoryFlags = RepositoryFlags,
@@ -18,12 +109,24 @@ export abstract class BaseRepository<
   private _pk!: keyof M;
   private _pkProps!: any;
 
+  /**
+   * @description Gets the model class constructor.
+   * @summary Retrieves the constructor for the model class associated with this repository.
+   * Throws an error if no class definition is found.
+   * @return {Constructor<M>} The constructor for the model class
+   */
   get class() {
     if (!this._class)
       throw new InternalError(`No class definition found for this repository`);
     return this._class;
   }
 
+  /**
+   * @description Gets the primary key property name of the model.
+   * @summary Retrieves the name of the property that serves as the primary key for the model.
+   * If not already determined, it finds the primary key using the model's decorators.
+   * @return {keyof M} The name of the primary key property
+   */
   get pk(): keyof M {
     if (!this._pk) {
       const { id, props } = findPrimaryKey(new this.class());
@@ -33,6 +136,12 @@ export abstract class BaseRepository<
     return this._pk;
   }
 
+  /**
+   * @description Gets the primary key properties.
+   * @summary Retrieves the properties associated with the primary key of the model.
+   * If not already determined, it triggers the pk getter to find the primary key properties.
+   * @return {any} The properties of the primary key
+   */
   protected get pkProps(): any {
     if (!this._pkProps) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -56,12 +165,37 @@ export abstract class BaseRepository<
     });
   }
 
+  /**
+   * @description Creates a new model instance in the repository.
+   * @summary Persists a new model instance to the underlying data store.
+   * This method must be implemented by concrete repository classes.
+   * @param {M} model - The model instance to create
+   * @param {any[]} args - Additional arguments for the create operation
+   * @return {Promise<M>} A promise that resolves to the created model instance
+   */
   abstract create(model: M, ...args: any[]): Promise<M>;
 
+  /**
+   * @description Creates multiple model instances in the repository.
+   * @summary Persists multiple model instances to the underlying data store by calling
+   * the create method for each model in the array.
+   * @param {M[]} models - The array of model instances to create
+   * @param {any[]} args - Additional arguments for the create operation
+   * @return {Promise<M[]>} A promise that resolves to an array of created model instances
+   */
   async createAll(models: M[], ...args: any[]): Promise<M[]> {
     return Promise.all(models.map((m) => this.create(m, ...args)));
   }
 
+  /**
+   * @description Prepares a model for creation and executes pre-creation operations.
+   * @summary Processes a model before it is created in the data store. This includes
+   * creating a context, instantiating a new model instance, and enforcing any decorators
+   * that should be applied before creation.
+   * @param {M} model - The model instance to prepare for creation
+   * @param {any[]} args - Additional arguments for the create operation
+   * @return {Promise<[M, ...any[]]>} A promise that resolves to an array containing the prepared model and context arguments
+   */
   protected async createPrefix(model: M, ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
       OperationKeys.CREATE,
@@ -79,6 +213,14 @@ export abstract class BaseRepository<
     return [model, ...contextArgs.args];
   }
 
+  /**
+   * @description Processes a model after creation and executes post-creation operations.
+   * @summary Finalizes a model after it has been created in the data store. This includes
+   * enforcing any decorators that should be applied after creation.
+   * @param {M} model - The model instance that was created
+   * @param {C} context - The context for the operation
+   * @return {Promise<M>} A promise that resolves to the processed model instance
+   */
   protected async createSuffix(model: M, context: C) {
     await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
@@ -90,6 +232,15 @@ export abstract class BaseRepository<
     return model;
   }
 
+  /**
+   * @description Prepares multiple models for creation and executes pre-creation operations.
+   * @summary Processes multiple models before they are created in the data store. This includes
+   * creating a context, instantiating new model instances, and enforcing any decorators
+   * that should be applied before creation for each model.
+   * @param {M[]} models - The array of model instances to prepare for creation
+   * @param {any[]} args - Additional arguments for the create operation
+   * @return {Promise<[M[], ...any[]]>} A promise that resolves to an array containing the prepared models and context arguments
+   */
   protected async createAllPrefix(models: M[], ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
       OperationKeys.CREATE,
@@ -112,6 +263,14 @@ export abstract class BaseRepository<
     return [models, ...contextArgs.args];
   }
 
+  /**
+   * @description Processes multiple models after creation and executes post-creation operations.
+   * @summary Finalizes multiple models after they have been created in the data store. This includes
+   * enforcing any decorators that should be applied after creation for each model.
+   * @param {M[]} models - The array of model instances that were created
+   * @param {C} context - The context for the operation
+   * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
+   */
   protected async createAllSuffix(models: M[], context: C) {
     await Promise.all(
       models.map((m) =>
@@ -127,12 +286,36 @@ export abstract class BaseRepository<
     return models;
   }
 
+  /**
+   * @description Retrieves a model instance from the repository by its primary key.
+   * @summary Fetches a model instance from the underlying data store using its primary key.
+   * This method must be implemented by concrete repository classes.
+   * @param {string | number} key - The primary key of the model to retrieve
+   * @param {any[]} args - Additional arguments for the read operation
+   * @return {Promise<M>} A promise that resolves to the retrieved model instance
+   */
   abstract read(key: string | number, ...args: any[]): Promise<M>;
 
+  /**
+   * @description Retrieves multiple model instances from the repository by their primary keys.
+   * @summary Fetches multiple model instances from the underlying data store using their primary keys
+   * by calling the read method for each key in the array.
+   * @param {string[] | number[]} keys - The array of primary keys of the models to retrieve
+   * @param {any[]} args - Additional arguments for the read operation
+   * @return {Promise<M[]>} A promise that resolves to an array of retrieved model instances
+   */
   async readAll(keys: string[] | number[], ...args: any[]): Promise<M[]> {
     return await Promise.all(keys.map((id) => this.read(id, ...args)));
   }
 
+  /**
+   * @description Processes a model after retrieval and executes post-read operations.
+   * @summary Finalizes a model after it has been retrieved from the data store. This includes
+   * enforcing any decorators that should be applied after reading.
+   * @param {M} model - The model instance that was retrieved
+   * @param {C} context - The context for the operation
+   * @return {Promise<M>} A promise that resolves to the processed model instance
+   */
   protected async readSuffix(model: M, context: C) {
     await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
@@ -144,6 +327,15 @@ export abstract class BaseRepository<
     return model;
   }
 
+  /**
+   * @description Prepares for reading a model and executes pre-read operations.
+   * @summary Processes a key before a model is read from the data store. This includes
+   * creating a context, instantiating a new model instance with the key, and enforcing any decorators
+   * that should be applied before reading.
+   * @param {string} key - The primary key of the model to read
+   * @param {any[]} args - Additional arguments for the read operation
+   * @return {Promise<[string, ...any[]]>} A promise that resolves to an array containing the key and context arguments
+   */
   protected async readPrefix(key: string, ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
       OperationKeys.READ,
@@ -162,6 +354,15 @@ export abstract class BaseRepository<
     return [key, ...contextArgs.args];
   }
 
+  /**
+   * @description Prepares for reading multiple models and executes pre-read operations.
+   * @summary Processes multiple keys before models are read from the data store. This includes
+   * creating a context, instantiating new model instances with the keys, and enforcing any decorators
+   * that should be applied before reading for each key.
+   * @param {string[] | number[]} keys - The array of primary keys of the models to read
+   * @param {any[]} args - Additional arguments for the read operation
+   * @return {Promise<[string[] | number[], ...any[]]>} A promise that resolves to an array containing the keys and context arguments
+   */
   protected async readAllPrefix(keys: string[] | number[], ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
       OperationKeys.READ,
@@ -184,6 +385,14 @@ export abstract class BaseRepository<
     return [keys, ...contextArgs.args];
   }
 
+  /**
+   * @description Processes multiple models after retrieval and executes post-read operations.
+   * @summary Finalizes multiple models after they have been retrieved from the data store. This includes
+   * enforcing any decorators that should be applied after reading for each model.
+   * @param {M[]} models - The array of model instances that were retrieved
+   * @param {C} context - The context for the operation
+   * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
+   */
   protected async readAllSuffix(models: M[], context: C) {
     await Promise.all(
       models.map((m) =>
@@ -199,12 +408,36 @@ export abstract class BaseRepository<
     return models;
   }
 
+  /**
+   * @description Updates an existing model instance in the repository.
+   * @summary Updates an existing model instance in the underlying data store.
+   * This method must be implemented by concrete repository classes.
+   * @param {M} model - The model instance to update
+   * @param {any[]} args - Additional arguments for the update operation
+   * @return {Promise<M>} A promise that resolves to the updated model instance
+   */
   abstract update(model: M, ...args: any[]): Promise<M>;
 
+  /**
+   * @description Updates multiple model instances in the repository.
+   * @summary Updates multiple model instances in the underlying data store by calling
+   * the update method for each model in the array.
+   * @param {M[]} models - The array of model instances to update
+   * @param {any[]} args - Additional arguments for the update operation
+   * @return {Promise<M[]>} A promise that resolves to an array of updated model instances
+   */
   async updateAll(models: M[], ...args: any): Promise<M[]> {
     return Promise.all(models.map((m) => this.update(m, ...args)));
   }
 
+  /**
+   * @description Processes a model after update and executes post-update operations.
+   * @summary Finalizes a model after it has been updated in the data store. This includes
+   * enforcing any decorators that should be applied after updating.
+   * @param {M} model - The model instance that was updated
+   * @param {C} context - The context for the operation
+   * @return {Promise<M>} A promise that resolves to the processed model instance
+   */
   protected async updateSuffix(model: M, context: C) {
     await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
@@ -216,6 +449,15 @@ export abstract class BaseRepository<
     return model;
   }
 
+  /**
+   * @description Prepares a model for update and executes pre-update operations.
+   * @summary Processes a model before it is updated in the data store. This includes
+   * creating a context, validating the primary key, retrieving the existing model,
+   * and enforcing any decorators that should be applied before updating.
+   * @param {M} model - The model instance to prepare for update
+   * @param {any[]} args - Additional arguments for the update operation
+   * @return {Promise<[M, ...any[]]>} A promise that resolves to an array containing the prepared model and context arguments
+   */
   protected async updatePrefix(model: M, ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
       OperationKeys.UPDATE,
@@ -239,6 +481,15 @@ export abstract class BaseRepository<
     return [model, ...contextArgs.args];
   }
 
+  /**
+   * @description Prepares multiple models for update and executes pre-update operations.
+   * @summary Processes multiple models before they are updated in the data store. This includes
+   * creating a context, instantiating new model instances, and enforcing any decorators
+   * that should be applied before updating for each model.
+   * @param {M[]} models - The array of model instances to prepare for update
+   * @param {any[]} args - Additional arguments for the update operation
+   * @return {Promise<[M[], ...any[]]>} A promise that resolves to an array containing the prepared models and context arguments
+   */
   protected async updateAllPrefix(models: M[], ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
       OperationKeys.UPDATE,
@@ -261,6 +512,14 @@ export abstract class BaseRepository<
     return [models, ...contextArgs.args];
   }
 
+  /**
+   * @description Processes multiple models after update and executes post-update operations.
+   * @summary Finalizes multiple models after they have been updated in the data store. This includes
+   * enforcing any decorators that should be applied after updating for each model.
+   * @param {M[]} models - The array of model instances that were updated
+   * @param {C} context - The context for the operation
+   * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
+   */
   protected async updateAllSuffix(models: M[], context: C) {
     await Promise.all(
       models.map((m) =>
@@ -276,12 +535,36 @@ export abstract class BaseRepository<
     return models;
   }
 
+  /**
+   * @description Deletes a model instance from the repository by its primary key.
+   * @summary Removes a model instance from the underlying data store using its primary key.
+   * This method must be implemented by concrete repository classes.
+   * @param {string | number} key - The primary key of the model to delete
+   * @param {any[]} args - Additional arguments for the delete operation
+   * @return {Promise<M>} A promise that resolves to the deleted model instance
+   */
   abstract delete(key: string | number, ...args: any[]): Promise<M>;
 
+  /**
+   * @description Deletes multiple model instances from the repository by their primary keys.
+   * @summary Removes multiple model instances from the underlying data store using their primary keys
+   * by calling the delete method for each key in the array.
+   * @param {string[] | number[]} keys - The array of primary keys of the models to delete
+   * @param {any[]} args - Additional arguments for the delete operation
+   * @return {Promise<M[]>} A promise that resolves to an array of deleted model instances
+   */
   async deleteAll(keys: string[] | number[], ...args: any[]): Promise<M[]> {
     return Promise.all(keys.map((k) => this.delete(k, ...args)));
   }
 
+  /**
+   * @description Processes a model after deletion and executes post-delete operations.
+   * @summary Finalizes a model after it has been deleted from the data store. This includes
+   * enforcing any decorators that should be applied after deletion.
+   * @param {M} model - The model instance that was deleted
+   * @param {C} context - The context for the operation
+   * @return {Promise<M>} A promise that resolves to the processed model instance
+   */
   protected async deleteSuffix(model: M, context: C) {
     await enforceDBDecorators<M, typeof this, any, F, C>(
       this,
@@ -293,6 +576,15 @@ export abstract class BaseRepository<
     return model;
   }
 
+  /**
+   * @description Prepares for deleting a model and executes pre-delete operations.
+   * @summary Processes a key before a model is deleted from the data store. This includes
+   * creating a context, retrieving the model to be deleted, and enforcing any decorators
+   * that should be applied before deletion.
+   * @param {any} key - The primary key of the model to delete
+   * @param {any[]} args - Additional arguments for the delete operation
+   * @return {Promise<[any, ...any[]]>} A promise that resolves to an array containing the key and context arguments
+   */
   protected async deletePrefix(key: any, ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
       OperationKeys.DELETE,
@@ -310,6 +602,15 @@ export abstract class BaseRepository<
     return [key, ...contextArgs.args];
   }
 
+  /**
+   * @description Prepares for deleting multiple models and executes pre-delete operations.
+   * @summary Processes multiple keys before models are deleted from the data store. This includes
+   * creating a context, retrieving the models to be deleted, and enforcing any decorators
+   * that should be applied before deletion for each model.
+   * @param {string[] | number[]} keys - The array of primary keys of the models to delete
+   * @param {any[]} args - Additional arguments for the delete operation
+   * @return {Promise<[string[] | number[], ...any[]]>} A promise that resolves to an array containing the keys and context arguments
+   */
   protected async deleteAllPrefix(keys: string[] | number[], ...args: any[]) {
     const contextArgs = await Context.args<M, C, F>(
       OperationKeys.DELETE,
@@ -331,6 +632,14 @@ export abstract class BaseRepository<
     return [keys, ...contextArgs.args];
   }
 
+  /**
+   * @description Processes multiple models after deletion and executes post-delete operations.
+   * @summary Finalizes multiple models after they have been deleted from the data store. This includes
+   * enforcing any decorators that should be applied after deletion for each model.
+   * @param {M[]} models - The array of model instances that were deleted
+   * @param {C} context - The context for the operation
+   * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
+   */
   protected async deleteAllSuffix(models: M[], context: C) {
     await Promise.all(
       models.map((m) =>
@@ -346,6 +655,14 @@ export abstract class BaseRepository<
     return models;
   }
 
+  /**
+   * @description Merges two model instances into a new instance.
+   * @summary Creates a new model instance by combining properties from an old model and a new model.
+   * Properties from the new model override properties from the old model if they are defined.
+   * @param {M} oldModel - The original model instance
+   * @param {M} model - The new model instance with updated properties
+   * @return {M} A new model instance with merged properties
+   */
   protected merge(oldModel: M, model: M): M {
     const extract = (model: M) =>
       Object.entries(model).reduce((accum: Record<string, any>, [key, val]) => {
@@ -356,6 +673,11 @@ export abstract class BaseRepository<
     return new this.class(Object.assign({}, extract(oldModel), extract(model)));
   }
 
+  /**
+   * @description Returns a string representation of the repository.
+   * @summary Creates a string that identifies this repository by the name of its model class.
+   * @return {string} A string representation of the repository
+   */
   toString() {
     return `${this.class.name} Repository`;
   }
