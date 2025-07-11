@@ -60,7 +60,7 @@ export function validateCompare<M extends Model>(
           UpdateValidationKeys.REFLECT,
           newModel,
           prop
-        ) as ValidationPropertyDecoratorDefinition
+        ) as unknown as ValidationPropertyDecoratorDefinition
       );
 
   let result: ModelErrors | undefined = undefined;
