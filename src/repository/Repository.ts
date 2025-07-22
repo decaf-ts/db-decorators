@@ -82,7 +82,7 @@ export abstract class Repository<
       OperationKeys.ON
     );
 
-    const errors = model.hasErrors();
+    const errors = await Promise.resolve(model.hasErrors());
     if (errors) throw new ValidationError(errors.toString());
 
     return [model, ...contextArgs.args];
@@ -120,16 +120,23 @@ export abstract class Repository<
         return m;
       })
     );
-    const errors = models
-      .map((m) => m.hasErrors())
-      .reduce((accum: string | undefined, e, i) => {
+
+    const modelsValidation = await Promise.all(
+      models.map((m) => Promise.resolve(m.hasErrors()))
+    );
+
+    const errors = modelsValidation.reduce(
+      (accum: string | undefined, e, i) => {
         if (e)
           accum =
             typeof accum === "string"
               ? accum + `\n - ${i}: ${e.toString()}`
               : ` - ${i}: ${e.toString()}`;
         return accum;
-      }, undefined);
+      },
+      undefined
+    );
+
     if (errors) throw new ValidationError(errors);
     return [models, ...contextArgs.args];
   }
@@ -174,7 +181,7 @@ export abstract class Repository<
       oldModel
     );
 
-    const errors = model.hasErrors(oldModel as any);
+    const errors = await Promise.resolve(model.hasErrors(oldModel as any));
     if (errors) throw new ValidationError(errors.toString());
     return [model, ...contextArgs.args];
   }
@@ -220,16 +227,22 @@ export abstract class Repository<
       )
     );
 
-    const errors = models
-      .map((m, i) => m.hasErrors(oldModels[i] as any))
-      .reduce((accum: string | undefined, e, i) => {
+    const modelsValidation = await Promise.all(
+      models.map((m, i) => Promise.resolve(m.hasErrors(oldModels[i] as any)))
+    );
+
+    const errors = modelsValidation.reduce(
+      (accum: string | undefined, e, i) => {
         if (e)
           accum =
             typeof accum === "string"
               ? accum + `\n - ${i}: ${e.toString()}`
               : ` - ${i}: ${e.toString()}`;
         return accum;
-      }, undefined);
+      },
+      undefined
+    );
+
     if (errors) throw new ValidationError(errors);
     return [models, ...contextArgs.args];
   }

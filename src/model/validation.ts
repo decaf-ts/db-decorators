@@ -14,6 +14,12 @@ import { DecoratorMetadata, Reflection } from "@decaf-ts/reflection";
 import { UpdateValidationKeys, UpdateValidator } from "../validation";
 import { findModelId } from "../identity";
 
+// type ModelAsync<M> = M extends Model<infer Async extends boolean> ? Async : never;
+export type ModelConditionalAsync<M> =
+  M extends Model<true>
+    ? Promise<ModelErrorDefinition | undefined>
+    : ModelErrorDefinition | undefined;
+
 /**
  * @description Validates changes between two model versions
  * @summary Compares an old and new model version to validate update operations
@@ -44,11 +50,11 @@ import { findModelId } from "../identity";
  *   end
  *   validateCompare-->>Caller: validation errors or undefined
  */
-export function validateCompare<M extends Model>(
+export function validateCompare<M extends Model<any>>(
   oldModel: M,
   newModel: M,
   ...exceptions: string[]
-): ModelErrorDefinition | undefined {
+): ModelConditionalAsync<M> {
   const decoratedProperties: ValidationPropertyDecoratorDefinition[] = [];
   for (const prop in newModel)
     if (

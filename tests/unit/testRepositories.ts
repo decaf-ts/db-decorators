@@ -1,5 +1,5 @@
-import {InheritanceTestModel, TestModel} from "./TestModel";
-import {RamRepository} from "./RamRepository";
+import { InheritanceTestModel, TestModel, UserModel } from "./TestModel";
+import { RamRepository } from "./RamRepository";
 
 export class TestRamRepository extends RamRepository<TestModel> {
   constructor() {
@@ -10,5 +10,11 @@ export class TestRamRepository extends RamRepository<TestModel> {
 export class InheritanceRamRepository extends RamRepository<InheritanceTestModel> {
   constructor() {
     super(InheritanceTestModel);
+  }
+}
+
+export class UserRamRepository extends RamRepository<UserModel> {
+  constructor() {
+    super(UserModel);
   }
 }
