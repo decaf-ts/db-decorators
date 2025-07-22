@@ -9,6 +9,7 @@ import {
   Validation,
   ValidationKeys,
   ValidationPropertyDecoratorDefinition,
+  ValidationPropertyDecoratorDefinitionAsync,
 } from "@decaf-ts/decorator-validation";
 import { DecoratorMetadata, Reflection } from "@decaf-ts/reflection";
 import { UpdateValidationKeys, UpdateValidator } from "../validation";
@@ -19,6 +20,30 @@ export type ModelConditionalAsync<M> =
   M extends Model<true>
     ? Promise<ModelErrorDefinition | undefined>
     : ModelErrorDefinition | undefined;
+
+export function getValidatableProperties(
+  obj: any,
+  propsToIgnore: string[]
+): ValidationPropertyDecoratorDefinitionAsync[] {
+  const decoratedProperties: ValidationPropertyDecoratorDefinitionAsync[] = [];
+
+  for (const prop in obj) {
+    if (
+      Object.prototype.hasOwnProperty.call(obj, prop) &&
+      !propsToIgnore.includes(prop)
+    ) {
+      decoratedProperties.push(
+        Reflection.getPropertyDecorators(
+          UpdateValidationKeys.REFLECT,
+          obj,
+          prop
+        ) as unknown as ValidationPropertyDecoratorDefinitionAsync
+      );
+    }
+  }
+
+  return decoratedProperties;
+}
 
 /**
  * @description Validates changes between two model versions
@@ -53,21 +78,11 @@ export type ModelConditionalAsync<M> =
 export function validateCompare<M extends Model<any>>(
   oldModel: M,
   newModel: M,
+  async: boolean = false,
   ...exceptions: string[]
 ): ModelConditionalAsync<M> {
-  const decoratedProperties: ValidationPropertyDecoratorDefinition[] = [];
-  for (const prop in newModel)
-    if (
-      Object.prototype.hasOwnProperty.call(newModel, prop) &&
-      exceptions.indexOf(prop) === -1
-    )
-      decoratedProperties.push(
-        Reflection.getPropertyDecorators(
-          UpdateValidationKeys.REFLECT,
-          newModel,
-          prop
-        ) as unknown as ValidationPropertyDecoratorDefinition
-      );
+  const decoratedProperties: ValidationPropertyDecoratorDefinitionAsync[] =
+    getValidatableProperties(newModel, exceptions);
 
   let result: ModelErrors | undefined = undefined;
 
@@ -164,7 +179,7 @@ export function validateCompare<M extends Model<any>>(
                     throw new Error(`Invalid attribute type ${c}`);
                 }
 
-                err = currentList
+                err = (currentList || [])
                   .map((v: Validatable) => {
                     const id = findModelId(v as any, true);
                     if (!id) return "Failed to find model id";

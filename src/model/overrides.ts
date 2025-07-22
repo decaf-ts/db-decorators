@@ -26,9 +26,20 @@ Model.prototype.hasErrors = function <M extends Model<boolean>>(
     previousVersion = undefined;
   }
 
-  const errs = validate(this, this.isAsync(), ...exclusions);
+  const async = this.isAsync();
+  const errs = validate(this, async, ...exclusions);
+
+  if (async) {
+    return Promise.resolve(errs).then((resolvedErrs) => {
+      if (resolvedErrs || !previousVersion) {
+        return resolvedErrs;
+      }
+      return validateCompare(previousVersion, this, async, ...exclusions);
+    }) as any;
+  }
+
   if (errs || !previousVersion) return errs as any;
 
   // @ts-expect-error Overriding Model prototype method with dynamic conditional return type.
-  return validateCompare(previousVersion, this, ...exclusions);
+  return validateCompare(previousVersion, this, async, ...exclusions);
 };

@@ -63,23 +63,24 @@ export class PromiseValidator extends AsyncValidator<PromiseValidatorOptions> {
     options?: PromiseValidatorOptions
   ): Promise<string | undefined> {
     const delay = options?.timeout ?? 100;
-    if (value > delay) {
-      return CUSTOM_VALIDATION_ERROR_MESSAGE;
-    }
-
     await new Promise((res) => setTimeout(res, delay));
+    if (value > delay) return CUSTOM_VALIDATION_ERROR_MESSAGE;
     return undefined;
   }
 }
 
 export const testAsync = (message: string = PROMISE_ERROR_MESSAGE) => {
+  // return (target: any, propertyKey: string | symbol) => {
+  // };
+  const options = {
+    message,
+    types: ["number"],
+    async: true,
+  };
+
   return propMetadata<ValidationMetadata>(
     Validation.key(PROMISE_VALIDATION_KEY),
-    {
-      message: message,
-      types: ["number"],
-      async: true,
-    }
+    options
   );
 };
 
