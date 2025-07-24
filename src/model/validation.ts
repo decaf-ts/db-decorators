@@ -3,28 +3,45 @@ import {
   DecoratorMetadataAsync,
   getValidationDecorators,
   Model,
+  ModelConditionalAsync,
   ModelErrorDefinition,
   ModelErrors,
   ModelKeys,
+  toConditionalPromise,
   Validation,
   ValidationKeys,
-  ValidationPropertyDecoratorDefinitionAsync,
+  ValidationPropertyDecoratorDefinition,
 } from "@decaf-ts/decorator-validation";
 import { Reflection } from "@decaf-ts/reflection";
 import { UpdateValidationKeys, UpdateValidator } from "../validation";
 import { findModelId } from "../identity";
 
-// type ModelAsync<M> = M extends Model<infer Async extends boolean> ? Async : never;
-export type ModelConditionalAsync<M> =
-  M extends Model<true>
-    ? Promise<ModelErrorDefinition | undefined>
-    : ModelErrorDefinition | undefined;
-
+/**
+ * @description
+ * Retrieves validation decorator definitions from a model for update operations, including
+ * support for special handling of list decorators.
+ *
+ * @summary
+ * Iterates over the model's own enumerable properties and filters out those specified in the
+ * `propsToIgnore` array. For each remaining property, retrieves validation decorators specific
+ * to update operations using the `UpdateValidationKeys.REFLECT` key. Additionally, it explicitly
+ * checks for and appends any `LIST` type decorators to ensure proper validation of collection types.
+ *
+ * @template M - A generic parameter extending the `Model` class, representing the model type being inspected.
+ *
+ * @param {M} model - The model instance whose properties are being inspected for update-related validations.
+ * @param {string[]} propsToIgnore - A list of property names to exclude from the validation decorator retrieval process.
+ *
+ * @return {ValidationPropertyDecoratorDefinition[]} An array of validation decorator definitions, including both
+ * update-specific and list-type decorators, excluding those for ignored properties.
+ *
+ * @function getValidatableUpdateProps
+ */
 export function getValidatableUpdateProps<M extends Model>(
   model: M,
   propsToIgnore: string[]
-): ValidationPropertyDecoratorDefinitionAsync[] {
-  const decoratedProperties: ValidationPropertyDecoratorDefinitionAsync[] = [];
+): ValidationPropertyDecoratorDefinition[] {
+  const decoratedProperties: ValidationPropertyDecoratorDefinition[] = [];
   for (const prop in model) {
     if (
       Object.prototype.hasOwnProperty.call(model, prop) &&
@@ -70,11 +87,11 @@ export function validateDecorator<
   }
 
   // Skip validators that aren't UpdateValidators
-  if (!validator.updateHasErrors)
-    return (async ? Promise.resolve(undefined) : undefined) as any;
+  if (!validator.updateHasErrors) return toConditionalPromise(undefined, async);
 
   // skip async decorators if validateDecorators is called synchronously (async = false)
-  if (!async && decorator.props.async) return undefined as any;
+  if (!async && decorator.props.async)
+    return toConditionalPromise(undefined, async);
 
   const decoratorProps = Object.values(decorator.props) || {};
 
@@ -84,12 +101,12 @@ export function validateDecorator<
   // });
 
   const maybeError = validator.updateHasErrors(
-    (newModel as any)[prop.toString()],
-    (oldModel as any)[prop.toString()],
+    (newModel as any)[prop],
+    (oldModel as any)[prop],
     ...decoratorProps
   );
 
-  return (async ? Promise.resolve(maybeError) : maybeError) as any;
+  return toConditionalPromise(maybeError, async);
 }
 
 export function validateDecorators<
@@ -108,14 +125,20 @@ export function validateDecorators<
     // skip async decorators if validateDecorators is called synchronously (async = false)
     if (!async && decorator.props.async) continue;
 
-    let err = validateDecorator(newModel, oldModel, prop, decorator, async);
+    let validationErrors = validateDecorator(
+      newModel,
+      oldModel,
+      prop,
+      decorator,
+      async
+    );
 
     /*
     If the decorator is a list, each element must be checked.
     When 'async' is true, the 'err' will always be a pending promise initially,
     so the '!err' check will evaluate to false (even if the promise later resolves with no errors)
     */
-    if ((!err || async) && decorator.key === ValidationKeys.LIST) {
+    if (decorator.key === ValidationKeys.LIST && (!validationErrors || async)) {
       const newPropValue = (newModel as any)[prop];
       const oldPropValue = (oldModel as any)[prop];
 
@@ -131,37 +154,37 @@ export function validateDecorators<
           decorator.props.customTypes;
 
         const allowedTypes = [types].flat().map((t) => String(t).toLowerCase());
-        const errs = newValues.map((v: any) => {
+        const errs = newValues.map((childValue: any) => {
           // find by id so the list elements order doesn't matter
-          const id = findModelId(v as any, true);
+          const id = findModelId(childValue as any, true);
           if (!id) return "Failed to find model id";
 
           const oldModel = oldValues.find(
             (el: any) => id === findModelId(el, true)
           );
 
-          if (Model.isModel(v)) {
-            return v.hasErrors(oldModel);
+          if (Model.isModel(childValue)) {
+            return childValue.hasErrors(oldModel);
           }
 
-          return allowedTypes.includes(typeof v)
+          return allowedTypes.includes(typeof childValue)
             ? undefined
             : "Value has no validatable type";
         });
 
         if (async) {
-          err = Promise.all(errs).then((result) => {
+          validationErrors = Promise.all(errs).then((result) => {
             const allEmpty = result.every((r) => !r);
             return allEmpty ? undefined : result;
           }) as any;
         } else {
           const allEmpty = errs.every((r: string | undefined) => !r);
-          err = errs.length > 0 && !allEmpty ? errs : undefined;
+          validationErrors = errs.length > 0 && !allEmpty ? errs : undefined;
         }
       }
     }
 
-    if (err) (result as any)[decorator.key] = err;
+    if (validationErrors) (result as any)[decorator.key] = validationErrors;
   }
 
   if (!async)
@@ -187,6 +210,7 @@ export function validateDecorators<
  * @template M - Type extending Model
  * @param {M} oldModel - The original model version
  * @param {M} newModel - The updated model version
+ * @param {boolean} async - A flag indicating whether validation should be asynchronous.
  * @param {...string[]} exceptions - Properties to exclude from validation
  * @return {ModelErrorDefinition|undefined} Error definition if validation fails, undefined otherwise
  * @function validateCompare
@@ -217,7 +241,7 @@ export function validateCompare<M extends Model<any>>(
   async: boolean,
   ...exceptions: string[]
 ): ModelConditionalAsync<M> {
-  const decoratedProperties: ValidationPropertyDecoratorDefinitionAsync[] =
+  const decoratedProperties: ValidationPropertyDecoratorDefinition[] =
     getValidatableUpdateProps(newModel, exceptions);
 
   const result: Record<string, any> = {};
@@ -243,7 +267,7 @@ export function validateCompare<M extends Model<any>>(
         ValidationKeys.REFLECT,
         newModel,
         propKey
-      ) as unknown as ValidationPropertyDecoratorDefinitionAsync;
+      ) as unknown as ValidationPropertyDecoratorDefinition;
 
       if (!decorators.some((d) => d.key === ValidationKeys.LIST)) {
         result[propKey] = {
