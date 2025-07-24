@@ -46,7 +46,7 @@ describe(`Repository`, function () {
 
     const address = {
       street: "Main St",
-      city: "New York",
+      country: "US",
     };
 
     const user = new UserModel({
@@ -57,6 +57,7 @@ describe(`Repository`, function () {
 
     const result = await repo.create(user);
     expect(result?.id).toBeDefined();
+    expect(result?.documentId).toEqual(10);
     expect(result?.address).toBeDefined();
     expect(result?.address).toEqual(address);
     expect(result?.updatedOn).toBeDefined();
@@ -68,7 +69,7 @@ describe(`Repository`, function () {
 
     const address = {
       street: "Main St",
-      city: "New York",
+      country: "US",
     };
 
     const user = new UserModel({
@@ -84,6 +85,7 @@ describe(`Repository`, function () {
     expect(result?.id).toBeDefined();
     expect(result?.address).toBeDefined();
     expect(result?.address).toEqual(address);
+    expect(result?.documentId).toEqual(20);
     expect(result?.updatedOn).toBeDefined();
     expect(result?.createdOn).toBeDefined();
   });

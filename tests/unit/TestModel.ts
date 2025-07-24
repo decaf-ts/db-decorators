@@ -1,7 +1,9 @@
 import {
   async,
   AsyncValidator,
+  min,
   minlength,
+  model,
   Model,
   ModelArg,
   prop,
@@ -84,6 +86,20 @@ export const testAsync = (message: string = PROMISE_ERROR_MESSAGE) => {
   );
 };
 
+@model()
+@async()
+export class AsyncModel extends Model {
+  @min(200)
+  @testAsync()
+  value?: number;
+
+  public constructor(model?: ModelArg<AsyncModel>) {
+    super();
+    Model.fromObject(this, model);
+  }
+}
+
+@model()
 export class AddressModel extends Model {
   @minlength(5)
   street?: string;
@@ -97,6 +113,7 @@ export class AddressModel extends Model {
   }
 }
 
+@model()
 @async()
 export class UserModel extends Model {
   @id()
@@ -107,6 +124,9 @@ export class UserModel extends Model {
 
   @testAsync()
   documentId: number;
+
+  @prop()
+  asyncNested?: AsyncModel;
 
   @prop()
   address?: AddressModel;
