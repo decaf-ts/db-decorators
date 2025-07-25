@@ -1,7 +1,6 @@
 import {
   Model,
   ModelConditionalAsync,
-  ModelErrorDefinition,
   validate,
 } from "@decaf-ts/decorator-validation";
 import { validateCompare } from "./validation";
