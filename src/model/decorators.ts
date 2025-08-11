@@ -1,6 +1,7 @@
 import { DBKeys, DefaultSeparator } from "./constants";
 import { apply } from "@decaf-ts/reflection";
 import {
+  Decoration,
   Hashing,
   Model,
   propMetadata,
@@ -269,12 +270,15 @@ export function versionCreateUpdate(operation: CrudOperations) {
  * @category PropertyDecorators
  */
 export function version() {
-  return apply(
-    type(Number.name),
-    onCreate(versionCreateUpdate(OperationKeys.CREATE)),
-    onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
-    propMetadata(Repository.key(DBKeys.VERSION), true)
-  );
+  const key = Repository.key(DBKeys.VERSION);
+  return Decoration.for(key)
+    .define(
+      type(Number.name),
+      onCreate(versionCreateUpdate(OperationKeys.CREATE)),
+      onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
+      propMetadata(key, true)
+    )
+    .apply();
 }
 
 /**
@@ -285,8 +289,11 @@ export function version() {
  * @category PropertyDecorators
  */
 export function transient() {
-  return function transient(model: any, attribute: string) {
-    propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model, attribute);
-    propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model.constructor);
-  };
+  const key = Repository.key(DBKeys.TRANSIENT);
+  return Decoration.for(key)
+    .define(function transient(model: any, attribute: any) {
+      propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model, attribute);
+      propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model.constructor);
+    })
+    .apply();
 }

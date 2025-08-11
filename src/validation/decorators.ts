@@ -120,14 +120,14 @@ export function timestamp(
   const key = Validation.updateKey(DBKeys.TIMESTAMP);
 
   const decorators: any[] = [
-    date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE),
-    required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED),
+    { decorator: date, args: [format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE] },
+    { decorator: required, args: [DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED] },
     on(operation, timestampHandler),
   ];
 
   if (operation.indexOf(OperationKeys.UPDATE) !== -1)
     decorators.push(
-      propMetadata(Validation.updateKey(DBKeys.TIMESTAMP), {
+      propMetadata(key, {
         message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
       })
     );
