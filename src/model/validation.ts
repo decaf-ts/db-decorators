@@ -124,9 +124,10 @@ export function validateCompare<M extends Model>(
     const dec = decorators.pop() as DecoratorMetadata;
     const clazz = dec.props.name
       ? [dec.props.name]
-      : Array.isArray(dec.props.customTypes)
-        ? dec.props.customTypes
-        : [dec.props.customTypes];
+      : (Array.isArray(dec.props.customTypes)
+          ? dec.props.customTypes
+          : [dec.props.customTypes]
+        ).map((t) => (typeof t === "function" ? t() : t));
     const reserved = Object.values(ReservedModels).map((v) =>
       v.toLowerCase()
     ) as string[];
