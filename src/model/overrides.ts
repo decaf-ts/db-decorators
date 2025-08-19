@@ -1,8 +1,9 @@
 import {
   Model,
-  ModelErrorDefinition,
+  ModelConditionalAsync,
   validate,
 } from "@decaf-ts/decorator-validation";
+import { validateCompare } from "./validation";
 
 /**
  * @description Validates the model and checks for errors
@@ -14,20 +15,31 @@ import {
  * @function hasErrors
  * @memberOf module:db-decorators
  */
-import { validateCompare } from "./validation";
-
-Model.prototype.hasErrors = function <M extends Model>(
+// @ts-expect-error Overriding Model prototype method with dynamic conditional return type.
+Model.prototype.hasErrors = function <M extends Model<boolean>>(
   this: M,
   previousVersion?: M | any,
   ...exclusions: any[]
-): ModelErrorDefinition | undefined {
+): ModelConditionalAsync<M> {
   if (previousVersion && !(previousVersion instanceof Model)) {
     exclusions.unshift(previousVersion);
     previousVersion = undefined;
   }
 
-  const errs = validate(this, ...exclusions);
-  if (errs || !previousVersion) return errs;
+  const async = this.isAsync();
+  const errs = validate(this, async, ...exclusions);
 
-  return validateCompare(previousVersion, this, ...exclusions);
+  if (async) {
+    return Promise.resolve(errs).then((resolvedErrs) => {
+      if (resolvedErrs || !previousVersion) {
+        return resolvedErrs;
+      }
+      return validateCompare(previousVersion, this, async, ...exclusions);
+    }) as any;
+  }
+
+  if (errs || !previousVersion) return errs as any;
+
+  // @ts-expect-error Overriding Model prototype method with dynamic conditional return type.
+  return validateCompare(previousVersion, this, async, ...exclusions);
 };
