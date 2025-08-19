@@ -115,7 +115,7 @@ export class AddressModel extends Model {
 
 @model()
 @async()
-export class UserModel extends Model {
+export class UserModel extends Model<true> {
   @id()
   id!: string | number;
 
