@@ -8,7 +8,7 @@ import {
   ValidationKeys,
 } from "@decaf-ts/decorator-validation";
 import { id, readonly } from "../../src";
-import { AsyncModel, UserModel } from "./TestModel";
+import { AddressModel, AsyncModel, UserModel } from "./TestModel";
 
 Model.setBuilder(Model.fromObject);
 
@@ -208,10 +208,10 @@ describe("Model class override", () => {
   });
 
   it("should work with async decorators", async () => {
-    const address = {
+    const address = new AddressModel({
       street: "Main St",
       city: "New York",
-    };
+    });
 
     const original = new UserModel({
       id: Date.now().toString(),
@@ -237,6 +237,9 @@ describe("Model class override", () => {
     expect(errs).toBeDefined();
     expect(errs).toEqual(
       new ModelErrorDefinition({
+        "address.country": {
+          required: "This field is required",
+        },
         documentId: {
           "async-validator-key": "Invalid value",
         },
