@@ -284,8 +284,9 @@ export class Context<F extends RepositoryFlags> {
         c = last as C;
         args.push(last);
       } else {
+        args.push(last);
         c = (await getContext()) as C;
-        args.push(last, c);
+        args.push(c);
       }
     } else {
       c = (await getContext()) as C;
