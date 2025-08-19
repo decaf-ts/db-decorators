@@ -153,7 +153,12 @@ export function validateDecorators<
           decorator.props.clazz ||
           decorator.props.customTypes;
 
-        const allowedTypes = [types].flat().map((t) => String(t).toLowerCase());
+        const allowedTypes = [types].flat().map((t) => {
+          t = typeof t === "function" && !t.name ? t() : t;
+          t = (t as any).name ? (t as any).name : t;
+          return String(t).toLowerCase();
+        });
+
         const errs = newValues.map((childValue: any) => {
           // find by id so the list elements order doesn't matter
           const id = findModelId(childValue as any, true);
