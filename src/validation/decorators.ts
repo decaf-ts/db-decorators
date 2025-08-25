@@ -3,6 +3,7 @@ import {
   date,
   Decoration,
   Model,
+  prop,
   propMetadata,
   required,
   type,
@@ -119,20 +120,30 @@ export function timestamp(
 ) {
   const key = Validation.updateKey(DBKeys.TIMESTAMP);
 
-  const decorators: any[] = [
-    date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE),
-    required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED),
-    on(operation, timestampHandler),
-  ];
-
-  if (operation.indexOf(OperationKeys.UPDATE) !== -1)
-    decorators.push(
-      propMetadata(Validation.updateKey(DBKeys.TIMESTAMP), {
-        message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
-      })
-    );
+  function ts(operation: OperationKeys[], format: string) {
+    const decorators: any[] = [
+      date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE),
+      required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED),
+      propMetadata(Validation.key(DBKeys.TIMESTAMP), {
+        operation: operation,
+        format: format,
+      }),
+      on(operation, timestampHandler),
+    ];
+    if (operation.indexOf(OperationKeys.UPDATE) !== -1)
+      decorators.push(
+        propMetadata(key, {
+          message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
+        })
+      );
+    else decorators.push(readonly());
+    return apply(...decorators);
+  }
   return Decoration.for(key)
-    .define(...decorators)
+    .define({
+      decorator: ts,
+      args: [operation, format],
+    })
     .apply();
 }
 
