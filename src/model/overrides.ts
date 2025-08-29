@@ -15,8 +15,7 @@ import { validateCompare } from "./validation";
  * @function hasErrors
  * @memberOf module:db-decorators
  */
-// @ts-expect-error Overriding Model prototype method with dynamic conditional return type.
-Model.prototype.hasErrors = function <M extends Model<boolean>>(
+Model.prototype.hasErrors = function <M extends Model<true | false>>(
   this: M,
   previousVersion?: M | any,
   ...exclusions: any[]

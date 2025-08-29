@@ -256,7 +256,7 @@ export class Context<F extends RepositoryFlags> {
    *   C->>C: Return final context
    */
   static async args<
-    M extends Model,
+    M extends Model<any>,
     C extends Context<F>,
     F extends RepositoryFlags,
   >(
