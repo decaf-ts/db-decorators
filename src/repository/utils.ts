@@ -71,7 +71,7 @@ export const getHandlerArgs = function (
  * @memberOf db-decorators.utils
  */
 export async function enforceDBDecorators<
-  M extends Model,
+  M extends Model<true | false>,
   R extends IRepository<M, F, C>,
   V extends object = object,
   F extends RepositoryFlags = RepositoryFlags,

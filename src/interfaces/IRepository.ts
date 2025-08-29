@@ -13,7 +13,7 @@ import { Context } from "../repository";
  * @memberOf module:db-decorators
  */
 export interface IRepository<
-  M extends Model,
+  M extends Model<true | false>,
   F extends RepositoryFlags = RepositoryFlags,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   C extends Context<F> = Context<F>,

@@ -46,7 +46,7 @@ import { RepositoryFlags } from "./types";
  * }
  */
 export abstract class Repository<
-  M extends Model,
+  M extends Model<true | false>,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
 > extends BaseRepository<M, F, C> {
