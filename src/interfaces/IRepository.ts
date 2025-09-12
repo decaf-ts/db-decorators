@@ -24,5 +24,9 @@ export interface IRepository<
    */
   readonly class: ModelConstructor<M>;
 
+  /**
+   * @description Primary key property name
+   * @summary The key of the primary identifier property on model M used to uniquely identify records
+   */
   readonly pk: keyof M;
 }

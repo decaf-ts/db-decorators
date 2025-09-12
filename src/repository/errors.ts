@@ -1,14 +1,22 @@
 /**
  * @description Base error class for the repository module
- * @summary Abstract base error class that all other error types extend from. Provides common error handling functionality.
+ * @summary Abstract base error class that all other error types extend from. Provides common error handling functionality and standardized HTTP code mapping.
  * @param {string} name - The name of the error
- * @param {string|Error} msg - The error message or Error object
+ * @param {string|Error} msg - The error message or Error object to wrap
  * @param {number} code - The HTTP status code associated with this error
+ * @return {void}
  * @class BaseError
  * @example
  * // This is an abstract class and should not be instantiated directly
  * // Instead, use one of the concrete error classes:
  * throw new ValidationError('Invalid data provided');
+ * @mermaid
+ * sequenceDiagram
+ *   participant C as Caller
+ *   participant E as BaseError
+ *   C->>E: new BaseError(name,msg,code)
+ *   E-->>C: Error instance with message and code
+ * @category Errors
  */
 export abstract class BaseError extends Error {
   readonly code!: number;
@@ -32,6 +40,7 @@ export abstract class BaseError extends Error {
  * if (!isValid(data)) {
  *   throw new ValidationError('Invalid data format');
  * }
+ * @category Errors
  */
 export class ValidationError extends BaseError {
   constructor(msg: string | Error) {
@@ -51,6 +60,7 @@ export class ValidationError extends BaseError {
  * } catch (error) {
  *   throw new InternalError('Unexpected internal error occurred');
  * }
+ * @category Errors
  */
 export class InternalError extends BaseError {
   constructor(msg: string | Error) {
@@ -70,6 +80,7 @@ export class InternalError extends BaseError {
  * } catch (error) {
  *   throw new SerializationError('Failed to parse JSON data');
  * }
+ * @category Errors
  */
 export class SerializationError extends BaseError {
   constructor(msg: string | Error) {
@@ -89,6 +100,7 @@ export class SerializationError extends BaseError {
  * if (!user) {
  *   throw new NotFoundError(`User with ID ${id} not found`);
  * }
+ * @category Errors
  */
 export class NotFoundError extends BaseError {
   constructor(msg: string | Error) {
@@ -107,6 +119,7 @@ export class NotFoundError extends BaseError {
  * if (existingUser) {
  *   throw new ConflictError(`User with email ${email} already exists`);
  * }
+ * @category Errors
  */
 export class ConflictError extends BaseError {
   constructor(msg: string | Error) {

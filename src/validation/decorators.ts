@@ -3,7 +3,6 @@ import {
   date,
   Decoration,
   Model,
-  prop,
   propMetadata,
   required,
   type,
@@ -55,7 +54,6 @@ export function readonly(
  * @param {M} model - The model instance being updated
  * @return {Promise<void>} A promise that resolves when the timestamp has been set
  * @function timestampHandler
- * @memberOf module:db-decorators
  */
 export async function timestampHandler<
   M extends Model,
@@ -161,7 +159,6 @@ export function timestamp(
  * @param {M} model - The model instance being processed
  * @return {Promise<void>} A promise that resolves when the property has been serialized
  * @function serializeOnCreateUpdate
- * @memberOf module:db-decorators
  */
 export async function serializeOnCreateUpdate<
   M extends Model,
@@ -195,7 +192,6 @@ export async function serializeOnCreateUpdate<
  * @param {M} model - The model instance being processed
  * @return {Promise<void>} A promise that resolves when the property has been deserialized
  * @function serializeAfterAll
- * @memberOf module:db-decorators
  */
 export async function serializeAfterAll<
   M extends Model,
