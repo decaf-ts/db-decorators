@@ -20,7 +20,7 @@
  */
 export abstract class BaseError extends Error {
   readonly code!: number;
-  protected constructor(name: string, msg: string | Error, code: number = 500) {
+  protected constructor(name: string, msg: string | Error, code: number) {
     if (msg instanceof BaseError) return msg;
     const message = `[${name}] ${msg instanceof Error ? msg.message : msg}`;
     super(message);
@@ -30,7 +30,21 @@ export abstract class BaseError extends Error {
 }
 
 /**
- * @description Error thrown when validation fails
+ * @description Error (40) thrown when a bad request is received
+ * @summary Represents a failure in the input data, typically thrown when a client sends invalid or incomplete data
+ * @param {string|Error} msg - The error message or Error object
+ * @return {BadRequestError} A new BadRequestError instance
+ * @class BadRequestError
+ * @category Errors
+ */
+export class BadRequestError extends BaseError {
+  constructor(msg: string | Error, name = BadRequestError.name, code = 400) {
+    super(name, msg, code);
+  }
+}
+
+/**
+ * @description Error (422) thrown when validation fails
  * @summary Represents a failure in the Model details, typically thrown when data validation fails
  * @param {string|Error} msg - The error message or Error object
  * @return {ValidationError} A new ValidationError instance
@@ -42,13 +56,13 @@ export abstract class BaseError extends Error {
  * }
  * @category Errors
  */
-export class ValidationError extends BaseError {
+export class ValidationError extends BadRequestError {
   constructor(msg: string | Error) {
-    super(ValidationError.name, msg, 422);
+    super(msg, ValidationError.name, 422);
   }
 }
 /**
- * @description Error thrown for internal system failures
+ * @description Error (500) thrown for internal system failures
  * @summary Represents an internal failure (should mean an error in code) with HTTP 500 status code
  * @param {string|Error} msg - The error message or Error object
  * @return {InternalError} A new InternalError instance
@@ -63,12 +77,12 @@ export class ValidationError extends BaseError {
  * @category Errors
  */
 export class InternalError extends BaseError {
-  constructor(msg: string | Error) {
-    super(InternalError.name, msg, 500);
+  constructor(msg: string | Error, name = InternalError.name, code = 500) {
+    super(name, msg, code);
   }
 }
 /**
- * @description Error thrown when serialization or deserialization fails
+ * @description Error (500) thrown when serialization or deserialization fails
  * @summary Represents a failure in the Model de/serialization, typically when converting between data formats
  * @param {string|Error} msg - The error message or Error object
  * @return {SerializationError} A new SerializationError instance
@@ -82,9 +96,9 @@ export class InternalError extends BaseError {
  * }
  * @category Errors
  */
-export class SerializationError extends BaseError {
+export class SerializationError extends InternalError {
   constructor(msg: string | Error) {
-    super(SerializationError.name, msg, 422);
+    super(msg, SerializationError.name, 500);
   }
 }
 
@@ -102,9 +116,9 @@ export class SerializationError extends BaseError {
  * }
  * @category Errors
  */
-export class NotFoundError extends BaseError {
+export class NotFoundError extends BadRequestError {
   constructor(msg: string | Error) {
-    super(NotFoundError.name, msg, 404);
+    super(msg, NotFoundError.name, 404);
   }
 }
 /**
@@ -121,8 +135,8 @@ export class NotFoundError extends BaseError {
  * }
  * @category Errors
  */
-export class ConflictError extends BaseError {
+export class ConflictError extends BadRequestError {
   constructor(msg: string | Error) {
-    super(ConflictError.name, msg, 409);
+    super(msg, ConflictError.name, 409);
   }
 }

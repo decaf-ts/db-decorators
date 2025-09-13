@@ -131,7 +131,7 @@ describe("Model class override", () => {
                 readonly: "This cannot be updated",
               },
             }),
-          ],
+          ] as any,
         },
       })
     );
@@ -199,7 +199,7 @@ describe("Model class override", () => {
                 readonly: "This cannot be updated",
               },
             },
-          ],
+          ] as any,
         },
       })
     );

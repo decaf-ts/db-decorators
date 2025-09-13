@@ -100,7 +100,7 @@ import { RepositoryFlags } from "./types";
  *   S->>C: Return model
  */
 export abstract class BaseRepository<
-  M extends Model,
+  M extends Model<boolean>,
   F extends RepositoryFlags = RepositoryFlags,
   C extends Context<F> = Context<F>,
 > implements IRepository<M, F, C>
