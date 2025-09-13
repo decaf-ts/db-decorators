@@ -105,22 +105,18 @@ export class Context<F extends RepositoryFlags> {
 
   static factory: ContextFactory<any> = DefaultContextFactory;
 
-  private readonly cache: F & ObjectAccumulator<F> =
-    new ObjectAccumulator() as F & ObjectAccumulator<F>;
+  readonly cache: RepositoryFlags & ObjectAccumulator<any> =
+    new ObjectAccumulator() as unknown as RepositoryFlags &
+      ObjectAccumulator<any>;
 
   /**
    * @description Accumulates new values into the context.
    * @summary Merges the provided value object with the existing context state,
    * creating a new immutable cache state.
-   *
-   * @template F - current accumulator type
-   * @template V - Type extending object for the values to accumulate
-   * @param {V} value - The object containing values to accumulate
-   * @returns A new context instance with accumulated values
    */
   accumulate<V extends object>(value: V) {
     Object.defineProperty(this, "cache", {
-      value: this.cache.accumulate(value),
+      value: (this.cache as ObjectAccumulator<any>).accumulate(value),
       writable: false,
       enumerable: false,
       configurable: true,
@@ -129,81 +125,40 @@ export class Context<F extends RepositoryFlags> {
   }
 
   get timestamp() {
-    return this.cache.timestamp;
+    return (this.cache as any).timestamp as F["timestamp"];
   }
 
   /**
    * @description Retrieves a value from the context by key.
-   * @summary Attempts to get a value from the current context's cache.
-   * If not found, traverses up the parent context chain.
-   *
-   * @template K - Type extending keyof F for the key to retrieve
-   * @template F - Accumulator type
-   * @param {K} key - The key to retrieve from the context
-   * @returns The value associated with the key
-   * @throws {Error} If the key is not found in the context chain
    */
   get<K extends keyof F>(key: K): F[K] {
     try {
-      return this.cache.get(key);
+      return (this.cache as ObjectAccumulator<any>).get(
+        key as unknown as string
+      ) as F[K];
     } catch (e: unknown) {
-      if (this.cache.parentContext) return this.cache.parentContext.get(key);
+      const parent = (this.cache as any).parentContext as
+        | Context<F>
+        | undefined;
+      if (parent) return parent.get(key);
       throw e;
     }
   }
 
   /**
-   * @description Creates a child context
-   * @summary Generates a new context instance with current context as parent
-   *
-   * @template M - Type extending Model
-   * @param {OperationKeys} operation - The operation type
-   * @param {Constructor<M>} [model] - Optional model constructor
-   * @returns {C} New child context instance
-   */
-  child<M extends Model, C extends Context<F>>(
-    operation: OperationKeys,
-    model?: Constructor<M>
-  ): C {
-    return Context.childFrom<F, C>(
-      this as unknown as C,
-      {
-        operation: operation,
-        affectedTables: model ? [model] : [],
-      } as unknown as Partial<F>
-    );
-  }
-
-  /**
    * @description Creates a child context from another context
-   * @summary Generates a new context instance with parent reference
-   *
-   * @template F - Type extending Repository Flags
-   * @template C - Type extending Context<F>
-   * @param {C} context - The parent context
-   * @param {Partial<F>} [overrides] - Optional flag overrides
-   * @returns {C} New child context instance
    */
   static childFrom<F extends RepositoryFlags, C extends Context<F>>(
     context: C,
     overrides?: Partial<F>
   ): C {
     return Context.factory(
-      Object.assign({}, context.cache, overrides || {})
+      Object.assign({}, (context as any).cache, overrides || {})
     ) as unknown as C;
   }
 
   /**
    * @description Creates a new context from operation parameters
-   * @summary Generates a context instance for specific operation
-   *
-   * @template F - Type extending Repository Flags
-   * @template M - Type extending Model
-   * @param {OperationKeys.DELETE} operation - The operation type
-   * @param {Partial<F>} overrides - Flag overrides
-   * @param {Constructor<M>} model - The model constructor
-   * @param {any} args - Operation arguments
-   * @returns {Promise<C>} Promise resolving to new context
    */
   static async from<
     M extends Model,
@@ -221,7 +176,7 @@ export class Context<F extends RepositoryFlags> {
     ...args: any[]
   ): Promise<C> {
     return Context.factory(
-      Object.assign({}, DefaultRepositoryFlags, overrides, {
+      Object.assign({}, DefaultRepositoryFlags as RepositoryFlags, overrides, {
         operation: operation,
         model: model,
       })
@@ -230,30 +185,6 @@ export class Context<F extends RepositoryFlags> {
 
   /**
    * @description Prepares arguments for context operations
-   * @summary Creates a context args object with the specified operation parameters
-   *
-   * @template F - Type extending {@link RepositoryFlags}
-   * @template M - Type extending {@link Model}
-   * @param {OperationKeys.DELETE} operation - The operation type
-   * @param {Constructor<M>} model - The model constructor
-   * @param {any[]} args - Operation arguments
-   * @param {Contextual<F>} [contextual] - Optional contextual object
-   * @param {Partial<F>} [overrides] - Optional flag overrides
-   * @returns {Promise<ContextArgs>} Promise resolving to context arguments
-   *
-   * @mermaid
-   * sequenceDiagram
-   *   participant C as Context
-   *   participant M as Model
-   *   participant A as Args
-   *
-   *   C->>C: Receive operation request
-   *   C->>M: Validate model constructor
-   *   C->>C: Create child context
-   *   C->>A: Process operation args
-   *   A->>C: Return context args
-   *   C->>C: Apply overrides
-   *   C->>C: Return final context
    */
   static async args<
     M extends Model<any>,
