@@ -32,8 +32,8 @@
       "useLongnameInNav": false
     },
     "better-docs": {
-      "name": "Database Decorators",
-      "title": "Database Decorators",
+      "name": "@decaf-ts/db-decorators Documentation",
+      "title": "@decaf-ts/db-decorators docs",
       "hideGenerator": true,
       "useLongnameInNav": false,
       "navLinks": [
