@@ -12,7 +12,7 @@ import { IRepository } from "../interfaces/IRepository";
 import { InternalError } from "../repository/errors";
 import { Repository } from "../repository/Repository";
 import { Context } from "../repository/Context";
-import { CrudOperations, OperationKeys } from "../operations";
+import { CrudOperations, GroupSort, OperationKeys } from "../operations";
 import { RepositoryFlags } from "../repository/types";
 
 /**
@@ -144,7 +144,8 @@ function composedFrom(
   separator: string = DefaultSeparator,
   type: "keys" | "values" = "values",
   prefix = "",
-  suffix = ""
+  suffix = "",
+  groupsort : GroupSort = {priority: 55}
 ) {
   const data: ComposedFromMetadata = {
     args: args,
@@ -156,7 +157,7 @@ function composedFrom(
   };
 
   const decorators = [
-    onCreateUpdate(composedFromCreateUpdate, data),
+    onCreateUpdate(composedFromCreateUpdate, data, groupsort),
     propMetadata(Repository.key(DBKeys.COMPOSED), data),
   ];
   if (hashResult) decorators.push(hash());
@@ -180,9 +181,10 @@ export function composedFromKeys(
   separator: string = DefaultSeparator,
   hash: boolean = false,
   prefix = "",
-  suffix = ""
+  suffix = "",
+  groupsort : GroupSort = {priority: 55}
 ) {
-  return composedFrom(args, hash, separator, "keys", prefix, suffix);
+  return composedFrom(args, hash, separator, "keys", prefix, suffix, groupsort);
 }
 
 /**
@@ -202,9 +204,10 @@ export function composed(
   separator: string = DefaultSeparator,
   hash: boolean = false,
   prefix = "",
-  suffix = ""
+  suffix = "",
+  groupsort : GroupSort = {priority: 55}
 ) {
-  return composedFrom(args, hash, separator, "values", prefix, suffix);
+  return composedFrom(args, hash, separator, "values", prefix, suffix, groupsort);
 }
 
 /**
