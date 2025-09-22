@@ -1,8 +1,6 @@
 import { model, Model, required } from "@decaf-ts/decorator-validation";
 import type { ModelArg } from "@decaf-ts/decorator-validation";
-import { PersistenceKeys } from "../../../core/src";
 import { RamRepository } from "./RamRepository";
-
 import { RepositoryFlags } from "../../src/repository/types";
 import { IRepository } from "../../src/interfaces/IRepository";
 import { Context } from "../../src/repository/Context";
@@ -14,6 +12,8 @@ import { NotFoundError } from "../../src/repository/errors";
 export const globals = {
   counter: 0,
 };
+
+const METADATA = "__metadata";
 
 function saveGroupSort<
   M extends Model,
@@ -28,8 +28,8 @@ function saveGroupSort<
       ["group_" + (k as string)]: metadata[i].igroup,
     };
     globals.counter++;
-    model[PersistenceKeys.METADATA] = {
-      ...model[PersistenceKeys.METADATA],
+    model[METADATA] = {
+      ...model[METADATA],
       ...newMetadata,
     };
   });
@@ -119,7 +119,7 @@ describe("Adapter", () => {
     expect(created).toBeDefined();
 
     //check correct order of the decorator execution
-    const metadata = created[PersistenceKeys.METADATA];
+    const metadata = created[METADATA];
     expect(metadata).toBeDefined();
 
     priorityA.forEach((val, i) => {
@@ -133,7 +133,7 @@ describe("Adapter", () => {
     expect(read).toBeDefined();
     expect(read.equals(created)).toEqual(true); // same model
 
-    const metadata = created[PersistenceKeys.METADATA];
+    const metadata = created[METADATA];
     expect(metadata).toBeDefined();
 
     priorityA.forEach((val, i) => {
@@ -152,9 +152,7 @@ describe("Adapter", () => {
 
     expect(updated).toBeDefined();
     expect(updated.equals(created)).toEqual(false);
-    expect(updated.equals(created, PersistenceKeys.METADATA, "name")).toEqual(
-      true
-    ); // minus the expected changes
+    expect(updated.equals(created, METADATA, "name")).toEqual(true); // minus the expected changes
   });
 
   it("deletes", async () => {
