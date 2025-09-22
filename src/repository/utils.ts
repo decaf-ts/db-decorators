@@ -1,5 +1,3 @@
-import { Operations } from "../operations/Operations";
-import { OperationHandler, UpdateOperationHandler } from "../operations/types";
 import { IRepository } from "../interfaces/IRepository";
 import { OperationKeys } from "../operations/constants";
 import { DecoratorMetadata, Reflection } from "@decaf-ts/reflection";
@@ -11,7 +9,8 @@ import {
   getHandlersDecorators,
   groupDecorators,
   sortDecorators,
-} from "../operations";
+} from "../operations/decorators";
+import { UpdateOperationHandler } from "../operations/types";
 
 /**
  * @description Context arguments for repository operations.

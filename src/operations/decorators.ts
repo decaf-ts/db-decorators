@@ -10,14 +10,11 @@ import { DBOperations, OperationKeys } from "./constants";
 import { Operations } from "./Operations";
 import { apply } from "@decaf-ts/reflection";
 import { Model, propMetadata } from "@decaf-ts/decorator-validation";
-import {
-  Context,
-  getHandlerArgs,
-  InternalError,
-  NotFoundError,
-  RepositoryFlags,
-} from "../repository";
 import { IRepository } from "../interfaces";
+import { RepositoryFlags } from "../repository/types";
+import { Context } from "../repository/Context";
+import { InternalError } from "../repository/errors";
+import { getHandlerArgs } from "../repository/utils";
 
 /**
  * @description Represents sorting parameters for grouping decorators
@@ -221,7 +218,7 @@ export function sortDecorators(
  * @function onCreateUpdate
  * @category Property Decorators
  */
-export function onCreateUpdate<V extends object>(
+export function onCreateUpdate<V = object>(
   handler:
     | GeneralOperationHandler<any, any, V, any, any>
     | GeneralUpdateOperationHandler<any, any, V, any, any>,
@@ -240,7 +237,7 @@ export function onCreateUpdate<V extends object>(
  * @function onUpdate
  * @category Property Decorators
  */
-export function onUpdate<V extends object>(
+export function onUpdate<V = object>(
   handler: UpdateOperationHandler<any, any, V, any>,
   data?: V,
   groupsort?: GroupSort
@@ -257,7 +254,7 @@ export function onUpdate<V extends object>(
  * @function onCreate
  * @category Property Decorators
  */
-export function onCreate<V extends object>(
+export function onCreate<V = object>(
   handler: GeneralOperationHandler<any, any, V, any, any>,
   data?: V,
   groupsort?: GroupSort
@@ -275,7 +272,7 @@ export function onCreate<V extends object>(
  * @function onRead
  * @category Property Decorators
  */
-export function onRead<V extends object>(
+export function onRead<V = object>(
   handler: IdOperationHandler<any, any, V, any, any>,
   data: V,
   groupsort?: GroupSort
@@ -293,7 +290,7 @@ export function onRead<V extends object>(
  * @function onDelete
  * @category Property Decorators
  */
-export function onDelete<V extends object>(
+export function onDelete<V = object>(
   handler: OperationHandler<any, any, V, any, any>,
   data: V,
   groupsort?: GroupSort
@@ -311,7 +308,7 @@ export function onDelete<V extends object>(
  * @function onAny
  * @category Property Decorators
  */
-export function onAny<V extends object>(
+export function onAny<V = object>(
   handler: OperationHandler<any, any, V, any, any>,
   data: V,
   groupsort?: GroupSort
@@ -336,7 +333,7 @@ export function onAny<V extends object>(
  *   myProperty: string;
  * }
  */
-export function on<V extends object>(
+export function on<V = object>(
   op: OperationKeys[] = DBOperations.ALL,
   handler: OperationHandler<any, any, V, any, any>,
   data?: V,
@@ -354,7 +351,7 @@ export function on<V extends object>(
  * @function afterCreateUpdate
  * @category Property Decorators
  */
-export function afterCreateUpdate<V extends object>(
+export function afterCreateUpdate<V = object>(
   handler:
     | StandardOperationHandler<any, any, V, any, any>
     | UpdateOperationHandler<any, any, V, any, any>,
@@ -374,7 +371,7 @@ export function afterCreateUpdate<V extends object>(
  * @function afterUpdate
  * @category Property Decorators
  */
-export function afterUpdate<V extends object>(
+export function afterUpdate<V = object>(
   handler: UpdateOperationHandler<any, any, V, any, any>,
   data: V,
   groupsort?: GroupSort
@@ -392,7 +389,7 @@ export function afterUpdate<V extends object>(
  * @function afterCreate
  * @category Property Decorators
  */
-export function afterCreate<V extends object>(
+export function afterCreate<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
   data: V,
   groupsort?: GroupSort
@@ -410,7 +407,7 @@ export function afterCreate<V extends object>(
  * @function afterRead
  * @category Property Decorators
  */
-export function afterRead<V extends object>(
+export function afterRead<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
   data?: V,
   groupsort?: GroupSort
@@ -427,7 +424,7 @@ export function afterRead<V extends object>(
  * @function afterDelete
  * @category Property Decorators
  */
-export function afterDelete<V extends object>(
+export function afterDelete<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
   data?: V,
   groupsort?: GroupSort
@@ -445,7 +442,7 @@ export function afterDelete<V extends object>(
  * @function afterAny
  * @category Property Decorators
  */
-export function afterAny<V extends object>(
+export function afterAny<V = object>(
   handler: StandardOperationHandler<any, any, V, any, any>,
   data?: V,
   groupsort?: GroupSort
@@ -470,7 +467,7 @@ export function afterAny<V extends object>(
  *   myProperty: string;
  * }
  */
-export function after<V extends object>(
+export function after<V = object>(
   op: OperationKeys[] = DBOperations.ALL,
   handler: OperationHandler<any, any, V, any, any>,
   data?: V,
@@ -507,7 +504,7 @@ export function after<V extends object>(
  *   Handler-->>Operations: Return result
  *   Operations-->>Client: Return final result
  */
-export function operation<V extends object>(
+export function operation<V = object>(
   baseOp: OperationKeys.ON | OperationKeys.AFTER,
   operation: OperationKeys[] = DBOperations.ALL,
   handler: OperationHandler<any, any, V, any, any>,

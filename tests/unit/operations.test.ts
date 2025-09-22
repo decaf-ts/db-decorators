@@ -148,7 +148,7 @@ describe("Operations decorators", () => {
       expect(mock).toHaveBeenCalledTimes(1);
       expect(mock).toHaveBeenCalledWith(
         expect.any(Context),
-        undefined,
+        { priority: 50 },
         "read",
         expect.objectContaining({ id: model.id as string, read: "test" })
       );
