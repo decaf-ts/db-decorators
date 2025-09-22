@@ -134,6 +134,7 @@ export function composedFromCreateUpdate<
  * @param {"keys"|"values"} [type="values"] - Whether to use property keys or values
  * @param {string} [prefix=""] - Optional prefix to add to the composed value
  * @param {string} [suffix=""] - Optional suffix to add to the composed value
+ * @param {GroupSort} groupsort - GroupSort configuration
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function composedFrom
  * @category PropertyDecorators
@@ -145,7 +146,7 @@ function composedFrom(
   type: "keys" | "values" = "values",
   prefix = "",
   suffix = "",
-  groupsort : GroupSort = {priority: 55}
+  groupsort: GroupSort = { priority: 55 }
 ) {
   const data: ComposedFromMetadata = {
     args: args,
@@ -172,6 +173,7 @@ function composedFrom(
  * @param {boolean} [hash=false] - Whether to hash the composed result
  * @param {string} [prefix=""] - Optional prefix to add to the composed value
  * @param {string} [suffix=""] - Optional suffix to add to the composed value
+ * @param {GroupSort} groupsort - GroupSort configuration
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function composedFromKeys
  * @category PropertyDecorators
@@ -182,7 +184,7 @@ export function composedFromKeys(
   hash: boolean = false,
   prefix = "",
   suffix = "",
-  groupsort : GroupSort = {priority: 55}
+  groupsort: GroupSort = { priority: 55 }
 ) {
   return composedFrom(args, hash, separator, "keys", prefix, suffix, groupsort);
 }
@@ -195,6 +197,7 @@ export function composedFromKeys(
  * @param {boolean} [hash=false] - Whether to hash the composed result
  * @param {string} [prefix=""] - Optional prefix to add to the composed value
  * @param {string} [suffix=""] - Optional suffix to add to the composed value
+ * @param {GroupSort} groupsort - GroupSort configuration
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function composed
  * @category PropertyDecorators
@@ -205,9 +208,17 @@ export function composed(
   hash: boolean = false,
   prefix = "",
   suffix = "",
-  groupsort : GroupSort = {priority: 55}
+  groupsort: GroupSort = { priority: 55 }
 ) {
-  return composedFrom(args, hash, separator, "values", prefix, suffix, groupsort);
+  return composedFrom(
+    args,
+    hash,
+    separator,
+    "values",
+    prefix,
+    suffix,
+    groupsort
+  );
 }
 
 /**

@@ -19,7 +19,15 @@ import {
 } from "../repository";
 import { IRepository } from "../interfaces";
 
-// lower number = higher priority
+/**
+ * @description Represents sorting parameters for grouping decorators
+ * @summary Defines the structure for specifying group sorting options
+ * @typedef {Object} GroupSort
+ * @property {number} priority - The priority of the sorting operation, lower numbers represent higher priority
+ * @property {string} [group] - Optional property to group decorators, used for grouping related operations
+ * @property {number} [groupPriority] - Optional property to specify the priority within a group, lower numbers represent higher priority within the group
+ * @category Type Definitions
+ */
 export type GroupSort = {
   priority: number;
   group?: string;
