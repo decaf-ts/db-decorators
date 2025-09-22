@@ -61,14 +61,14 @@ describe("Operations decorators", () => {
       static async anotherArgHandler<
         M extends Model,
         R extends IRepository<M, F, C>,
-        V extends number,
+        V extends { dateDif: number },
         F extends RepositoryFlags = RepositoryFlags,
         C extends Context<F> = Context<F>,
       >(this: R, context: C, data: V, key: keyof M, model: M) {
         const currentDate: Date | undefined = model[key] as Date | undefined;
         if (!currentDate) throw new InternalError("date not provided");
         model[key] = currentDate.setFullYear(
-          currentDate.getFullYear() + (data as any)
+          currentDate.getFullYear() + (data.dateDif as any)
         ) as M[keyof M];
       }
     }
@@ -312,7 +312,7 @@ describe("Operations decorators", () => {
       }
 
       class OverriddenOrderBaseModel extends OrderBaseModel {
-        @onCreate(Handler.anotherArgHandler, yearDiff)
+        @onCreate(Handler.anotherArgHandler, { dateDif: yearDiff })
         override updatedOn!: Date;
 
         constructor(
