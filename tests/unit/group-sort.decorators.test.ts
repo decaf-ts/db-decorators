@@ -1,10 +1,4 @@
-import {
-  maxlength,
-  minlength,
-  model,
-  Model,
-  required,
-} from "@decaf-ts/decorator-validation";
+import { model, Model, required } from "@decaf-ts/decorator-validation";
 import type { ModelArg } from "@decaf-ts/decorator-validation";
 import { PersistenceKeys } from "../../../core/src";
 import { RamRepository } from "./RamRepository";
