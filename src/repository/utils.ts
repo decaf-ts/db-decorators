@@ -1,5 +1,3 @@
-import { Operations } from "../operations/Operations";
-import { OperationHandler, UpdateOperationHandler } from "../operations/types";
 import { IRepository } from "../interfaces/IRepository";
 import { OperationKeys } from "../operations/constants";
 import { DecoratorMetadata, Reflection } from "@decaf-ts/reflection";
@@ -7,6 +5,12 @@ import { InternalError } from "./errors";
 import { Constructor, Model, ModelKeys } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
+import {
+  getHandlersDecorators,
+  groupDecorators,
+  sortDecorators,
+} from "../operations/decorators";
+import { UpdateOperationHandler } from "../operations/types";
 
 /**
  * @description Context arguments for repository operations.
@@ -89,46 +93,32 @@ export async function enforceDBDecorators<
 
   if (!decorators) return;
 
-  for (const prop in decorators) {
-    const decs: DecoratorMetadata[] = decorators[prop];
-    for (const dec of decs) {
-      const { key } = dec;
-      const handlers: OperationHandler<M, R, V, F, C>[] | undefined =
-        Operations.get<M, R, V, F, C>(model, prop, prefix + key);
-      if (!handlers || !handlers.length)
-        throw new InternalError(
-          `Could not find registered handler for the operation ${prefix + key} under property ${prop}`
-        );
+  const hanlersDecorators = getHandlersDecorators(model, decorators, prefix);
+  const groupedDecorators = groupDecorators(hanlersDecorators);
+  const sortedDecorators = sortDecorators(groupedDecorators);
 
-      const handlerArgs = getHandlerArgs(dec, prop, model as any);
+  for (const dec of sortedDecorators) {
+    const args: any[] = [
+      context,
+      dec.data.length > 1 ? dec.data : dec.data[0],
+      dec.prop.length > 1 ? dec.prop : dec.prop[0],
+      model,
+    ];
 
-      if (!handlerArgs || Object.values(handlerArgs).length !== handlers.length)
-        throw new InternalError("Args and handlers length do not match");
-
-      let handler: OperationHandler<M, R, V, F, C>;
-      let data: any;
-      for (let i = 0; i < handlers.length; i++) {
-        handler = handlers[i];
-        data = Object.values(handlerArgs)[i];
-
-        const args: any[] = [context, data.data, prop, model];
-
-        if (operation === OperationKeys.UPDATE && prefix === OperationKeys.ON) {
-          if (!oldModel)
-            throw new InternalError("Missing old model for update operation");
-          args.push(oldModel);
-        }
-        try {
-          await (handler as UpdateOperationHandler<M, R, V, F, C>).apply(
-            repo,
-            args as [C, V, keyof M, M, M]
-          );
-        } catch (e: unknown) {
-          const msg = `Failed to execute handler ${handler.name} for ${prop} on ${model.constructor.name} due to error: ${e}`;
-          if (context.get("breakOnHandlerError")) throw new InternalError(msg);
-          console.log(msg);
-        }
-      }
+    if (operation === OperationKeys.UPDATE && prefix === OperationKeys.ON) {
+      if (!oldModel)
+        throw new InternalError("Missing old model for update operation");
+      args.push(oldModel);
+    }
+    try {
+      await (dec.handler as UpdateOperationHandler<M, R, V, F, C>).apply(
+        repo,
+        args as [C, V, keyof M, M, M]
+      );
+    } catch (e: unknown) {
+      const msg = `Failed to execute handler ${dec.handler.name} for ${dec.prop} on ${model.constructor.name} due to error: ${e}`;
+      if (context.get("breakOnHandlerError")) throw new InternalError(msg);
+      console.log(msg);
     }
   }
 }
