@@ -130,6 +130,8 @@ export class Context<F extends RepositoryFlags> {
 
   /**
    * @description Retrieves a value from the context by key.
+   * @param {string} key
+   * @return {any}
    */
   get<K extends keyof F>(key: K): F[K] {
     try {
