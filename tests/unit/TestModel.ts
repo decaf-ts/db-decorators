@@ -6,15 +6,13 @@ import {
   model,
   Model,
   ModelArg,
-  prop,
-  propMetadata,
   required,
   Validation,
-  ValidationMetadata,
   validator,
   ValidatorOptions,
 } from "@decaf-ts/decorator-validation";
 import { DBOperations, id, readonly, timestamp } from "../../src";
+import { propMetadata, prop } from "@decaf-ts/decoration";
 
 export class TestModel extends Model {
   @id()
@@ -34,8 +32,7 @@ export class TestModel extends Model {
   createdOn!: Date;
 
   public constructor(testModel?: ModelArg<TestModel>) {
-    super();
-    Model.fromObject(this, testModel);
+    super(testModel);
   }
 }
 
@@ -80,10 +77,7 @@ export const testAsync = (message: string = PROMISE_ERROR_MESSAGE) => {
     async: true,
   };
 
-  return propMetadata<ValidationMetadata>(
-    Validation.key(PROMISE_VALIDATION_KEY),
-    options
-  );
+  return propMetadata(Validation.key(PROMISE_VALIDATION_KEY), options);
 };
 
 @model()
@@ -123,7 +117,7 @@ export class UserModel extends Model<true> {
   name?: string;
 
   @testAsync()
-  documentId: number;
+  documentId!: number;
 
   @prop()
   asyncNested?: AsyncModel;

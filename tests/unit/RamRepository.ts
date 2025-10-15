@@ -1,9 +1,10 @@
 import { Repository } from "../../src/repository/Repository";
 import { findModelId } from "../../src/identity/utils";
 import { NotFoundError } from "../../src/repository/errors";
-import { Constructor, Model } from "@decaf-ts/decorator-validation";
+import { Model } from "@decaf-ts/decorator-validation";
 import { Context } from "../../src/repository/Context";
 import { RepositoryFlags } from "../../src";
+import { Constructor } from "@decaf-ts/decoration";
 
 export class RamRepository<M extends Model> extends Repository<
   M,

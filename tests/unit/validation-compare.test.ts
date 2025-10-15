@@ -1,3 +1,4 @@
+import { prop } from "@decaf-ts/decoration";
 import {
   email,
   list,
@@ -11,7 +12,6 @@ import {
   ModelErrorDefinition,
   password,
   pattern,
-  prop,
   required,
   step,
   type,
@@ -46,7 +46,7 @@ class InnerTestModel extends Model {
 
 @model()
 class TestModel extends Model {
-  @type(["string", "number"])
+  @type([String, Number])
   @required()
   id!: string | number;
 
@@ -75,7 +75,7 @@ class TestModel extends Model {
   @url()
   prop6?: string;
 
-  @type(InnerTestModel.name)
+  @type(InnerTestModel)
   prop7?: InnerTestModel;
 
   @list(InnerTestModel)

@@ -1,12 +1,5 @@
 import { DBKeys, DefaultSeparator } from "./constants";
-import { apply } from "@decaf-ts/reflection";
-import {
-  Decoration,
-  Hashing,
-  Model,
-  propMetadata,
-  type,
-} from "@decaf-ts/decorator-validation";
+import { Hashing, Model, type } from "@decaf-ts/decorator-validation";
 import { onCreate, onCreateUpdate, onUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { InternalError } from "../repository/errors";
@@ -14,6 +7,7 @@ import { Repository } from "../repository/Repository";
 import { Context } from "../repository/Context";
 import { CrudOperations, GroupSort, OperationKeys } from "../operations";
 import { RepositoryFlags } from "../repository/types";
+import { Decoration, propMetadata, apply } from "@decaf-ts/decoration";
 
 /**
  * @description Hashes a property value during create or update operations
@@ -287,7 +281,7 @@ export function version() {
   const key = Repository.key(DBKeys.VERSION);
   return Decoration.for(key)
     .define(
-      type(Number.name),
+      type(Number),
       onCreate(versionCreateUpdate(OperationKeys.CREATE)),
       onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
       propMetadata(key, true)

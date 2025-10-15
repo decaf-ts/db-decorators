@@ -2,7 +2,7 @@ import { IRepository } from "../interfaces/IRepository";
 import { OperationKeys } from "../operations/constants";
 import { DecoratorMetadata, Reflection } from "@decaf-ts/reflection";
 import { InternalError } from "./errors";
-import { Constructor, Model, ModelKeys } from "@decaf-ts/decorator-validation";
+import { Model, ModelKeys } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
 import {
@@ -11,6 +11,7 @@ import {
   sortDecorators,
 } from "../operations/decorators";
 import { UpdateOperationHandler } from "../operations/types";
+import { Constructor } from "@decaf-ts/decoration";
 
 /**
  * @description Context arguments for repository operations.

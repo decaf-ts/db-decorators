@@ -1,5 +1,5 @@
 import { IRepository } from "../interfaces/IRepository";
-import { Constructor, Model } from "@decaf-ts/decorator-validation";
+import { Model } from "@decaf-ts/decorator-validation";
 import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
@@ -7,6 +7,7 @@ import { wrapMethodWithContext } from "./wrappers";
 import { findPrimaryKey } from "../identity/utils";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
+import { Constructor } from "@decaf-ts/decoration";
 
 /**
  * @description Base repository implementation providing CRUD operations for models.

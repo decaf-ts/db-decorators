@@ -14,15 +14,15 @@ import { isEqual } from "@decaf-ts/reflection";
  * class User {
  *   @readonly()
  *   id: string;
- *   
+ *
  *   name: string;
- *   
+ *
  *   constructor(id: string, name: string) {
  *     this.id = id;
  *     this.name = name;
  *   }
  * }
- * 
+ *
  * // This will trigger validation error when trying to update
  * const user = new User('123', 'John');
  * user.id = '456'; // Will be prevented by ReadOnlyValidator
@@ -57,7 +57,7 @@ export class ReadOnlyValidator extends Validator {
   public updateHasErrors(
     value: any,
     oldValue: any,
-    message?: string,
+    message?: string
   ): string | undefined {
     if (value === undefined) return;
 

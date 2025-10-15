@@ -2,10 +2,11 @@ import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError, ValidationError } from "./errors";
 import { BaseRepository } from "./BaseRepository";
-import { Constructor, Model } from "@decaf-ts/decorator-validation";
+import { Model } from "@decaf-ts/decorator-validation";
 import { DBKeys } from "../model/constants";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
+import { Constructor } from "@decaf-ts/decoration";
 
 /**
  * @description Concrete repository implementation with validation support.

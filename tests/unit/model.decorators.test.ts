@@ -16,6 +16,8 @@ import {
   type ComposedFromMetadata,
 } from "../../src/model/decorators";
 import { RepositoryFlags } from "../../src/index";
+import { Constructor, Metadata } from "@decaf-ts/decoration";
+import { Constructor } from "@decaf-ts/decoration";
 
 // Simple type to satisfy generics
 class C<F extends RepositoryFlags = any> extends Context<F> {}
@@ -159,7 +161,8 @@ describe("model/decorators", () => {
       dec(M1.prototype, "ver" as any);
       // ensure metadata exists
       const key = Repository.key(DBKeys.VERSION);
-      const meta = Reflect.getMetadata(key, M1.prototype, "ver");
+      // const meta = Reflect.getMetadata(key, M1.prototype, "ver");
+      const meta = Metadata.get(M1 as Constructor, key);
       expect(meta).toBeDefined();
     });
   });
@@ -171,10 +174,12 @@ describe("model/decorators", () => {
       dec(M2.prototype, "tmp" as any);
       const key = Repository.key(DBKeys.TRANSIENT);
       // property-level transient marker (empty key is used internally)
-      const propMeta = Reflect.getMetadata(key, M2.prototype, "tmp");
+      // const propMeta = Reflect.getMetadata(key, M2.prototype, "tmp");
+      const propMeta = Metadata.get(M2 as Constructor, key);
       expect(propMeta).toBeDefined();
       // class-level transient marker
-      const classMeta = Reflect.getMetadata(key, M2);
+      // const classMeta = Reflect.getMetadata(key, M2);
+      const classMeta = Metadata.get(M2 as Constructor, key);
       expect(classMeta).toBeDefined();
     });
   });

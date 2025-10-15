@@ -1,9 +1,7 @@
 import "./validation";
 import {
   date,
-  Decoration,
   Model,
-  propMetadata,
   required,
   type,
   Validation,
@@ -14,10 +12,15 @@ import { DBOperations, OperationKeys } from "../operations/constants";
 import { after, on, onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { SerializationError } from "../repository/errors";
-import { apply, metadata } from "@decaf-ts/reflection";
 import { Repository } from "../repository";
 import { Context } from "../repository/Context";
 import { RepositoryFlags } from "../repository/types";
+import {
+  Decoration,
+  propMetadata,
+  apply,
+  metadata,
+} from "@decaf-ts/decoration";
 
 /**
  * @description Prevents a property from being modified after initial creation.
@@ -243,7 +246,7 @@ export function serialize() {
   return apply(
     onCreateUpdate(serializeOnCreateUpdate),
     after(DBOperations.ALL, serializeAfterAll),
-    type([String.name, Object.name]),
+    type([String, Object]),
     metadata(Repository.key(DBKeys.SERIALIZE), {})
   );
 }

@@ -117,6 +117,7 @@
     "@decaf-ts/decorator-validation": "latest",
     "@decaf-ts/injectable-decorators": "latest",
     "@decaf-ts/reflection": "latest",
+    "@decaf-ts/decoration": "latest",
     "reflect-metadata": "^0.2.1",
     "typed-object-accumulator": "^0.1.2"
   }

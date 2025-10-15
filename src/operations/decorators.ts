@@ -8,13 +8,13 @@ import {
 } from "./types";
 import { DBOperations, OperationKeys } from "./constants";
 import { Operations } from "./Operations";
-import { apply } from "@decaf-ts/reflection";
-import { Model, propMetadata } from "@decaf-ts/decorator-validation";
+import { Model } from "@decaf-ts/decorator-validation";
 import { IRepository } from "../interfaces";
 import { RepositoryFlags } from "../repository/types";
 import { Context } from "../repository/Context";
 import { InternalError } from "../repository/errors";
 import { getHandlerArgs } from "../repository/utils";
+import { propMetadata, apply } from "@decaf-ts/decoration";
 
 /**
  * @description Represents sorting parameters for grouping decorators
