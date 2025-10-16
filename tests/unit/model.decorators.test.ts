@@ -162,7 +162,7 @@ describe("model/decorators", () => {
       // ensure metadata exists
       const key = Repository.key(DBKeys.VERSION);
       // const meta = Reflect.getMetadata(key, M1.prototype, "ver");
-      const meta = Metadata.get(M1 as Constructor, key);
+      const meta = Metadata.get(M1, key);
       expect(meta).toBeDefined();
     });
   });
@@ -175,11 +175,11 @@ describe("model/decorators", () => {
       const key = Repository.key(DBKeys.TRANSIENT);
       // property-level transient marker (empty key is used internally)
       // const propMeta = Reflect.getMetadata(key, M2.prototype, "tmp");
-      const propMeta = Metadata.get(M2 as Constructor, key);
+      const propMeta = Metadata.get(M2, key);
       expect(propMeta).toBeDefined();
       // class-level transient marker
       // const classMeta = Reflect.getMetadata(key, M2);
-      const classMeta = Metadata.get(M2 as Constructor, key);
+      const classMeta = Metadata.get(M2, key);
       expect(classMeta).toBeDefined();
     });
   });
