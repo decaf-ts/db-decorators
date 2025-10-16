@@ -4,11 +4,11 @@ import {
   model,
   ModelArg,
   ModelErrorDefinition,
-  prop,
   ValidationKeys,
 } from "@decaf-ts/decorator-validation";
 import { id, readonly } from "../../src";
 import { AddressModel, AsyncModel, UserModel } from "./TestModel";
+import { prop } from "@decaf-ts/decoration";
 
 Model.setBuilder(Model.fromObject);
 
@@ -51,7 +51,7 @@ describe("Model class override", () => {
     }
   }
 
-  it("should overrides the original model's error method", () => {
+  it("should override the original model's error method", () => {
     let m = new ModelOverride();
     expect(m.hasErrors()).toBeDefined();
     m = new ModelOverride({

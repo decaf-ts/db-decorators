@@ -16,8 +16,7 @@ import {
   type ComposedFromMetadata,
 } from "../../src/model/decorators";
 import { RepositoryFlags } from "../../src/index";
-import { Constructor, Metadata } from "@decaf-ts/decoration";
-import { Constructor } from "@decaf-ts/decoration";
+import { Metadata } from "@decaf-ts/decoration";
 
 // Simple type to satisfy generics
 class C<F extends RepositoryFlags = any> extends Context<F> {}

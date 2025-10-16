@@ -1,6 +1,7 @@
 import "./validation";
 import {
   date,
+  innerValidationDecorator,
   Model,
   required,
   type,
@@ -33,13 +34,17 @@ import {
 export function readonly(
   message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID
 ) {
-  const key = Validation.updateKey(DBKeys.READONLY);
+  const key = DBKeys.READONLY;
+  const meta = {
+    message: message,
+    description: `defines the attribute as readOnly`,
+    async: false,
+  };
   return Decoration.for(key)
-    .define(
-      propMetadata(key, {
-        message: message,
-      })
-    )
+    .define({
+      decorator: innerValidationDecorator,
+      args: [readonly, key, meta],
+    })
     .apply();
 }
 
