@@ -1,6 +1,6 @@
 import { validator, Validator } from "@decaf-ts/decorator-validation";
 import { DEFAULT_ERROR_MESSAGES, UpdateValidationKeys } from "../constants";
-import { isEqual } from "@decaf-ts/reflection";
+import { isEqual } from "@decaf-ts/decorator-validation";
 
 /**
  * @description A validator that ensures properties marked as readonly cannot be modified during updates.
