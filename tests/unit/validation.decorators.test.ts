@@ -1,8 +1,6 @@
 import "reflect-metadata";
 import { Model, list } from "@decaf-ts/decorator-validation";
 import { Context } from "../../src/repository/Context";
-import { Repository } from "../../src/repository/Repository";
-import { DBKeys } from "../../src/model/constants";
 import {
   serialize,
   serializeAfterAll,
@@ -15,6 +13,7 @@ import {
   validateDecorator,
 } from "../../src/model/validation";
 import { Validation, ValidationKeys } from "@decaf-ts/decorator-validation";
+import { Metadata } from "@decaf-ts/decoration";
 
 class C<F extends RepositoryFlags = any> extends Context<F> {}
 
@@ -75,8 +74,11 @@ describe("validation/decorators - serialize", () => {
     class M {}
     const dec = serialize();
     dec(M.prototype, "extra" as any);
-    const key = Repository.key(DBKeys.SERIALIZE);
-    const meta = Reflect.getMetadata(key, M.prototype, "extra");
+    const meta = Metadata.validationFor(
+      M.prototype.constructor as any,
+      "extra" as keyof M
+    );
+
     expect(meta).toBeDefined();
   });
 });
@@ -95,14 +97,14 @@ describe("model/validation helpers", () => {
     m.tags = ["a"];
     m.name = "x";
     const res = getValidatableUpdateProps(m as any, []);
-    const listEntry = res.find((d) => d.prop === "tags");
+    const listEntry = res.find((d: any) => d.prop === "tags");
     expect(listEntry).toBeDefined();
     expect(
-      listEntry!.decorators.some((d) => d.key === ValidationKeys.LIST)
+      listEntry!.decorators.some((d: any) => d.key === ValidationKeys.LIST)
     ).toBe(true);
     // ensure ignored props are excluded
-    const res2 = getValidatableUpdateProps(m as any, ["name"]);
-    expect(res2.find((d) => d.prop === "name")).toBeUndefined();
+    const res2 = Metadata.validatableProperties(m.constructor as any, "name");
+    expect(res2.includes("name")).toBeFalsy();
   });
 
   test("validateDecorator throws when validator missing", async () => {
@@ -135,7 +137,7 @@ describe("model/validation helpers", () => {
       .mockReturnValue(mockValidator);
     // @ts-expect-error forcing abstract class to be instantiated
     const m = new Model();
-    const dec: any = { key: "decaf.validation.ASYNC", props: { async: true } };
+    const dec: any = { key: "decaf.validation.ASYNC", async: true };
     const res = validateDecorator(m as any, m as any, "a", dec, false);
     expect(res).toBeUndefined();
     expect(mockValidator.updateHasErrors).not.toHaveBeenCalled();

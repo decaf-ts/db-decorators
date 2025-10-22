@@ -4,13 +4,14 @@ import {
   model,
   ModelArg,
   ModelErrorDefinition,
+  required,
   ValidationKeys,
 } from "@decaf-ts/decorator-validation";
 import { id, readonly } from "../../src";
 import { AddressModel, AsyncModel, UserModel } from "./TestModel";
 import { prop } from "@decaf-ts/decoration";
 
-Model.setBuilder(Model.fromObject);
+// Model.setBuilder(Model.fromObject);
 
 export function isPromise(obj: any): boolean {
   return (
@@ -41,7 +42,8 @@ describe("Model class override", () => {
     name?: string;
 
     @prop()
-    submodelOverride?: SubmodelOverride;
+    @required()
+    submodelOverride?: SubmodelOverride = new SubmodelOverride({ id: "test" });
 
     @list(SubmodelOverride)
     submodelOverrideList?: SubmodelOverride[] = [];
@@ -113,8 +115,8 @@ describe("Model class override", () => {
     const modified = new ModelOverride({
       ...original,
       submodelOverrideList: [
-        new SubmodelOverride({ id: "item1", surname: "name1" }), // Changed readonly
-        new SubmodelOverride({ id: "item2", surname: "changedName2" }),
+        new SubmodelOverride({ id: "item1", surname: "name1" }),
+        new SubmodelOverride({ id: "item2", surname: "changedName2" }), // Changed readonly
       ],
     });
 
