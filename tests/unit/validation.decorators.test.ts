@@ -153,7 +153,7 @@ describe("model/validation helpers", () => {
       .mockReturnValue(mockValidator);
     // @ts-expect-error forcing abstract class to be instantiated
     const m = new Model();
-    const dec: any = { key: "decaf.validation.ASYNC", props: { async: true } };
+    const dec: any = { key: "decaf.validation.ASYNC", async: true };
     const res = await validateDecorator(m as any, m as any, "a", dec, true);
     expect(res).toBe("ERR");
     expect(mockValidator.updateHasErrors).toHaveBeenCalled();

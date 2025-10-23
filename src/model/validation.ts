@@ -39,29 +39,27 @@ import { Constructor, Metadata } from "@decaf-ts/decoration";
 export function getValidatableUpdateProps<M extends Model>(
   model: M,
   propsToIgnore: string[]
-): ValidationPropertyDecoratorDefinition[] {
-  const decoratedProperties: ValidationPropertyDecoratorDefinition[] = [];
+): any[] {
+  const decoratedProperties: any[] = [];
   for (const prop in model) {
     if (
-      Object.prototype.hasOwnProperty.call(model, prop) &&
-      !propsToIgnore.includes(prop)
-    ) {
-      const validationPropertyDefinition = getValidationDecorators(
-        model,
-        prop,
-        UpdateValidationKeys.REFLECT
-      );
+      !Object.prototype.hasOwnProperty.call(model, prop) ||
+      propsToIgnore.includes(prop)
+    )
+      continue;
 
-      const listDecorator = getValidationDecorators(
-        model,
-        prop
-      ).decorators.find(({ key }) => key === ValidationKeys.LIST);
+    const decorators =
+      Metadata.validationFor(model.constructor as Constructor, prop) || {};
 
-      if (listDecorator)
-        validationPropertyDefinition.decorators.push(listDecorator);
+    // Intentionally leaving this part commented out until all tests are complete
+    // const listDecorator = getValidationDecorators(model, prop).decorators.find(
+    //   ({ key }) => key === ValidationKeys.LIST
+    // );
 
-      decoratedProperties.push(validationPropertyDefinition);
-    }
+    // if (listDecorator)
+    //   validationPropertyDefinition.decorators.push(listDecorator);
+
+    decoratedProperties.push({ prop, decorators });
   }
 
   return decoratedProperties;
@@ -250,53 +248,24 @@ export function validateCompare<M extends Model<any>>(
   async: boolean,
   ...propsToIgnore: string[]
 ): ModelConditionalAsync<M> {
-  // TODO: Need to use getValidatableUpdateProps to reduce the validated properties to the ones updated.
-  const decoratedProperties = Metadata.validatableProperties(
-    newModel.constructor as any,
-    ...propsToIgnore
+  const ValidatableUpdateProps = getValidatableUpdateProps(
+    newModel,
+    propsToIgnore
   );
 
   const result: Record<string, any> = {};
   const nestedErrors: Record<string, any> = {};
 
-  for (const prop of decoratedProperties) {
+  for (const { prop, decorators } of ValidatableUpdateProps) {
     const propKey = String(prop);
     const propValue = (newModel as any)[prop];
 
-    const propTypes: any[] | undefined = Metadata.allowedTypes(
+    const { designTypes, designType } = Metadata.getPropDesignTypes(
       newModel.constructor as any,
-      prop
+      prop as keyof M,
+      Metadata.get(newModel.constructor as any, prop)?.validation
     );
-
-    const decorators = Metadata.validationFor(
-      newModel.constructor as Constructor,
-      prop
-    );
-
-    if (!propTypes || !propTypes?.length || !decorators) continue;
-
-    const designTypeDec = propTypes[0];
-    const designType: any =
-      designTypeDec.class ||
-      designTypeDec.clazz ||
-      designTypeDec.customTypes ||
-      designTypeDec.name;
-
-    const designTypes = (
-      Array.isArray(designType) ? designType : [designType]
-    ).map((e: any) => {
-      e = typeof e === "function" && !e.name ? e() : e;
-      return (e as any).name ? (e as any).name : e;
-    }) as string[];
-
-    // Adds by default the type validation
-    if (!decorators[ValidationKeys.TYPE])
-      decorators[ValidationKeys.TYPE] = {
-        customTypes: designTypes,
-        message: DEFAULT_ERROR_MESSAGES.TYPE,
-        description: "defines the accepted types for the attribute",
-        async: false,
-      };
+    if (!designTypes) continue;
 
     // Handle array or Set types and enforce the presence of @list decorator
     if (designTypes.some((t) => [Array.name, Set.name].includes(t))) {

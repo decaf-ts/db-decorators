@@ -4,14 +4,11 @@ import {
   model,
   ModelArg,
   ModelErrorDefinition,
-  required,
   ValidationKeys,
 } from "@decaf-ts/decorator-validation";
 import { id, readonly } from "../../src";
 import { AddressModel, AsyncModel, UserModel } from "./TestModel";
 import { prop } from "@decaf-ts/decoration";
-
-// Model.setBuilder(Model.fromObject);
 
 export function isPromise(obj: any): boolean {
   return (
@@ -42,7 +39,6 @@ describe("Model class override", () => {
     name?: string;
 
     @prop()
-    @required()
     submodelOverride?: SubmodelOverride = new SubmodelOverride({ id: "test" });
 
     @list(SubmodelOverride)
