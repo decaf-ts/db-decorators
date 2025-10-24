@@ -1,172 +1,170 @@
-{
-  "db‑decorators": [
-    {
-      "Slogan": "db‑decorators: So your models wear suits, not roller‑skates.",
-      "Tags": "Decorators, Models, Style"
-    },
-    {
-      "Slogan": "Decorate your data so your code doesn’t caffeinate itself.",
-      "Tags": "Decorators, Calm, Coffee‑themed"
-    },
-    {
-      "Slogan": "From @entity to @column — make your data look sharp in decaf mode.",
-      "Tags": "Annotations, Coffee‑themed, Technical"
-    },
-    {
-      "Slogan": "When your model looks professional, your bugs wear pajamas.",
-      "Tags": "Models, Humor, Decorators"
-    },
-    {
-      "Slogan": "Mark your relationships like a barista marks your decaf latte.",
-      "Tags": "Relations, Coffee‑themed, Metaphor"
-    },
-    {
-      "Slogan": "Schema decor so smooth you’ll forget you’re doing backend work.",
-      "Tags": "Schema, Chill, Developer"
-    },
-    {
-      "Slogan": "Decorators that bring elegance, not adrenaline.",
-      "Tags": "Decorators, Calm, Technical"
-    },
-    {
-      "Slogan": "Your model’s wardrobe: tidy, typed, decaf‑prepared.",
-      "Tags": "Models, Coffee‑themed, Typescript"
-    },
-    {
-      "Slogan": "Let your decorators do the pomp while you do the code.",
-      "Tags": "Decorators, Productivity, Calm"
-    },
-    {
-      "Slogan": "Column, PK, relation — all without you sweating a coffee break.",
-      "Tags": "Schema, Humor, Coffee‑themed"
-    },
-    {
-      "Slogan": "Annotate and relax — your repository sees everything anyway.",
-      "Tags": "Annotations, Chill, Backend"
-    },
-    {
-      "Slogan": "We swapped caffeine for decorators — same energy, less crash.",
-      "Tags": "Decorators, Humor, Calm"
-    },
-    {
-      "Slogan": "When your model metadata is crisp, your dev‑flow is calm.",
-      "Tags": "Metadata, DeveloperDX, Calm"
-    },
-    {
-      "Slogan": "Decorators: because your code deserves latte art too.",
-      "Tags": "Decorators, Coffee‑themed, Fun"
-    },
-    {
-      "Slogan": "Mark it up, ship it out, sip your decaf.",
-      "Tags": "Decorators, Workflow, Coffee‑themed"
-    },
-    {
-      "Slogan": "Relations that don’t tangle your wiring — wired for decaf.",
-      "Tags": "Relations, Calm, Decorators"
-    },
-    {
-      "Slogan": "Your models don’t need energy drinks; they need annotations.",
-      "Tags": "Models, Humor, Decorators"
-    },
-    {
-      "Slogan": "From @table to @oneToMany — style your schema like a latte menu.",
-      "Tags": "Schema, Decorators, Coffee‑themed"
-    },
-    {
-      "Slogan": "Clean decor, clean data, no caffeine crash.",
-      "Tags": "Decorators, Calm, Technical"
-    },
-    {
-      "Slogan": "Schema decorators with zero jitters and full flavour.",
-      "Tags": "Schema, Coffee‑themed, Style"
-    },
-    {
-      "Slogan": "Inject metadata, not panic.",
-      "Tags": "Metadata, Calm, Developer"
-    },
-    {
-      "Slogan": "Your DB model’s fashion statement: decaf cool.",
-      "Tags": "Models, Coffee‑themed, Fun"
-    },
-    {
-      "Slogan": "Decorators that whisper ‘persist’ instead of shouting ‘error’.",
-      "Tags": "Decorators, Calm, Backend"
-    },
-    {
-      "Slogan": "Default your columns like you default your brew: easy and chill.",
-      "Tags": "Columns, Chill, Coffee‑themed"
-    },
-    {
-      "Slogan": "Schema style guide: lean, typed, decaf‑approved.",
-      "Tags": "Schema, Developer, Calm"
-    },
-    {
-      "Slogan": "When the backend looks good, you feel good. And you didn’t need espresso.",
-      "Tags": "Backend, Coffee‑themed, Developer"
-    },
-    {
-      "Slogan": "Decorate your data so your queries don’t need adrenaline.",
-      "Tags": "Decorators, Calm, Technical"
-    },
-    {
-      "Slogan": "Models wear less boilerplate in these threads.",
-      "Tags": "Boilerplate, Developer, Decorators"
-    },
-    {
-      "Slogan": "Typed metadata + relaxed devs = sustainable stack.",
-      "Tags": "Typing, Calm, Developer"
-    },
-    {
-      "Slogan": "When your persistence layer is a boutique café, not a nightclub.",
-      "Tags": "Metaphor, Persistence, Coffee‑themed"
-    },
-    {
-      "Slogan": "Decorators: your model’s barista‑style garnish.",
-      "Tags": "Decorators, Fun, Coffee‑themed"
-    },
-    {
-      "Slogan": "Mark your fields, relationships and indices — sit back while they sort themselves.",
-      "Tags": "Indices, Chill, Backend"
-    },
-    {
-      "Slogan": "Your models deserve more than spaghetti; they deserve decaf structure.",
-      "Tags": "Models, Humor, Decorators"
-    },
-    {
-      "Slogan": "When annotated properly, your repository thanks you.",
-      "Tags": "Repository, Developer, Calm"
-    },
-    {
-      "Slogan": "Schema metadata: served neat, no sugar‑rush.",
-      "Tags": "Schema, Coffee‑themed, Technical"
-    },
-    {
-      "Slogan": "Decorators that give your code purpose and your devs pause.",
-      "Tags": "Decorators, Calm, Developer"
-    },
-    {
-      "Slogan": "Your DB model’s vibe: cozy café, not caffeine chaos.",
-      "Tags": "Database, Coffee‑themed, Developer"
-    },
-    {
-      "Slogan": "Stop decorating chaos; start decorating clarity.",
-      "Tags": "Decorators, Calm, Technical"
-    },
-    {
-      "Slogan": "Schema style guide: decaf edition.",
-      "Tags": "Schema, Branding, Calm"
-    },
-    {
-      "Slogan": "Your code’s annotation lounge — come in, relax, persist.",
-      "Tags": "Developer, Calm, Decorators"
-    },
-    {
-      "Slogan": "When your model metadata aligns, your dev day flows.",
-      "Tags": "Metadata, Productivity, Calm"
-    },
-    {
-      "Slogan": "db‑decorators: Because your data deserves decaf elegance.",
-      "Tags": "Decorators, Branding, Coffee‑themed"
-    }
-  ]
-}
+[
+  {
+    "Slogan": "db‑decorators: So your models wear suits, not roller‑skates.",
+    "Tags": "Decorators, Models, Style"
+  },
+  {
+    "Slogan": "Decorate your data so your code doesn’t caffeinate itself.",
+    "Tags": "Decorators, Calm, Coffee‑themed"
+  },
+  {
+    "Slogan": "From @entity to @column — make your data look sharp in decaf mode.",
+    "Tags": "Annotations, Coffee‑themed, Technical"
+  },
+  {
+    "Slogan": "When your model looks professional, your bugs wear pajamas.",
+    "Tags": "Models, Humor, Decorators"
+  },
+  {
+    "Slogan": "Mark your relationships like a barista marks your decaf latte.",
+    "Tags": "Relations, Coffee‑themed, Metaphor"
+  },
+  {
+    "Slogan": "Schema decor so smooth you’ll forget you’re doing backend work.",
+    "Tags": "Schema, Chill, Developer"
+  },
+  {
+    "Slogan": "Decorators that bring elegance, not adrenaline.",
+    "Tags": "Decorators, Calm, Technical"
+  },
+  {
+    "Slogan": "Your model’s wardrobe: tidy, typed, decaf‑prepared.",
+    "Tags": "Models, Coffee‑themed, Typescript"
+  },
+  {
+    "Slogan": "Let your decorators do the pomp while you do the code.",
+    "Tags": "Decorators, Productivity, Calm"
+  },
+  {
+    "Slogan": "Column, PK, relation — all without you sweating a coffee break.",
+    "Tags": "Schema, Humor, Coffee‑themed"
+  },
+  {
+    "Slogan": "Annotate and relax — your repository sees everything anyway.",
+    "Tags": "Annotations, Chill, Backend"
+  },
+  {
+    "Slogan": "We swapped caffeine for decorators — same energy, less crash.",
+    "Tags": "Decorators, Humor, Calm"
+  },
+  {
+    "Slogan": "When your model metadata is crisp, your dev‑flow is calm.",
+    "Tags": "Metadata, DeveloperDX, Calm"
+  },
+  {
+    "Slogan": "Decorators: because your code deserves latte art too.",
+    "Tags": "Decorators, Coffee‑themed, Fun"
+  },
+  {
+    "Slogan": "Mark it up, ship it out, sip your decaf.",
+    "Tags": "Decorators, Workflow, Coffee‑themed"
+  },
+  {
+    "Slogan": "Relations that don’t tangle your wiring — wired for decaf.",
+    "Tags": "Relations, Calm, Decorators"
+  },
+  {
+    "Slogan": "Your models don’t need energy drinks; they need annotations.",
+    "Tags": "Models, Humor, Decorators"
+  },
+  {
+    "Slogan": "From @table to @oneToMany — style your schema like a latte menu.",
+    "Tags": "Schema, Decorators, Coffee‑themed"
+  },
+  {
+    "Slogan": "Clean decor, clean data, no caffeine crash.",
+    "Tags": "Decorators, Calm, Technical"
+  },
+  {
+    "Slogan": "Schema decorators with zero jitters and full flavour.",
+    "Tags": "Schema, Coffee‑themed, Style"
+  },
+  {
+    "Slogan": "Inject metadata, not panic.",
+    "Tags": "Metadata, Calm, Developer"
+  },
+  {
+    "Slogan": "Your DB model’s fashion statement: decaf cool.",
+    "Tags": "Models, Coffee‑themed, Fun"
+  },
+  {
+    "Slogan": "Decorators that whisper ‘persist’ instead of shouting ‘error’.",
+    "Tags": "Decorators, Calm, Backend"
+  },
+  {
+    "Slogan": "Default your columns like you default your brew: easy and chill.",
+    "Tags": "Columns, Chill, Coffee‑themed"
+  },
+  {
+    "Slogan": "Schema style guide: lean, typed, decaf‑approved.",
+    "Tags": "Schema, Developer, Calm"
+  },
+  {
+    "Slogan": "When the backend looks good, you feel good. And you didn’t need espresso.",
+    "Tags": "Backend, Coffee‑themed, Developer"
+  },
+  {
+    "Slogan": "Decorate your data so your queries don’t need adrenaline.",
+    "Tags": "Decorators, Calm, Technical"
+  },
+  {
+    "Slogan": "Models wear less boilerplate in these threads.",
+    "Tags": "Boilerplate, Developer, Decorators"
+  },
+  {
+    "Slogan": "Typed metadata + relaxed devs = sustainable stack.",
+    "Tags": "Typing, Calm, Developer"
+  },
+  {
+    "Slogan": "When your persistence layer is a boutique café, not a nightclub.",
+    "Tags": "Metaphor, Persistence, Coffee‑themed"
+  },
+  {
+    "Slogan": "Decorators: your model’s barista‑style garnish.",
+    "Tags": "Decorators, Fun, Coffee‑themed"
+  },
+  {
+    "Slogan": "Mark your fields, relationships and indices — sit back while they sort themselves.",
+    "Tags": "Indices, Chill, Backend"
+  },
+  {
+    "Slogan": "Your models deserve more than spaghetti; they deserve decaf structure.",
+    "Tags": "Models, Humor, Decorators"
+  },
+  {
+    "Slogan": "When annotated properly, your repository thanks you.",
+    "Tags": "Repository, Developer, Calm"
+  },
+  {
+    "Slogan": "Schema metadata: served neat, no sugar‑rush.",
+    "Tags": "Schema, Coffee‑themed, Technical"
+  },
+  {
+    "Slogan": "Decorators that give your code purpose and your devs pause.",
+    "Tags": "Decorators, Calm, Developer"
+  },
+  {
+    "Slogan": "Your DB model’s vibe: cozy café, not caffeine chaos.",
+    "Tags": "Database, Coffee‑themed, Developer"
+  },
+  {
+    "Slogan": "Stop decorating chaos; start decorating clarity.",
+    "Tags": "Decorators, Calm, Technical"
+  },
+  {
+    "Slogan": "Schema style guide: decaf edition.",
+    "Tags": "Schema, Branding, Calm"
+  },
+  {
+    "Slogan": "Your code’s annotation lounge — come in, relax, persist.",
+    "Tags": "Developer, Calm, Decorators"
+  },
+  {
+    "Slogan": "When your model metadata aligns, your dev day flows.",
+    "Tags": "Metadata, Productivity, Calm"
+  },
+  {
+    "Slogan": "db‑decorators: Because your data deserves decaf elegance.",
+    "Tags": "Decorators, Branding, Coffee‑themed"
+  }
+]
