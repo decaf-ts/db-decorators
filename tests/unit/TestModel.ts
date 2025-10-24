@@ -14,6 +14,7 @@ import {
 import { DBOperations, id, readonly, timestamp } from "../../src";
 import { propMetadata, prop } from "@decaf-ts/decoration";
 
+@model()
 export class TestModel extends Model {
   @id()
   id!: string | number;

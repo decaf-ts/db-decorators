@@ -39,7 +39,7 @@ describe("Model class override", () => {
     name?: string;
 
     @prop()
-    submodelOverride?: SubmodelOverride = new SubmodelOverride({ id: "test" });
+    submodelOverride?: SubmodelOverride;
 
     @list(SubmodelOverride)
     submodelOverrideList?: SubmodelOverride[] = [];

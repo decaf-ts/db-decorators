@@ -100,7 +100,9 @@ describe("model/validation helpers", () => {
     const listEntry = res.find((d: any) => d.prop === "tags");
     expect(listEntry).toBeDefined();
     expect(
-      listEntry!.decorators.some((d: any) => d.key === ValidationKeys.LIST)
+      Object.keys(listEntry!.decorators).some(
+        (d: any) => d === ValidationKeys.LIST
+      )
     ).toBe(true);
     // ensure ignored props are excluded
     const res2 = Metadata.validatableProperties(m.constructor as any, "name");

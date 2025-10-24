@@ -4,6 +4,8 @@ import {
   validate,
 } from "@decaf-ts/decorator-validation";
 import { validateCompare } from "../model/validation";
+import { Constructor, Metadata } from "@decaf-ts/decoration";
+import { DBKeys } from "../model/constants";
 
 /**
  * @description Validates the model and checks for errors
@@ -42,3 +44,16 @@ Model.prototype.hasErrors = function <M extends Model<true | false>>(
   // @ts-expect-error Overriding Model prototype method with dynamic conditional return type.
   return validateCompare(previousVersion, this, async, ...exclusions);
 };
+
+// Unfinished
+(Metadata as any).pk = function <M extends Model>(model: Constructor<M>) {
+  return Object.keys(Metadata.get(model, DBKeys.ID))[0];
+}.bind(Metadata);
+
+// Unfinished
+(Metadata as any).pkDef = function <M extends Model>(
+  model: Constructor<M>,
+  property: keyof M
+) {
+  return Metadata.set(model.constructor as Constructor, DBKeys.ID, property);
+}.bind(Metadata);
