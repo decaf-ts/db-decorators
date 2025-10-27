@@ -1,8 +1,7 @@
-![Banner](./workdocs/assets/Banner.png)
+![Banner](./workdocs/assets/decaf-logo.svg)
 ### DB-Decorators: Database Operations Made Simple
 
 The db-decorators library provides a comprehensive set of TypeScript decorators and utilities for database operations. It implements the repository pattern with support for model definition, validation, identity management, and operation hooks. The library enables developers to define database models with decorators, perform CRUD operations with validation, and customize behavior during database operations through operation hooks.
-
 
 
 ![Licence](https://img.shields.io/github/license/decaf-ts/db-decorators.svg?style=plastic)
@@ -27,6 +26,9 @@ The db-decorators library provides a comprehensive set of TypeScript decorators 
 ![NPM Version](https://img.shields.io/badge/dynamic/json.svg?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbadges%2Fshields%2Fmaster%2Fpackage.json&label=NPM&query=$.engines.npm&colorB=purple)
 
 Documentation available [here](https://decaf-ts.github.io/db-decorators/)
+
+Minimal size: 7.1 KB kb gzipped
+
 
 
 ### DB-Decorators
@@ -605,6 +607,24 @@ console.log("Empty ID:", emptyId);
 
 
 
+
+
+## Coding Principles
+
+- group similar functionality in folders (analog to namespaces but without any namespace declaration)
+- one class per file;
+- one interface per file (unless interface is just used as a type);
+- group types as other interfaces in a types.ts file per folder;
+- group constants or enums in a constants.ts file per folder;
+- group decorators in a decorators.ts file per folder;
+- always import from the specific file, never from a folder or index file (exceptions for dependencies on other packages);
+- prefer the usage of established design patters where applicable:
+  - Singleton (can be an anti-pattern. use with care);
+  - factory;
+  - observer;
+  - strategy;
+  - builder;
+  - etc;
 
 
 ### Related
