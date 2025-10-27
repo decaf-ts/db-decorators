@@ -46,14 +46,20 @@ Model.prototype.hasErrors = function <M extends Model<true | false>>(
 };
 
 // Unfinished
-(Metadata as any).pk = function <M extends Model>(model: Constructor<M>) {
-  return Object.keys(Metadata.get(model, DBKeys.ID))[0];
-}.bind(Metadata);
+(Model as any).pkDef = function <M extends Model>(
+  model: Constructor<M>,
+  property: keyof M = DBKeys.ID as keyof M
+) {
+  return Metadata.set(model, DBKeys.ID, property);
+}.bind(Model);
 
 // Unfinished
-(Metadata as any).pkDef = function <M extends Model>(
-  model: Constructor<M>,
-  property: keyof M
+(Model as any).pk = function <M extends Model>(
+  model: M,
+  returnIdValue = false
 ) {
-  return Metadata.set(model.constructor as Constructor, DBKeys.ID, property);
-}.bind(Metadata);
+  if (!model) throw new Error("No model was provided");
+  const idProp = Metadata.get(model.constructor as Constructor, DBKeys.ID);
+  if (returnIdValue) return model[idProp as keyof M];
+  return idProp;
+}.bind(Model);

@@ -14,6 +14,7 @@ import { ValidationError } from "../../src/repository/errors";
 import { IRepository } from "../../src/interfaces/IRepository";
 import { Injectables } from "@decaf-ts/injectable-decorators";
 import { id } from "../../src";
+import { Constructor, Metadata } from "@decaf-ts/decoration";
 
 @model()
 class InnerTestModel extends Model {
@@ -67,6 +68,19 @@ class OuterListTestModel extends Model {
   children!: InnerTestModel[];
 
   constructor(arg: ModelArg<OuterTestModel>) {
+    super(arg);
+  }
+}
+
+@model()
+class PlainModel extends Model {
+  @id()
+  id!: string;
+
+  @readonly()
+  surname?: string;
+
+  constructor(arg?: ModelArg<PlainModel>) {
     super(arg);
   }
 }
@@ -265,6 +279,18 @@ describe(`DB extended Model`, function () {
       expect(toUpdate?.hasErrors(created)).toBeDefined();
       expect(validateMock1).toHaveBeenCalledTimes(3); // because the update call it one for non update properties, and another for update
       expect(validateMock2).toHaveBeenCalledTimes(3); // because the update call it one for non update properties, and another for update
+    });
+
+    it("tests id definition and retrieval", () => {
+      const newModel = new PlainModel({ id: "pktest" });
+      Model.pkDef(newModel.constructor as Constructor, "id");
+      const pkProp = Model.pk(newModel);
+      const id = Model.pk(newModel, true);
+
+      expect(pkProp).toBeDefined();
+      expect(pkProp).toEqual("id");
+
+      expect(id).toEqual("pktest");
     });
   });
 });
