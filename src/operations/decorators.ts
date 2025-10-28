@@ -6,7 +6,7 @@ import {
   StandardOperationHandler,
   UpdateOperationHandler,
 } from "./types";
-import { DBOperations, OperationKeys } from "./constants";
+import { CrudOperations, DBOperations, OperationKeys } from "./constants";
 import { Operations } from "./Operations";
 import { apply } from "@decaf-ts/reflection";
 import { Model, propMetadata } from "@decaf-ts/decorator-validation";
@@ -15,6 +15,7 @@ import { RepositoryFlags } from "../repository/types";
 import { Context } from "../repository/Context";
 import { InternalError } from "../repository/errors";
 import { getHandlerArgs } from "../repository/utils";
+import { metadata } from "@decaf-ts/decoration";
 
 /**
  * @description Represents sorting parameters for grouping decorators
@@ -561,3 +562,83 @@ export function operation<V = object>(
     return apply(...decorators)(target, propertyKey);
   };
 }
+
+/**
+ * @description
+ * Creates a higher-order function that attaches a metadata entry containing a handler
+ * and its execution parameters, to be conditionally evaluated later.
+ *
+ * @summary
+ * The `executeIf` function is a decorator factory designed to wrap a handler function
+ * and associate it with a specific metadata key. When invoked, it stores both the
+ * parameters passed and the handler reference inside the metadata system for deferred
+ * or conditional evaluation. This is particularly useful for dynamically applying logic
+ * or decorators only when certain conditions are met.
+ *
+ * @template P - Represents a tuple of any parameter types that the handler function accepts.
+ *
+ * @param {string} key - The metadata key used to store and later retrieve the handler and its parameters.
+ * @param {(...params: P) => boolean} handler - A predicate or handler function that receives the same parameters as the decorator
+ * and determines whether the associated logic should execute.
+ *
+ * @return {(...params: P) => ReturnType<typeof metadata>}
+ * Returns a function that, when invoked with the given parameters, stores a metadata object containing
+ * both the parameters and the handler reference under the provided key.
+ *
+ * @function storeHandlerMetadata
+ *
+ * @mermaid
+ * sequenceDiagram
+ *   participant Dev as Developer
+ *   participant executeIf as executeIf()
+ *   participant ReturnedFn as Returned Function
+ *   participant Metadata as metadata()
+ *
+ *   Dev->>executeIf: Calls executeIf(key, handler)
+ *   executeIf->>ReturnedFn: Returns function(...params)
+ *   Dev->>ReturnedFn: Invokes returned function with (...params)
+ *   ReturnedFn->>Metadata: Calls metadata(key, { args: params, handler })
+ *   Metadata-->>ReturnedFn: Returns stored metadata reference
+ *   ReturnedFn-->>Dev: Returns metadata response
+ *
+ */
+export function storeHandlerMetadata<P extends any[]>(
+  key: string,
+  handler: (...params: P) => boolean
+) {
+  return (...params: Partial<P>) => {
+    return metadata(key, { args: params, handler });
+  };
+}
+
+/**
+ * @description
+ * Decorator factory that conditionally blocks specific CRUD operations
+ * from being executed on a model or controller.
+ *
+ * @summary
+ * The `BlockOperations` decorator integrates with the `executeIf` mechanism to
+ * associate metadata that defines which CRUD operations should be restricted.
+ * When applied, it registers a conditional handler that evaluates whether a given
+ * operation is included in the list of blocked operations. This enables dynamic,
+ * metadata-driven control over allowed operations in CRUD-based systems.
+ *
+ * @template CrudOperations - Enum or type representing valid CRUD operations.
+ *
+ * @param {CrudOperations[]} operations - An array of CRUD operations that should be blocked.
+ * The handler will later check if the requested operation is part of this list.
+ *
+ * Returns a decorator that stores metadata indicating which operations are blocked.
+ * The metadata can be inspected or enforced later within the application's lifecycle.
+ *
+ * @function BlockOperations
+
+ * @category decorators
+ */
+export const BlockOperations = (operations: CrudOperations[]) =>
+  storeHandlerMetadata<[CrudOperations[], CrudOperations]>(
+    OperationKeys.REFLECT + OperationKeys.BLOCK,
+    (operations: CrudOperations[], operation: CrudOperations) => {
+      return operations.includes(operation);
+    }
+  )(operations);
