@@ -13,6 +13,7 @@ export enum OperationKeys {
   DELETE = "delete",
   ON = "on.",
   AFTER = "after.",
+  BLOCK = "block",
 }
 
 /**
