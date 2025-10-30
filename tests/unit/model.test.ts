@@ -75,7 +75,7 @@ class OuterListTestModel extends Model {
 @model()
 class PlainModel extends Model {
   @id()
-  id!: string;
+  pk!: string;
 
   @readonly()
   surname?: string;
@@ -281,16 +281,15 @@ describe(`DB extended Model`, function () {
       expect(validateMock2).toHaveBeenCalledTimes(3); // because the update call it one for non update properties, and another for update
     });
 
-    it("tests id definition and retrieval", () => {
-      const newModel = new PlainModel({ id: "pktest" });
-      Model.pkDef(newModel.constructor as Constructor, "id");
-      const pkProp = Model.pk(newModel);
-      const id = Model.pk(newModel, true);
+    it("tests id retrieval", () => {
+      const newModel = new PlainModel({ pk: "pktest" });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const meta = Metadata.get(newModel.constructor as any);
+      const pkprop = Model.pk(newModel);
+      expect(pkprop).toEqual("pk");
 
-      expect(pkProp).toBeDefined();
-      expect(pkProp).toEqual("id");
-
-      expect(id).toEqual("pktest");
+      const pkValue = Model.pk(newModel, true);
+      expect(pkValue).toEqual("pktest");
     });
   });
 });

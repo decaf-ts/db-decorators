@@ -12,7 +12,6 @@ import {
   ValidationPropertyDecoratorDefinition,
 } from "@decaf-ts/decorator-validation";
 import { UpdateValidationKeys, UpdateValidator } from "../validation";
-import { findModelId } from "../identity";
 import { Constructor, Metadata } from "@decaf-ts/decoration";
 
 /**
@@ -156,19 +155,12 @@ export function validateDecorators<
 
         const errs = newValues.map((childValue: any) => {
           // find by id so the list elements order doesn't matter
-          const id = findModelId(childValue as any, true);
+          const id = Model.pk(childValue as any, true);
           if (!id) return "Failed to find model id";
 
           const oldListModel = oldValues.find(
-            (el: any) => id === findModelId(el, true)
+            (el: any) => id === Model.pk(el as any, true)
           );
-
-          // temporary code, to make test 'override original method for lists' work.
-          // Need to create method to get id from metadata.
-          // Workaround works only when id property is named 'id'.
-          // const oldListModel = oldValues.find(
-          //   (el: any) => childValue.id === el.id
-          // );
 
           if (Model.isModel(childValue)) {
             return childValue.hasErrors(oldListModel);

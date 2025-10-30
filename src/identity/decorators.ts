@@ -1,7 +1,7 @@
 import { required } from "@decaf-ts/decorator-validation";
 import { readonly } from "../validation";
 import { DBKeys } from "../model/constants";
-import { propMetadata, apply } from "@decaf-ts/decoration";
+import { propMetadata, apply, Metadata } from "@decaf-ts/decoration";
 
 /**
  * @description Decorator that marks a property as an ID field
@@ -11,5 +11,11 @@ import { propMetadata, apply } from "@decaf-ts/decoration";
  * @category Property Decorators
  */
 export function id() {
-  return apply(required(), readonly(), propMetadata(DBKeys.ID, {}));
+  function idDecorator() {
+    return function idDecorator(model: object, prop?: any) {
+      return propMetadata(Metadata.key(DBKeys.ID, prop), {})(model, prop);
+    };
+  }
+
+  return apply(required(), readonly(), idDecorator());
 }

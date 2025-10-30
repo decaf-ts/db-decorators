@@ -2,6 +2,7 @@ import { DBKeys } from "../model/constants";
 import { getAllPropertyDecoratorsRecursive } from "../repository/utils";
 import { Model, ModelKeys, sf } from "@decaf-ts/decorator-validation";
 import { InternalError } from "../repository/errors";
+import { Metadata } from "@decaf-ts/decoration";
 
 /**
  * @description Finds the primary key attribute for a model
@@ -24,6 +25,15 @@ import { InternalError } from "../repository/errors";
  * @memberOf module:db-decorators
  */
 export function findPrimaryKey<M extends Model>(model: M) {
+  const idPropnew = Model.pk(model);
+  return {
+    id: idPropnew as keyof M,
+    props: Metadata.get(
+      model.constructor as any,
+      Metadata.key(DBKeys.ID, idPropnew)
+    ),
+  };
+
   const decorators = getAllPropertyDecoratorsRecursive(
     model,
     undefined,
@@ -42,7 +52,6 @@ export function findPrimaryKey<M extends Model>(model: M) {
     },
     {}
   );
-
   if (!idDecorators || !Object.keys(idDecorators).length)
     throw new InternalError("Could not find ID decorated Property");
   if (Object.keys(idDecorators).length > 1)
@@ -80,6 +89,7 @@ export function findModelId<M extends Model>(
   model: M,
   returnEmpty = false
 ): string | number | bigint {
+  return Model.pk(model, true) as string | number | bigint;
   const idProp = findPrimaryKey(model).id;
   const modelId = model[idProp];
   if (typeof modelId === "undefined" && !returnEmpty)

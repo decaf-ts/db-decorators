@@ -45,21 +45,15 @@ Model.prototype.hasErrors = function <M extends Model<true | false>>(
   return validateCompare(previousVersion, this, async, ...exclusions);
 };
 
-// Unfinished
-(Model as any).pkDef = function <M extends Model>(
-  model: Constructor<M>,
-  property: keyof M = DBKeys.ID as keyof M
-) {
-  return Metadata.set(model, DBKeys.ID, property);
-}.bind(Model);
-
-// Unfinished
-(Model as any).pk = function <M extends Model>(
-  model: M,
-  returnIdValue = false
-) {
+(Model as any).pk = function <M extends Model>(model: M, keyValue = false) {
   if (!model) throw new Error("No model was provided");
   const idProp = Metadata.get(model.constructor as Constructor, DBKeys.ID);
-  if (returnIdValue) return model[idProp as keyof M];
-  return idProp;
+  if (!idProp) {
+    throw new Error(
+      `No Id property defined for model ${model?.constructor?.name || "Unknown Model"}`
+    );
+  }
+  const key = Object.keys(idProp)[0] as keyof M;
+  if (!keyValue) return key;
+  return model[key as keyof M];
 }.bind(Model);
