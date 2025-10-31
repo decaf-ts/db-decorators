@@ -1,7 +1,5 @@
 import { DBKeys } from "../model/constants";
-import { getAllPropertyDecoratorsRecursive } from "../repository/utils";
-import { Model, ModelKeys, sf } from "@decaf-ts/decorator-validation";
-import { InternalError } from "../repository/errors";
+import { Model } from "@decaf-ts/decorator-validation";
 import { Metadata } from "@decaf-ts/decoration";
 
 /**
@@ -33,35 +31,6 @@ export function findPrimaryKey<M extends Model>(model: M) {
       Metadata.key(DBKeys.ID, idPropnew)
     ),
   };
-
-  const decorators = getAllPropertyDecoratorsRecursive(
-    model,
-    undefined,
-    DBKeys.REFLECT + DBKeys.ID
-  );
-  const idDecorators = Object.entries(decorators as object).reduce(
-    (accum: { [indexer: string]: any[] }, [prop, decs]) => {
-      const filtered = (decs as { key: string }[]).filter(
-        (d) => d.key !== ModelKeys.TYPE
-      );
-      if (filtered && filtered.length) {
-        accum[prop] = accum[prop] || [];
-        accum[prop].push(...filtered);
-      }
-      return accum;
-    },
-    {}
-  );
-  if (!idDecorators || !Object.keys(idDecorators).length)
-    throw new InternalError("Could not find ID decorated Property");
-  if (Object.keys(idDecorators).length > 1)
-    throw new InternalError(sf(Object.keys(idDecorators).join(", ")));
-  const idProp = Object.keys(idDecorators)[0];
-  if (!idProp) throw new InternalError("Could not find ID decorated Property");
-  return {
-    id: idProp as keyof M,
-    props: idDecorators[idProp][0].props,
-  };
 }
 
 /**
@@ -90,11 +59,4 @@ export function findModelId<M extends Model>(
   returnEmpty = false
 ): string | number | bigint {
   return Model.pk(model, true) as string | number | bigint;
-  const idProp = findPrimaryKey(model).id;
-  const modelId = model[idProp];
-  if (typeof modelId === "undefined" && !returnEmpty)
-    throw new InternalError(
-      `No value for the Id is defined under the property ${idProp as string}`
-    );
-  return modelId as string | number | bigint;
 }

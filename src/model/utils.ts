@@ -5,6 +5,7 @@ import {
 } from "../repository";
 import { Model } from "@decaf-ts/decorator-validation";
 import { DBKeys } from "./constants";
+import { Metadata } from "@decaf-ts/decoration";
 
 /**
  * @description Checks if a model is marked as transient
@@ -16,12 +17,9 @@ import { DBKeys } from "./constants";
  * @memberOf module:db-decorators
  */
 export function isTransient<M extends Model>(model: M) {
-  return !!(
-    Reflect.getMetadata(Repository.key(DBKeys.TRANSIENT), model.constructor) ||
-    Reflect.getMetadata(
-      Repository.key(DBKeys.TRANSIENT),
-      Model.get(model.constructor.name) as any
-    )
+  return !!Metadata.get(
+    model.constructor as any,
+    Repository.key(DBKeys.TRANSIENT)
   );
 }
 
@@ -64,6 +62,7 @@ export function modelToTransient<M extends Model>(
     undefined,
     Repository.key(DBKeys.TRANSIENT)
   ) as Record<string, any[]>;
+
 
   const result = Object.entries(decs).reduce(
     (

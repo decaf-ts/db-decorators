@@ -6,7 +6,9 @@ import { InternalError } from "./errors";
 import { wrapMethodWithContext } from "./wrappers";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
-import { Constructor } from "@decaf-ts/decoration";
+import { Constructor, Metadata } from "@decaf-ts/decoration";
+import { findPrimaryKey } from "../identity/utils";
+import { DBKeys } from "../model/constants";
 
 /**
  * @description Base repository implementation providing CRUD operations for models.
@@ -121,34 +123,41 @@ export abstract class BaseRepository<
     return this._class;
   }
 
-  // /**
-  //  * @description Gets the primary key property name of the model.
-  //  * @summary Retrieves the name of the property that serves as the primary key for the model.
-  //  * If not already determined, it finds the primary key using the model's decorators.
-  //  * @return The name of the primary key property
-  //  */
-  // get pk(): keyof M {
-  //   if (!this._pk) {
-  //     const { id, props } = findPrimaryKey(new this.class());
-  //     this._pk = id;
-  //     this._pkProps = props;
-  //   }
-  //   return this._pk;
-  // }
+  /**
+   * @description Gets the primary key property name of the model.
+   * @summary Retrieves the name of the property that serves as the primary key for the model.
+   * If not already determined, it finds the primary key using the model's decorators.
+   * @return The name of the primary key property
+   */
+  get pk(): keyof M {
+    if (!this._pk) {
+      // const instance = new this.class();
+      // Throws error decorator_validation_1.Model.pk is not a function
+      // const id = Model.pk(instance);
+      // const props = Metadata.get(
+      //   instance.constructor as any,
+      //   Metadata.key(DBKeys.ID, id)
+      // );
+      const { id, props } = findPrimaryKey(new this.class());
+      this._pk = id;
+      this._pkProps = props;
+    }
+    return this._pk;
+  }
 
-  // /**
-  //  * @description Gets the primary key properties.
-  //  * @summary Retrieves the properties associated with the primary key of the model.
-  //  * If not already determined, it triggers the pk getter to find the primary key properties.
-  //  * @return {any} The properties of the primary key
-  //  */
-  // protected get pkProps(): any {
-  //   if (!this._pkProps) {
-  //     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //     const pk = this.pk;
-  //   }
-  //   return this._pkProps;
-  // }
+  /**
+   * @description Gets the primary key properties.
+   * @summary Retrieves the properties associated with the primary key of the model.
+   * If not already determined, it triggers the pk getter to find the primary key properties.
+   * @return {any} The properties of the primary key
+   */
+  protected get pkProps(): any {
+    if (!this._pkProps) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const pk = this.pk;
+    }
+    return this._pkProps;
+  }
 
   protected constructor(clazz?: Constructor<M>) {
     if (clazz) this._class = clazz;

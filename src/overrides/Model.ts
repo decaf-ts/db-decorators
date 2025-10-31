@@ -1,3 +1,5 @@
+import "@decaf-ts/decorator-validation";
+
 declare module "@decaf-ts/decorator-validation" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   export namespace Model {

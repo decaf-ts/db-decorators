@@ -116,6 +116,9 @@ describe("Adapter", () => {
 
     created = await repo.create(model);
 
+    // const pk = Model.pk(created, true);
+    // console.log("pk:", pk);
+
     expect(created).toBeDefined();
 
     //check correct order of the decorator execution
