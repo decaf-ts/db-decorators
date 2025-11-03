@@ -1,8 +1,4 @@
-import {
-  getAllPropertyDecoratorsRecursive,
-  Repository,
-  SerializationError,
-} from "../repository";
+import { Repository, SerializationError } from "../repository";
 import { Model } from "@decaf-ts/decorator-validation";
 import { DBKeys } from "./constants";
 import { Metadata } from "@decaf-ts/decoration";
@@ -38,7 +34,7 @@ export function isTransient<M extends Model>(model: M) {
  *   participant Caller
  *   participant modelToTransient
  *   participant isTransient
- *   participant getAllPropertyDecoratorsRecursive
+ *   participant Metadata.validatableProperties
  *
  *   Caller->>modelToTransient: model
  *   modelToTransient->>isTransient: check if model is transient
@@ -46,8 +42,8 @@ export function isTransient<M extends Model>(model: M) {
  *   alt model is not transient
  *     modelToTransient-->>Caller: {model}
  *   else model is transient
- *     modelToTransient->>getAllPropertyDecoratorsRecursive: get transient properties
- *     getAllPropertyDecoratorsRecursive-->>modelToTransient: property decorators
+ *     modelToTransient->>Metadata.validatableProperties: get decorated properties, combine with model props
+ *     modelToTransient->>get transient properties from Metadata
  *     modelToTransient->>modelToTransient: separate properties
  *     modelToTransient->>Model.build: rebuild model without transient props
  *     modelToTransient-->>Caller: {model, transient}
@@ -57,36 +53,38 @@ export function modelToTransient<M extends Model>(
   model: M
 ): { model: M; transient?: Record<string, any> } {
   if (!isTransient(model)) return { model: model };
-  const decs: Record<string, any[]> = getAllPropertyDecoratorsRecursive(
-    model,
-    undefined,
-    Repository.key(DBKeys.TRANSIENT)
-  ) as Record<string, any[]>;
-
-
-  const result = Object.entries(decs).reduce(
-    (
-      accum: { model: Record<string, any>; transient?: Record<string, any> },
-      [k, val]
-    ) => {
-      const transient = val.find((el) => el.key === "");
-      if (transient) {
-        accum.transient = accum.transient || {};
-        try {
-          accum.transient[k] = model[k as keyof M];
-        } catch (e: unknown) {
-          throw new SerializationError(
-            `Failed to serialize transient property ${k}: ${e}`
-          );
-        }
-      } else {
-        accum.model = accum.model || {};
-        accum.model[k] = (model as Record<string, any>)[k];
-      }
-      return accum;
-    },
-    {} as { model: Record<string, any>; transient?: Record<string, any> }
+  const decoratedProperties = Metadata.validatableProperties(
+    model.constructor as any
   );
+  const modelProps = Object.keys(model);
+  const allProps = [...new Set([...decoratedProperties, ...modelProps])];
+
+  const transientProps = Metadata.get(
+    model.constructor as any,
+    DBKeys.TRANSIENT
+  );
+
+  const result = {
+    model: {} as Record<string, any>,
+    transient: {} as Record<string, any>,
+  };
+  for (const key of allProps) {
+    const isTransient = Object.keys(transientProps).includes(key);
+    if (isTransient) {
+      result.transient = result.transient || {};
+      try {
+        result.transient[key] = model[key as keyof M];
+      } catch (e: unknown) {
+        throw new SerializationError(
+          `Failed to serialize transient property ${key}: ${e}`
+        );
+      }
+    } else {
+      result.model = result.model || {};
+      result.model[key] = (model as Record<string, any>)[key];
+    }
+  }
+
   result.model = Model.build(result.model, model.constructor.name);
   return result as { model: M; transient?: Record<string, any> };
 }

@@ -7,7 +7,12 @@ import { Repository } from "../repository/Repository";
 import { Context } from "../repository/Context";
 import { CrudOperations, GroupSort, OperationKeys } from "../operations";
 import { RepositoryFlags } from "../repository/types";
-import { Decoration, propMetadata, apply } from "@decaf-ts/decoration";
+import {
+  Decoration,
+  propMetadata,
+  apply,
+  Metadata,
+} from "@decaf-ts/decoration";
 
 /**
  * @description Hashes a property value during create or update operations
@@ -300,8 +305,11 @@ export function transient() {
   const key = Repository.key(DBKeys.TRANSIENT);
   return Decoration.for(key)
     .define(function transient(model: any, attribute: any) {
-      propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model, attribute);
       propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model.constructor);
+      propMetadata(Metadata.key(DBKeys.TRANSIENT, attribute), {})(
+        model,
+        attribute
+      );
     })
     .apply();
 }

@@ -131,8 +131,8 @@ export abstract class BaseRepository<
    */
   get pk(): keyof M {
     if (!this._pk) {
-      // const instance = new this.class();
       // Throws error decorator_validation_1.Model.pk is not a function
+      // const instance = new this.class();
       // const id = Model.pk(instance);
       // const props = Metadata.get(
       //   instance.constructor as any,
