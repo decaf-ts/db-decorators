@@ -23,13 +23,12 @@ describe(`Repository`, function () {
 
   it(`Fills Properties Nicely`, async () => {
     const testRepository: IRepository<TestModel> = new TestRamRepository();
-
     const result = await testRepository.create(testModel);
     expect(result.updatedOn).toBeDefined();
     expect(result.createdOn).toBeDefined();
   });
 
-  it("should supports inheritance", async () => {
+  it("should support inheritance", async () => {
     const inheritedModel = new InheritanceTestModel({
       id: Date.now().toString(),
     });

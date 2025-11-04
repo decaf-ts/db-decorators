@@ -8,11 +8,12 @@ import {
   ModelArg,
   required,
   Validation,
+  ValidationKeys,
   validator,
   ValidatorOptions,
 } from "@decaf-ts/decorator-validation";
 import { DBOperations, id, readonly, timestamp } from "../../src";
-import { propMetadata, prop } from "@decaf-ts/decoration";
+import { propMetadata, prop, Metadata, apply } from "@decaf-ts/decoration";
 
 @model()
 export class TestModel extends Model {
@@ -40,7 +41,6 @@ export class TestModel extends Model {
 export class InheritanceTestModel extends TestModel {
   public constructor(testModel?: ModelArg<InheritanceTestModel>) {
     super(testModel);
-    Model.fromObject(this, testModel);
   }
 }
 
@@ -70,13 +70,17 @@ export class PromiseValidator extends AsyncValidator<PromiseValidatorOptions> {
 }
 
 export const testAsync = (message: string = PROMISE_ERROR_MESSAGE) => {
-  // return (target: any, propertyKey: string | symbol) => {
-  // };
   const options = {
     message,
     types: ["number"],
     async: true,
   };
+  return apply((model: object, prop?: any) =>
+    propMetadata(
+      Metadata.key(ValidationKeys.REFLECT, prop, PROMISE_VALIDATION_KEY),
+      options
+    )(model, prop)
+  );
 
   return propMetadata(Validation.key(PROMISE_VALIDATION_KEY), options);
 };
@@ -89,8 +93,7 @@ export class AsyncModel extends Model {
   value?: number;
 
   public constructor(model?: ModelArg<AsyncModel>) {
-    super();
-    Model.fromObject(this, model);
+    super(model);
   }
 }
 
@@ -103,8 +106,7 @@ export class AddressModel extends Model {
   country?: string;
 
   public constructor(addressModel?: ModelArg<AddressModel>) {
-    super();
-    Model.fromObject(this, addressModel);
+    super(addressModel);
   }
 }
 
@@ -126,7 +128,7 @@ export class UserModel extends Model<true> {
   @prop()
   address?: AddressModel;
 
-  @timestamp()
+  @timestamp(DBOperations.UPDATE)
   updatedOn!: Date;
 
   @timestamp(DBOperations.CREATE)
@@ -134,7 +136,6 @@ export class UserModel extends Model<true> {
   createdOn!: Date;
 
   public constructor(testModel?: ModelArg<TestModel>) {
-    super();
-    Model.fromObject(this, testModel);
+    super(testModel);
   }
 }

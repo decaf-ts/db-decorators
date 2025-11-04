@@ -1,5 +1,5 @@
 import { IRepository } from "../interfaces/IRepository";
-import { OperationKeys } from "../operations/constants";
+import { ModelOperations, OperationKeys } from "../operations/constants";
 import { DecoratorMetadata, Reflection } from "@decaf-ts/reflection";
 import { InternalError } from "./errors";
 import { Model, ModelKeys } from "@decaf-ts/decorator-validation";
@@ -11,7 +11,7 @@ import {
   sortDecorators,
 } from "../operations/decorators";
 import { UpdateOperationHandler } from "../operations/types";
-import { Constructor } from "@decaf-ts/decoration";
+import { Constructor, Metadata } from "@decaf-ts/decoration";
 
 /**
  * @description Context arguments for repository operations.
@@ -124,6 +124,41 @@ export async function enforceDBDecorators<
   }
 }
 
+// /**
+//  * Specific for DB Decorators
+//  * @param {T} model
+//  * @param {string} operation CRUD {@link OperationKeys}
+//  * @param {string} [extraPrefix]
+//  *
+//  * @function getDbPropertyDecorators
+//  *
+//  * @memberOf db-decorators.utils
+//  */
+// export function oldgetDbDecorators<T extends Model>(
+//   model: T,
+//   operation: string,
+//   extraPrefix?: string
+// ): Record<string, DecoratorMetadata[]> | undefined {
+//   const decorators: Record<string, DecoratorMetadata[]> | undefined =
+//     Reflection.getAllPropertyDecorators(
+//       model,
+//       // undefined,
+//       OperationKeys.REFLECT + (extraPrefix ? extraPrefix : "")
+//     );
+//   if (!decorators) return;
+//   return Object.keys(decorators).reduce(
+//     (accum: Record<string, DecoratorMetadata[]> | undefined, decorator) => {
+//       const dec = decorators[decorator].filter((d) => d.key === operation);
+//       if (dec && dec.length) {
+//         if (!accum) accum = {};
+//         accum[decorator] = dec;
+//       }
+//       return accum;
+//     },
+//     undefined
+//   );
+// }
+
 /**
  * Specific for DB Decorators
  * @param {T} model
@@ -139,19 +174,26 @@ export function getDbDecorators<T extends Model>(
   operation: string,
   extraPrefix?: string
 ): Record<string, DecoratorMetadata[]> | undefined {
-  const decorators: Record<string, DecoratorMetadata[]> | undefined =
-    Reflection.getAllPropertyDecorators(
-      model,
-      // undefined,
-      OperationKeys.REFLECT + (extraPrefix ? extraPrefix : "")
-    );
+  const prefix = extraPrefix?.replace(/[.]$/, "");
+
+  const decorators = Metadata.get(
+    model.constructor as Constructor<T>,
+    ModelOperations.OPERATIONS
+  );
+
   if (!decorators) return;
   return Object.keys(decorators).reduce(
     (accum: Record<string, DecoratorMetadata[]> | undefined, decorator) => {
-      const dec = decorators[decorator].filter((d) => d.key === operation);
-      if (dec && dec.length) {
+      const obj = prefix
+        ? decorators[decorator][prefix] || {}
+        : decorators[decorator];
+      const dec = Object.keys(obj).filter((d: any) => d === operation);
+      const decs = [];
+      for (const d of dec) decs.push({ key: d, props: obj[d] });
+
+      if (decs && decs.length) {
         if (!accum) accum = {};
-        accum[decorator] = dec;
+        accum[decorator] = decs;
       }
       return accum;
     },

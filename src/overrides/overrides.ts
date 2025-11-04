@@ -6,6 +6,7 @@ import {
 import { validateCompare } from "../model/validation";
 import { Constructor, Metadata } from "@decaf-ts/decoration";
 import { DBKeys } from "../model/constants";
+import { ModelOperations } from "../operations/constants";
 
 /**
  * @description Validates the model and checks for errors
@@ -57,3 +58,29 @@ Model.prototype.hasErrors = function <M extends Model<true | false>>(
   if (!keyValue) return key;
   return model[key as keyof M];
 }.bind(Model);
+
+(Metadata as any).saveOperation = function <M extends Model>(
+  model: Constructor<M>,
+  propertyKey: string,
+  operation: string,
+  metadata: any
+) {
+  if (!propertyKey) return;
+  Metadata.set(
+    model,
+    Metadata.key(ModelOperations.OPERATIONS, propertyKey, operation),
+    metadata
+  );
+}.bind(Metadata);
+
+(Metadata as any).readOperation = function <M extends Model>(
+  model: Constructor<M>,
+  propertyKey?: string,
+  operation?: string
+) {
+  if (!propertyKey || !operation) return;
+  return Metadata.get(
+    model,
+    Metadata.key(ModelOperations.OPERATIONS, propertyKey, operation)
+  );
+}.bind(Metadata);
