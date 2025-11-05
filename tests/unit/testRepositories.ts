@@ -24,10 +24,6 @@ export class InheritanceRamRepository extends RamRepository<InheritanceTestModel
 }
 
 export class UserRamRepository extends RamRepository<UserModel> {
-  @timestamp(DBOperations.UPDATE)
-  updatedOn!: Date;
-  @timestamp(DBOperations.CREATE)
-  createdOn!: Date;
   constructor() {
     super(UserModel);
   }

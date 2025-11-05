@@ -23,12 +23,12 @@ import { Metadata } from "@decaf-ts/decoration";
  * @memberOf module:db-decorators
  */
 export function findPrimaryKey<M extends Model>(model: M) {
-  const idPropnew = Model.pk(model);
+  const idProp = Model.pk(model);
   return {
-    id: idPropnew as keyof M,
+    id: idProp as keyof M,
     props: Metadata.get(
       model.constructor as any,
-      Metadata.key(DBKeys.ID, idPropnew)
+      Metadata.key(DBKeys.ID, idProp)
     ),
   };
 }

@@ -128,7 +128,7 @@ export class UserModel extends Model<true> {
   @prop()
   address?: AddressModel;
 
-  @timestamp(DBOperations.UPDATE)
+  @timestamp() // Intentionally left without DBOperations to test
   updatedOn!: Date;
 
   @timestamp(DBOperations.CREATE)
