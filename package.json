@@ -74,16 +74,13 @@
   },
   "homepage": "https://github.com/decaf-ts/db-decorators#readme",
   "devDependencies": {
-    "@decaf-ts/utils": "latest"
+    "@decaf-ts/utils": "latest",
+    "@decaf-ts/logging": "latest"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@decaf-ts/decoration": "latest",
     "@decaf-ts/decorator-validation": "latest",
     "@decaf-ts/injectable-decorators": "latest",
     "@decaf-ts/reflection": "latest"
-  },
-  "dependencies": {
-    "better-docs": "^2.7.3",
-    "taffydb": "^2.7.3"
   }
 }
