@@ -1,3 +1,4 @@
+import { Constructor } from "@decaf-ts/decoration";
 import "@decaf-ts/decorator-validation";
 
 declare module "@decaf-ts/decorator-validation" {
@@ -8,8 +9,8 @@ declare module "@decaf-ts/decorator-validation" {
      * @summary Retrieves primary key information or it's value for a model from it's metadata.
      *
      * @template model - The model type extending from Model
-     * @param {M} model - The model class
-     * @param {boolean} keyValue - Optional keyValue flag, to return the value of the id instead of the property
+     * @param {M | Constructor<M>} model - The model class or it's constructor
+     * @param {boolean} keyValue - Optional keyValue flag, to return the value of the id instead of the property. Does not work with constructor.
      * @return {any} The property of the id of the model, or it's value
      *
      * @example
@@ -18,6 +19,6 @@ declare module "@decaf-ts/decorator-validation" {
      *       const idProp = Model.pk(newModel);
      *       const id = Model.pk(newModel, true);
      */
-    function pk<M>(model: M, keyValue?: boolean): any;
+    function pk<M>(model: M | Constructor<M>, keyValue?: boolean): any;
   }
 }

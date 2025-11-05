@@ -8,7 +8,6 @@ import { wrapMethodWithContext } from "./wrappers";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
 import { Constructor, Metadata } from "@decaf-ts/decoration";
-import { findPrimaryKey } from "../identity/utils";
 import { DBKeys } from "../model/constants";
 
 /**
@@ -132,17 +131,11 @@ export abstract class BaseRepository<
    */
   get pk(): keyof M {
     if (!this._pk) {
-      // Throws error decorator_validation_1.Model.pk is not a function
-      // const instance = new this.class();
-      // const id = Model.pk(instance);
-      // const props = Metadata.get(
-      //   instance.constructor as any,
-      //   Metadata.key(DBKeys.ID, id)
-      // );
-      // TODO: Fix Model.pk method
-      const { id, props } = findPrimaryKey(new this.class());
-      this._pk = id;
-      this._pkProps = props;
+      this._pk = Model.pk(this.class);
+      this._pkProps = Metadata.get(
+        this.class as any,
+        Metadata.key(DBKeys.ID, this._pk as string)
+      );
     }
     return this._pk;
   }

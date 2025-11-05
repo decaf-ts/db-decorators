@@ -3,10 +3,11 @@ import { Model } from "@decaf-ts/decorator-validation";
 import { InternalError, ValidationError } from "../../src/repository/errors";
 import { Repository } from "../../src/repository/Repository";
 import * as utils from "../../src/repository/utils";
-import * as identity from "../../src/identity/utils";
 import { OperationKeys } from "../../src/operations/constants";
+import { id } from "../../src/identity";
 
 class T extends Model<true> {
+  @id()
   id?: string;
   name?: string;
   constructor(data?: Partial<T>) {
@@ -48,17 +49,6 @@ class TestRepo extends Repository<T> {
 
 describe("repository/BaseRepository & Repository integration", () => {
   let enforceSpy: jest.SpyInstance;
-  let pkSpy: jest.SpyInstance;
-
-  beforeAll(() => {
-    pkSpy = jest
-      .spyOn(identity, "findPrimaryKey" as any)
-      .mockReturnValue({ id: "id", props: {} });
-  });
-
-  afterAll(() => {
-    pkSpy.mockRestore();
-  });
 
   beforeEach(() => {
     enforceSpy = jest
