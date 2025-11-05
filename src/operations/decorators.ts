@@ -578,10 +578,10 @@ export function operation<V = object>(
  * @template P - Represents a tuple of any parameter types that the handler function accepts.
  *
  * @param {string} key - The metadata key used to store and later retrieve the handler and its parameters.
- * @param {(...params: P) => boolean} handler - A predicate or handler function that receives the same parameters as the decorator
+ * @param {function(...P):boolean} handler - A predicate or handler function that receives the same parameters as the decorator
  * and determines whether the associated logic should execute.
  *
- * @return {(...params: P) => ReturnType<typeof metadata>}
+ * @return {function(...P):function(...Partial<P>):void}
  * Returns a function that, when invoked with the given parameters, stores a metadata object containing
  * both the parameters and the handler reference under the provided key.
  *
