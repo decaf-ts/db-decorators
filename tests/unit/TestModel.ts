@@ -26,7 +26,7 @@ export class TestModel extends Model {
   @minlength(5)
   address?: string;
 
-  @timestamp()
+  @timestamp() // Intentionally left empty for tests
   updatedOn!: Date;
 
   @timestamp(DBOperations.CREATE)
