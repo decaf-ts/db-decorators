@@ -51,7 +51,7 @@ Model.prototype.hasErrors = function <M extends Model<true | false>>(
   const idProp = Metadata.get(model.constructor as Constructor, DBKeys.ID);
   if (!idProp) {
     throw new Error(
-      `No Id property defined for model ${model?.constructor?.name || "Unknown Model"}`
+      `No Id property defined for model ${model.constructor?.name || "Unknown Model"}`
     );
   }
   const key = Object.keys(idProp)[0] as keyof M;

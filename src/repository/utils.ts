@@ -124,41 +124,6 @@ export async function enforceDBDecorators<
   }
 }
 
-// /**
-//  * Specific for DB Decorators
-//  * @param {T} model
-//  * @param {string} operation CRUD {@link OperationKeys}
-//  * @param {string} [extraPrefix]
-//  *
-//  * @function getDbPropertyDecorators
-//  *
-//  * @memberOf db-decorators.utils
-//  */
-// export function oldgetDbDecorators<T extends Model>(
-//   model: T,
-//   operation: string,
-//   extraPrefix?: string
-// ): Record<string, DecoratorMetadata[]> | undefined {
-//   const decorators: Record<string, DecoratorMetadata[]> | undefined =
-//     Reflection.getAllPropertyDecorators(
-//       model,
-//       // undefined,
-//       OperationKeys.REFLECT + (extraPrefix ? extraPrefix : "")
-//     );
-//   if (!decorators) return;
-//   return Object.keys(decorators).reduce(
-//     (accum: Record<string, DecoratorMetadata[]> | undefined, decorator) => {
-//       const dec = decorators[decorator].filter((d) => d.key === operation);
-//       if (dec && dec.length) {
-//         if (!accum) accum = {};
-//         accum[decorator] = dec;
-//       }
-//       return accum;
-//     },
-//     undefined
-//   );
-// }
-
 /**
  * Specific for DB Decorators
  * @param {T} model

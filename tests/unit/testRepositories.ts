@@ -4,20 +4,12 @@ import { timestamp } from "../../src/validation/decorators";
 import { DBOperations } from "../../src/operations/constants";
 
 export class TestRamRepository extends RamRepository<TestModel> {
-  @timestamp(DBOperations.UPDATE)
-  updatedOn!: Date;
-  @timestamp(DBOperations.CREATE)
-  createdOn!: Date;
   constructor() {
     super(TestModel);
   }
 }
 
 export class InheritanceRamRepository extends RamRepository<InheritanceTestModel> {
-  @timestamp(DBOperations.UPDATE)
-  updatedOn!: Date;
-  @timestamp(DBOperations.CREATE)
-  createdOn!: Date;
   constructor() {
     super(InheritanceTestModel);
   }

@@ -1,3 +1,5 @@
+import { Metadata } from "@decaf-ts/decoration";
+
 export * from "./identity";
 export * from "./interfaces";
 export * from "./model";
@@ -19,3 +21,5 @@ export * from "./validation";
  * @memberOf module:db-decorators
  */
 export const VERSION = "##VERSION##";
+export const PACKAGE_NAME = "##PACKAGE##";
+Metadata.registerLibrary(PACKAGE_NAME, VERSION);

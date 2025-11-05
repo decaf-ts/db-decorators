@@ -1,3 +1,4 @@
+import "../overrides";
 import { IRepository } from "../interfaces/IRepository";
 import { Model } from "@decaf-ts/decorator-validation";
 import { enforceDBDecorators } from "./utils";
@@ -138,6 +139,7 @@ export abstract class BaseRepository<
       //   instance.constructor as any,
       //   Metadata.key(DBKeys.ID, id)
       // );
+      // TODO: Fix Model.pk method
       const { id, props } = findPrimaryKey(new this.class());
       this._pk = id;
       this._pkProps = props;

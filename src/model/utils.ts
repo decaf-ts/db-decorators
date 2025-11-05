@@ -56,8 +56,6 @@ export function modelToTransient<M extends Model>(
   const decoratedProperties = Metadata.validatableProperties(
     model.constructor as any
   );
-  const modelProps = Object.keys(model);
-  const allProps = [...new Set([...decoratedProperties, ...modelProps])];
 
   const transientProps = Metadata.get(
     model.constructor as any,
@@ -68,7 +66,7 @@ export function modelToTransient<M extends Model>(
     model: {} as Record<string, any>,
     transient: {} as Record<string, any>,
   };
-  for (const key of allProps) {
+  for (const key of decoratedProperties) {
     const isTransient = Object.keys(transientProps).includes(key);
     if (isTransient) {
       result.transient = result.transient || {};

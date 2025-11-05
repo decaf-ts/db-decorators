@@ -153,46 +153,6 @@ export function timestamp(
     .apply();
 }
 
-// export function timestamp(
-//   operation: OperationKeys[] = DBOperations.CREATE_UPDATE as unknown as OperationKeys[],
-//   format: string = DEFAULT_TIMESTAMP_FORMAT
-// ) {
-//   const key = DBKeys.TIMESTAMP;
-//   const decorators: any[] = [
-//     date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE),
-//     required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED),
-//     // propMetadata(Validation.key(DBKeys.TIMESTAMP), {
-//     //   operation: operation,
-//     //   format: format,
-//     // }),
-//     on(operation, timestampHandler),
-//   ];
-//   if (operation.indexOf(OperationKeys.UPDATE) !== -1)
-//     decorators.push(
-//       propMetadata(key, {
-//         message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
-//       })
-//     );
-//   else decorators.push(readonly());
-//   // apply(...decorators);
-
-//   const meta: any = {
-//     [DBKeys.TIMESTAMP]: operation,
-//     message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
-//     description: `timestamp validation decorator`,
-//     async: false,
-//     format,
-//     operation,
-//   };
-//   return apply(...decorators, innerValidationDecorator(timestamp, key, meta));
-//   return Decoration.for(key)
-//     .define({
-//       decorator: innerValidationDecorator,
-//       args: [timestamp, key, meta],
-//     })
-//     .apply();
-// }
-
 /**
  * @description Handler function that serializes a property to JSON string during create and update operations.
  * @summary Converts a complex object property to a JSON string before storing it in the database.

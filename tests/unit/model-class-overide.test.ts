@@ -8,7 +8,7 @@ import {
 } from "@decaf-ts/decorator-validation";
 import { id, readonly } from "../../src";
 import { AddressModel, AsyncModel, UserModel } from "./TestModel";
-import { Metadata, prop } from "@decaf-ts/decoration";
+import { prop } from "@decaf-ts/decoration";
 
 export function isPromise(obj: any): boolean {
   return (

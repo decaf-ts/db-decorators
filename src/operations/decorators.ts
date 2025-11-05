@@ -520,17 +520,11 @@ export function operation<V = object>(
     const name = target.constructor.name;
     const decorators = operation.reduce((accum: any[], op) => {
       const compoundKey = baseOp + op;
-      let data = Reflect.getMetadata(
-        Metadata.key(ModelOperations.OPERATIONS, propertyKey, compoundKey),
-        target,
-        propertyKey
+      let data = Metadata.readOperation(
+        target.constructor,
+        propertyKey as string,
+        compoundKey
       );
-      const meta = Metadata.get(target.constructor);
-      // let data2 = Metadata.readOperation(
-      //   target.constructor,
-      //   propertyKey as string,
-      //   Operations.key(compoundKey)
-      // );
       if (!data)
         data = {
           operation: op,
@@ -561,7 +555,6 @@ export function operation<V = object>(
         data.handlers[name][propertyKey][handlerKey] = {
           data: mergeData,
         };
-
         accum.push(
           handle(compoundKey as OperationKeys, handler),
           propMetadata(
@@ -570,12 +563,7 @@ export function operation<V = object>(
           )
         );
       }
-      // Metadata.saveOperation(
-      //   target.constructor,
-      //   propertyKey as string,
-      //   Operations.key(compoundKey),
-      //   data
-      // );
+
       return accum;
     }, []);
     return apply(...decorators)(target, propertyKey);
