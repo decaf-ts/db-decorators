@@ -254,8 +254,7 @@ export function validateCompare<M extends Model<any>>(
 
     const { designTypes, designType } = Metadata.getPropDesignTypes(
       newModel.constructor as any,
-      prop as keyof M,
-      Metadata.get(newModel.constructor as any, prop)?.validation
+      prop as keyof M
     );
     if (!designTypes) continue;
 
