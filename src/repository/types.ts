@@ -10,7 +10,9 @@ import { OperationKeys } from "../operations";
  * @typedef {M extends Model ? M : never} ModelExtension
  * @memberOf module:db-decorators
  */
-type ModelExtension<M extends Model = Model> = M extends Model ? M : never;
+export type ModelExtension<M extends Model = Model> = M extends Model
+  ? M
+  : never;
 
 /**
  * @description Configuration flags for repository operations.
