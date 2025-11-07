@@ -18,7 +18,7 @@ export type ModelExtension<M extends Model = Model> = M extends Model
  * @description Configuration flags for repository operations.
  * @summary Defines the configuration options that control repository behavior during operations.
  * These flags manage context relationships, validation behavior, operation metadata, and error handling.
- * @typedef {Object} RepositoryFlags
+ * @interface RepositoryFlags
  * @property {Context} [parentContext] - The parent context for hierarchical operations
  * @property {Context[]} [childContexts] - Child contexts spawned from this context
  * @property {any[]} [callArgs] - Arguments passed to the operation
@@ -31,7 +31,7 @@ export type ModelExtension<M extends Model = Model> = M extends Model
  * @property {boolean} rebuildWithTransient - Whether to include transient properties when rebuilding models
  * @memberOf module:db-decorators
  */
-export type RepositoryFlags = {
+export interface RepositoryFlags {
   parentContext?: Context<any>;
   childContexts?: Context<any>[];
   callArgs?: any[];
@@ -45,4 +45,4 @@ export type RepositoryFlags = {
   operation?: OperationKeys;
   breakOnHandlerError: boolean;
   rebuildWithTransient: boolean;
-};
+}
