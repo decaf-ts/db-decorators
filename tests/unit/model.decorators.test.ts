@@ -1,7 +1,6 @@
-import "reflect-metadata";
+import "../../src/overrides";
 import { Hashing } from "@decaf-ts/decorator-validation";
 import { Context } from "../../src/repository/Context";
-import { Repository } from "../../src/repository/Repository";
 import { DBKeys } from "../../src/model/constants";
 import { CrudOperations, OperationKeys } from "../../src/operations";
 import { InternalError } from "../../src/repository/errors";
@@ -158,10 +157,7 @@ describe("model/decorators", () => {
       // apply decorator to property
       const dec = version();
       dec(M1.prototype, "ver" as any);
-      // ensure metadata exists
-      const key = Repository.key(DBKeys.VERSION);
-      // const meta = Reflect.getMetadata(key, M1.prototype, "ver");
-      const meta = Metadata.get(M1, key);
+      const meta = Metadata.get(M1, DBKeys.VERSION);
       expect(meta).toBeDefined();
     });
   });
@@ -171,7 +167,7 @@ describe("model/decorators", () => {
       class M2 {}
       const dec = transient();
       dec(M2.prototype, "tmp" as any);
-      const key = Repository.key(DBKeys.TRANSIENT);
+      const key = DBKeys.TRANSIENT;
       // property-level transient marker (empty key is used internally)
       // const propMeta = Reflect.getMetadata(key, M2.prototype, "tmp");
       const propMeta = Metadata.get(M2, key);

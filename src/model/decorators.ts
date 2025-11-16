@@ -54,7 +54,7 @@ export function hashOnCreateUpdate<
 export function hash() {
   return apply(
     onCreateUpdate(hashOnCreateUpdate),
-    propMetadata(Repository.key(DBKeys.HASH), {})
+    propMetadata(DBKeys.HASH, {})
   );
 }
 
@@ -158,7 +158,7 @@ function composedFrom(
 
   const decorators = [
     onCreateUpdate(composedFromCreateUpdate, data, groupsort),
-    propMetadata(Repository.key(DBKeys.COMPOSED), data),
+    propMetadata(DBKeys.COMPOSED, data),
   ];
   if (hashResult) decorators.push(hash());
   return apply(...decorators);
@@ -283,7 +283,7 @@ export function versionCreateUpdate(operation: CrudOperations) {
  * @category PropertyDecorators
  */
 export function version() {
-  const key = Repository.key(DBKeys.VERSION);
+  const key = DBKeys.VERSION;
   return Decoration.for(key)
     .define(
       type(Number),
@@ -302,10 +302,9 @@ export function version() {
  * @category PropertyDecorators
  */
 export function transient() {
-  const key = Repository.key(DBKeys.TRANSIENT);
-  return Decoration.for(key)
+  return Decoration.for(DBKeys.TRANSIENT)
     .define(function transient(model: any, attribute: any) {
-      propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model.constructor);
+      propMetadata(DBKeys.TRANSIENT, true)(model.constructor);
       propMetadata(Metadata.key(DBKeys.TRANSIENT, attribute), {})(
         model,
         attribute

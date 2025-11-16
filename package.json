@@ -80,7 +80,6 @@
   "dependencies": {
     "@decaf-ts/decoration": "latest",
     "@decaf-ts/decorator-validation": "latest",
-    "@decaf-ts/injectable-decorators": "latest",
-    "@decaf-ts/reflection": "latest"
+    "@decaf-ts/injectable-decorators": "latest"
   }
 }

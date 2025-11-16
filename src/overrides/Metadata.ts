@@ -1,4 +1,5 @@
-import { Constructor } from "@decaf-ts/decoration";
+import type { Constructor } from "@decaf-ts/decoration";
+import type { Model } from "@decaf-ts/decorator-validation";
 
 declare module "@decaf-ts/decoration" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -20,7 +21,7 @@ declare module "@decaf-ts/decoration" {
      * // Set metatada for 'User' for key updatedOn, for operation on.create
      * Metadata.saveOperation(User.constructor,'updatedOn','on.create',metadata);
      */
-    function saveOperation<M>(
+    function saveOperation<M extends Model>(
       model: Constructor<M>,
       propertyKey: keyof M,
       operation: string,
@@ -43,10 +44,20 @@ declare module "@decaf-ts/decoration" {
      * // Get metatada for 'User' for key updatedOn, for operation on.create
      * const metadata = Metadata.readOperation(User.constructor,'updatedOn','on.create');
      */
-    function readOperation<M>(
+    function readOperation<M extends Model>(
       model: Constructor<M>,
       propertyKey?: keyof M,
       operation?: string
     ): any;
+
+    /**
+     * @description Checks if a model is marked as transient
+     * @summary Determines whether a model class has been decorated with the transient decorator
+     * @template M - Type extending Model
+     * @param {M | Constructor<M>} model - The model instance to check
+     * @return {boolean} True if the model is transient, false otherwise
+     * @function isTransient
+     */
+    function isTransient<M extends Model>(model: M | Constructor<M>): boolean;
   }
 }

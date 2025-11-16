@@ -522,7 +522,7 @@ export function operation<V = object>(
       const compoundKey = baseOp + op;
       let data = Metadata.readOperation(
         target.constructor,
-        propertyKey as string,
+        propertyKey as any,
         compoundKey
       );
       if (!data)

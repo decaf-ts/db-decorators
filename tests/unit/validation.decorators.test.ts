@@ -1,4 +1,4 @@
-import "reflect-metadata";
+import "../../src/overrides";
 import { Model, list } from "@decaf-ts/decorator-validation";
 import { Context } from "../../src/repository/Context";
 import {

@@ -247,15 +247,15 @@ export abstract class Repository<
     if (errors) throw new ValidationError(errors);
     return [models, ...contextArgs.args];
   }
-
-  /**
-   * @description Creates a reflection key for database operations.
-   * @summary Generates a key for storing metadata in the reflection system by prefixing
-   * the provided key with the database reflection prefix.
-   * @param {string} key - The base key to prefix
-   * @return {string} The prefixed reflection key
-   */
-  static key(key: string) {
-    return DBKeys.REFLECT + key;
-  }
+  //
+  // /**
+  //  * @description Creates a reflection key for database operations.
+  //  * @summary Generates a key for storing metadata in the reflection system by prefixing
+  //  * the provided key with the database reflection prefix.
+  //  * @param {string} key - The base key to prefix
+  //  * @return {string} The prefixed reflection key
+  //  */
+  // static key(key: string) {
+  //   return DBKeys.REFLECT + key;
+  // }
 }

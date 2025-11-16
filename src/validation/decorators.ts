@@ -252,6 +252,6 @@ export function serialize() {
     onCreateUpdate(serializeOnCreateUpdate),
     after(DBOperations.ALL, serializeAfterAll),
     type([String, Object]),
-    metadata(Repository.key(DBKeys.SERIALIZE), {})
+    metadata(DBKeys.SERIALIZE, {})
   );
 }

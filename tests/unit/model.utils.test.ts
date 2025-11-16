@@ -1,6 +1,5 @@
-import "reflect-metadata";
+import "../../src/overrides";
 import { Model } from "@decaf-ts/decorator-validation";
-import { modelToTransient, isTransient } from "../../src/model/utils";
 import { transient } from "../../src/model/decorators";
 import { SerializationError } from "../../src/repository/errors";
 
@@ -11,7 +10,7 @@ describe("model/utils", () => {
       tmp?: string;
     }
     const m = new M2();
-    expect(isTransient(m as any)).toBe(true);
+    expect(Model.isTransient(m as any)).toBe(true);
   });
 
   test("modelToTransient splits transient properties and rebuilds model", () => {
@@ -27,7 +26,7 @@ describe("model/utils", () => {
       .mockImplementation((obj: any) =>
         Object.assign(Object.create(M4.prototype), obj)
       );
-    const res = modelToTransient(m as any);
+    const res = Model.toTransient(m as any);
     // transient holds b
     expect(res.transient).toEqual({ b: 2 });
     // model has only a and is instance of same constructor
@@ -46,6 +45,6 @@ describe("model/utils", () => {
       }
     }
     const m = new M5();
-    expect(() => modelToTransient(m as any)).toThrow(SerializationError);
+    expect(() => Model.toTransient(m as any)).toThrow(SerializationError);
   });
 });
