@@ -51,13 +51,15 @@ Model.prototype.hasErrors = function <M extends Model<true | false>>(
   return validateCompare(previousVersion, this, async, ...exclusions);
 };
 
-Model.prototype.toTransient = function toTransient<M extends Model>(
+Model.prototype.segregate = function segregate<M extends Model>(
   this: M
-): { model: M; transient?: Record<string, any> } {
-  return Model.toTransient(this);
+): { model: M; transient?: Record<keyof M, M[keyof M]> } {
+  return Model.segregate(this);
 };
 
-(Model as any).toTransient = function toTransient<M extends Model>(model: M) {
+(Model as any).segregate = function segregate<M extends Model>(
+  model: M
+): { model: M; transient?: Record<keyof M, M[keyof M]> } {
   if (!Metadata.isTransient(model)) return { model: model };
   const decoratedProperties = Metadata.validatableProperties(
     model.constructor as any
@@ -90,7 +92,7 @@ Model.prototype.toTransient = function toTransient<M extends Model>(
   }
 
   result.model = Model.build(result.model, model.constructor.name);
-  return result as { model: M; transient?: Record<string, any> };
+  return result as { model: M; transient?: Record<keyof M, M[keyof M]> };
 };
 
 (Model as any).pk = function <M extends Model>(

@@ -13,7 +13,7 @@ describe("model/utils", () => {
     expect(Model.isTransient(m as any)).toBe(true);
   });
 
-  test("modelToTransient splits transient properties and rebuilds model", () => {
+  test("segregate splits transient properties and rebuilds model", () => {
     class M4 {
       a = 1;
       @transient()
@@ -26,7 +26,7 @@ describe("model/utils", () => {
       .mockImplementation((obj: any) =>
         Object.assign(Object.create(M4.prototype), obj)
       );
-    const res = Model.toTransient(m as any);
+    const res = Model.segregate(m as any);
     // transient holds b
     expect(res.transient).toEqual({ b: 2 });
     // model has only a and is instance of same constructor
@@ -35,7 +35,7 @@ describe("model/utils", () => {
     buildSpy.mockRestore();
   });
 
-  test("modelToTransient throws SerializationError when getter throws", () => {
+  test("segregate throws SerializationError when getter throws", () => {
     class M5 {
       a = 1;
       private _b = 2;
@@ -45,6 +45,6 @@ describe("model/utils", () => {
       }
     }
     const m = new M5();
-    expect(() => Model.toTransient(m as any)).toThrow(SerializationError);
+    expect(() => Model.segregate(m as any)).toThrow(SerializationError);
   });
 });

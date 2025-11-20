@@ -1,13 +1,12 @@
-import "@decaf-ts/decorator-validation";
 import { Constructor } from "@decaf-ts/decoration";
-import { Model as MM } from "@decaf-ts/decorator-validation";
+import "@decaf-ts/decorator-validation";
 
 declare module "@decaf-ts/decorator-validation" {
   export interface Model {
     isTransient(): boolean;
-    toTransient<M extends MM>(
+    segregate<M extends Model>(
       this: M
-    ): { model: M; transient?: Record<string, any> };
+    ): { model: M; transient?: Record<keyof M, M[keyof M]> };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -38,8 +37,7 @@ declare module "@decaf-ts/decorator-validation" {
      * @return {Object} Object containing the model without transient properties and a separate transient object
      * @property {M} model - The model with transient properties removed
      * @property {Record<string, any>} [transient] - Object containing the transient properties
-     * @function modelToTransient
-     * @memberOf module:db-decorators
+     * @function segregate
      * @mermaid
      * sequenceDiagram
      *   participant Caller
@@ -60,8 +58,8 @@ declare module "@decaf-ts/decorator-validation" {
      *     modelToTransient-->>Caller: {model, transient}
      *   end
      */
-    function toTransient<M extends Model>(
+    function segregate<M extends Model>(
       model: M
-    ): { model: M; transient?: Record<string, any> };
+    ): { model: M; transient?: Record<keyof M, M[keyof M]> };
   }
 }
