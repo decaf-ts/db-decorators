@@ -6,16 +6,16 @@ import {
   model,
   Model,
   ModelArg,
-  prop,
-  propMetadata,
   required,
   Validation,
-  ValidationMetadata,
+  ValidationKeys,
   validator,
   ValidatorOptions,
 } from "@decaf-ts/decorator-validation";
 import { DBOperations, id, readonly, timestamp } from "../../src";
+import { propMetadata, prop, Metadata, apply } from "@decaf-ts/decoration";
 
+@model()
 export class TestModel extends Model {
   @id()
   id!: string | number;
@@ -26,7 +26,7 @@ export class TestModel extends Model {
   @minlength(5)
   address?: string;
 
-  @timestamp()
+  @timestamp() // Intentionally left empty for tests
   updatedOn!: Date;
 
   @timestamp(DBOperations.CREATE)
@@ -34,15 +34,13 @@ export class TestModel extends Model {
   createdOn!: Date;
 
   public constructor(testModel?: ModelArg<TestModel>) {
-    super();
-    Model.fromObject(this, testModel);
+    super(testModel);
   }
 }
 
 export class InheritanceTestModel extends TestModel {
   public constructor(testModel?: ModelArg<InheritanceTestModel>) {
     super(testModel);
-    Model.fromObject(this, testModel);
   }
 }
 
@@ -72,18 +70,19 @@ export class PromiseValidator extends AsyncValidator<PromiseValidatorOptions> {
 }
 
 export const testAsync = (message: string = PROMISE_ERROR_MESSAGE) => {
-  // return (target: any, propertyKey: string | symbol) => {
-  // };
   const options = {
     message,
     types: ["number"],
     async: true,
   };
-
-  return propMetadata<ValidationMetadata>(
-    Validation.key(PROMISE_VALIDATION_KEY),
-    options
+  return apply((model: object, prop?: any) =>
+    propMetadata(
+      Metadata.key(ValidationKeys.REFLECT, prop, PROMISE_VALIDATION_KEY),
+      options
+    )(model, prop)
   );
+
+  return propMetadata(Validation.key(PROMISE_VALIDATION_KEY), options);
 };
 
 @model()
@@ -94,8 +93,7 @@ export class AsyncModel extends Model {
   value?: number;
 
   public constructor(model?: ModelArg<AsyncModel>) {
-    super();
-    Model.fromObject(this, model);
+    super(model);
   }
 }
 
@@ -108,8 +106,7 @@ export class AddressModel extends Model {
   country?: string;
 
   public constructor(addressModel?: ModelArg<AddressModel>) {
-    super();
-    Model.fromObject(this, addressModel);
+    super(addressModel);
   }
 }
 
@@ -123,7 +120,7 @@ export class UserModel extends Model<true> {
   name?: string;
 
   @testAsync()
-  documentId: number;
+  documentId!: number;
 
   @prop()
   asyncNested?: AsyncModel;
@@ -131,7 +128,7 @@ export class UserModel extends Model<true> {
   @prop()
   address?: AddressModel;
 
-  @timestamp()
+  @timestamp() // Intentionally left without DBOperations to test
   updatedOn!: Date;
 
   @timestamp(DBOperations.CREATE)
@@ -139,7 +136,6 @@ export class UserModel extends Model<true> {
   createdOn!: Date;
 
   public constructor(testModel?: ModelArg<TestModel>) {
-    super();
-    Model.fromObject(this, testModel);
+    super(testModel);
   }
 }

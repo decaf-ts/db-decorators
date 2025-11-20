@@ -1,12 +1,13 @@
 import "reflect-metadata";
 import { Model } from "@decaf-ts/decorator-validation";
 import { BaseRepository } from "../../src/repository/BaseRepository";
-import * as identity from "../../src/identity/utils";
 import * as utils from "../../src/repository/utils";
 import { OperationKeys } from "../../src/operations/constants";
 import { InternalError } from "../../src/repository/errors";
+import { id } from "../../src/identity";
 
 class U extends Model<boolean> {
+  @id()
   id?: string;
   name?: string;
   constructor(data?: Partial<U>) {
@@ -88,15 +89,7 @@ class ExposedBaseRepo extends BaseRepository<U> {
 }
 
 describe("BaseRepository protected methods coverage", () => {
-  let pkSpy: jest.SpyInstance;
   let enforceSpy: jest.SpyInstance;
-
-  beforeAll(() => {
-    pkSpy = jest
-      .spyOn(identity, "findPrimaryKey" as any)
-      .mockReturnValue({ id: "id", props: {} });
-  });
-  afterAll(() => pkSpy.mockRestore());
 
   beforeEach(() => {
     enforceSpy = jest
@@ -113,7 +106,6 @@ describe("BaseRepository protected methods coverage", () => {
     const pk2 = repo.pk;
     expect(pk1).toBe("id");
     expect(pk2).toBe("id");
-    expect(pkSpy).toHaveBeenCalledTimes(1);
     expect(props).toBeDefined();
   });
 

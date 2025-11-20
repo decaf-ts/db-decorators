@@ -1,10 +1,11 @@
 import { ContextArgs } from "./utils";
 import { Contextual } from "../interfaces/Contextual";
 import { OperationKeys } from "../operations/constants";
-import { Constructor, Model } from "@decaf-ts/decorator-validation";
+import { Model } from "@decaf-ts/decorator-validation";
 import { DefaultRepositoryFlags } from "./constants";
 import { ObjectAccumulator } from "typed-object-accumulator";
 import { RepositoryFlags } from "./types";
+import { Constructor } from "@decaf-ts/decoration";
 
 /**
  * @description Factory type for creating context instances.

@@ -4,13 +4,11 @@ import {
   model,
   ModelArg,
   ModelErrorDefinition,
-  prop,
   ValidationKeys,
 } from "@decaf-ts/decorator-validation";
 import { id, readonly } from "../../src";
 import { AddressModel, AsyncModel, UserModel } from "./TestModel";
-
-Model.setBuilder(Model.fromObject);
+import { prop } from "@decaf-ts/decoration";
 
 export function isPromise(obj: any): boolean {
   return (
@@ -51,7 +49,7 @@ describe("Model class override", () => {
     }
   }
 
-  it("should overrides the original model's error method", () => {
+  it("should override the original model's error method", () => {
     let m = new ModelOverride();
     expect(m.hasErrors()).toBeDefined();
     m = new ModelOverride({
@@ -113,8 +111,8 @@ describe("Model class override", () => {
     const modified = new ModelOverride({
       ...original,
       submodelOverrideList: [
-        new SubmodelOverride({ id: "item1", surname: "name1" }), // Changed readonly
-        new SubmodelOverride({ id: "item2", surname: "changedName2" }),
+        new SubmodelOverride({ id: "item1", surname: "name1" }),
+        new SubmodelOverride({ id: "item2", surname: "changedName2" }), // Changed readonly
       ],
     });
 

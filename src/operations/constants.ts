@@ -17,6 +17,18 @@ export enum OperationKeys {
 }
 
 /**
+ * @description Database operation key naming constants
+ * @summary Enum defining operations naming
+ * @enum {string}
+ * @readonly
+ * @memberOf module:db-decorators
+ */
+export enum ModelOperations {
+  OPERATIONS = "operations",
+  RELATIONS = "relations",
+}
+
+/**
  * @description Type for basic CRUD operations
  * @summary Union type of the four basic database operations: create, read, update, delete
  * @typedef {string} CrudOperations

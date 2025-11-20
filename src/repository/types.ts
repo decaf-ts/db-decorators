@@ -1,6 +1,7 @@
 import { Context } from "./Context";
-import { Constructor, Model } from "@decaf-ts/decorator-validation";
+import { Model } from "@decaf-ts/decorator-validation";
 import { OperationKeys } from "../operations";
+import { Constructor } from "@decaf-ts/decoration";
 
 /**
  * @description Type utility for ensuring model extension.

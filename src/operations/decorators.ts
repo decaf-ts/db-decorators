@@ -6,16 +6,20 @@ import {
   StandardOperationHandler,
   UpdateOperationHandler,
 } from "./types";
-import { CrudOperations, DBOperations, OperationKeys } from "./constants";
+import {
+  CrudOperations,
+  DBOperations,
+  ModelOperations,
+  OperationKeys,
+} from "./constants";
 import { Operations } from "./Operations";
-import { apply } from "@decaf-ts/reflection";
-import { Model, propMetadata } from "@decaf-ts/decorator-validation";
+import { Model } from "@decaf-ts/decorator-validation";
 import { IRepository } from "../interfaces";
 import { RepositoryFlags } from "../repository/types";
 import { Context } from "../repository/Context";
 import { InternalError } from "../repository/errors";
 import { getHandlerArgs } from "../repository/utils";
-import { metadata } from "@decaf-ts/decoration";
+import { propMetadata, apply, metadata, Metadata } from "@decaf-ts/decoration";
 
 /**
  * @description Represents sorting parameters for grouping decorators
@@ -516,10 +520,10 @@ export function operation<V = object>(
     const name = target.constructor.name;
     const decorators = operation.reduce((accum: any[], op) => {
       const compoundKey = baseOp + op;
-      let data = Reflect.getMetadata(
-        Operations.key(compoundKey),
-        target,
-        propertyKey
+      let data = Metadata.readOperation(
+        target.constructor,
+        propertyKey as any,
+        compoundKey
       );
       if (!data)
         data = {
@@ -551,12 +555,15 @@ export function operation<V = object>(
         data.handlers[name][propertyKey][handlerKey] = {
           data: mergeData,
         };
-
         accum.push(
           handle(compoundKey as OperationKeys, handler),
-          propMetadata(Operations.key(compoundKey), data)
+          propMetadata(
+            Metadata.key(ModelOperations.OPERATIONS, propertyKey, compoundKey),
+            data
+          )
         );
       }
+
       return accum;
     }, []);
     return apply(...decorators)(target, propertyKey);

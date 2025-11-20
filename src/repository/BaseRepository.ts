@@ -1,12 +1,14 @@
+import "../overrides";
 import { IRepository } from "../interfaces/IRepository";
-import { Constructor, Model } from "@decaf-ts/decorator-validation";
+import { Model } from "@decaf-ts/decorator-validation";
 import { enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
 import { wrapMethodWithContext } from "./wrappers";
-import { findPrimaryKey } from "../identity/utils";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
+import { Constructor, Metadata } from "@decaf-ts/decoration";
+import { DBKeys } from "../model/constants";
 
 /**
  * @description Base repository implementation providing CRUD operations for models.
@@ -129,9 +131,11 @@ export abstract class BaseRepository<
    */
   get pk(): keyof M {
     if (!this._pk) {
-      const { id, props } = findPrimaryKey(new this.class());
-      this._pk = id;
-      this._pkProps = props;
+      this._pk = Model.pk(this.class);
+      this._pkProps = Metadata.get(
+        this.class as any,
+        Metadata.key(DBKeys.ID, this._pk as string)
+      );
     }
     return this._pk;
   }

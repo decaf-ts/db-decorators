@@ -1,12 +1,5 @@
 import { DBKeys, DefaultSeparator } from "./constants";
-import { apply } from "@decaf-ts/reflection";
-import {
-  Decoration,
-  Hashing,
-  Model,
-  propMetadata,
-  type,
-} from "@decaf-ts/decorator-validation";
+import { Hashing, Model, type } from "@decaf-ts/decorator-validation";
 import { onCreate, onCreateUpdate, onUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { InternalError } from "../repository/errors";
@@ -14,6 +7,12 @@ import { Repository } from "../repository/Repository";
 import { Context } from "../repository/Context";
 import { CrudOperations, GroupSort, OperationKeys } from "../operations";
 import { RepositoryFlags } from "../repository/types";
+import {
+  Decoration,
+  propMetadata,
+  apply,
+  Metadata,
+} from "@decaf-ts/decoration";
 
 /**
  * @description Hashes a property value during create or update operations
@@ -55,7 +54,7 @@ export function hashOnCreateUpdate<
 export function hash() {
   return apply(
     onCreateUpdate(hashOnCreateUpdate),
-    propMetadata(Repository.key(DBKeys.HASH), {})
+    propMetadata(DBKeys.HASH, {})
   );
 }
 
@@ -159,7 +158,7 @@ function composedFrom(
 
   const decorators = [
     onCreateUpdate(composedFromCreateUpdate, data, groupsort),
-    propMetadata(Repository.key(DBKeys.COMPOSED), data),
+    propMetadata(DBKeys.COMPOSED, data),
   ];
   if (hashResult) decorators.push(hash());
   return apply(...decorators);
@@ -284,10 +283,10 @@ export function versionCreateUpdate(operation: CrudOperations) {
  * @category PropertyDecorators
  */
 export function version() {
-  const key = Repository.key(DBKeys.VERSION);
+  const key = DBKeys.VERSION;
   return Decoration.for(key)
     .define(
-      type(Number.name),
+      type(Number),
       onCreate(versionCreateUpdate(OperationKeys.CREATE)),
       onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
       propMetadata(key, true)
@@ -303,11 +302,13 @@ export function version() {
  * @category PropertyDecorators
  */
 export function transient() {
-  const key = Repository.key(DBKeys.TRANSIENT);
-  return Decoration.for(key)
+  return Decoration.for(DBKeys.TRANSIENT)
     .define(function transient(model: any, attribute: any) {
-      propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model, attribute);
-      propMetadata(Repository.key(DBKeys.TRANSIENT), true)(model.constructor);
+      propMetadata(DBKeys.TRANSIENT, true)(model.constructor);
+      propMetadata(Metadata.key(DBKeys.TRANSIENT, attribute), {})(
+        model,
+        attribute
+      );
     })
     .apply();
 }

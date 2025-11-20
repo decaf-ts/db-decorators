@@ -1,7 +1,10 @@
+import { Metadata } from "@decaf-ts/decoration";
+
 export * from "./identity";
 export * from "./interfaces";
 export * from "./model";
 export * from "./operations";
+export * from "./overrides";
 export * from "./repository";
 export * from "./validation";
 
@@ -11,7 +14,6 @@ export * from "./validation";
  * @module db-decorators
  */
 
-
 /**
  * @description Current version of the reflection package
  * @summary Stores the semantic version number of the package
@@ -19,3 +21,5 @@ export * from "./validation";
  * @memberOf module:db-decorators
  */
 export const VERSION = "##VERSION##";
+export const PACKAGE_NAME = "##PACKAGE##";
+Metadata.registerLibrary(PACKAGE_NAME, VERSION);

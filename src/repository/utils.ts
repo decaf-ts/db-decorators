@@ -1,8 +1,7 @@
 import { IRepository } from "../interfaces/IRepository";
-import { OperationKeys } from "../operations/constants";
-import { DecoratorMetadata, Reflection } from "@decaf-ts/reflection";
+import { ModelOperations, OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
-import { Constructor, Model, ModelKeys } from "@decaf-ts/decorator-validation";
+import { Model } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
 import { RepositoryFlags } from "./types";
 import {
@@ -11,6 +10,7 @@ import {
   sortDecorators,
 } from "../operations/decorators";
 import { UpdateOperationHandler } from "../operations/types";
+import { Constructor, Metadata } from "@decaf-ts/decoration";
 
 /**
  * @description Context arguments for repository operations.
@@ -138,19 +138,26 @@ export function getDbDecorators<T extends Model>(
   operation: string,
   extraPrefix?: string
 ): Record<string, DecoratorMetadata[]> | undefined {
-  const decorators: Record<string, DecoratorMetadata[]> | undefined =
-    Reflection.getAllPropertyDecorators(
-      model,
-      // undefined,
-      OperationKeys.REFLECT + (extraPrefix ? extraPrefix : "")
-    );
+  const prefix = extraPrefix?.replace(/[.]$/, "");
+
+  const decorators = Metadata.get(
+    model.constructor as Constructor<T>,
+    ModelOperations.OPERATIONS
+  );
+
   if (!decorators) return;
   return Object.keys(decorators).reduce(
     (accum: Record<string, DecoratorMetadata[]> | undefined, decorator) => {
-      const dec = decorators[decorator].filter((d) => d.key === operation);
-      if (dec && dec.length) {
+      const obj = prefix
+        ? decorators[decorator][prefix] || {}
+        : decorators[decorator];
+      const dec = Object.keys(obj).filter((d: any) => d === operation);
+      const decs = [];
+      for (const d of dec) decs.push({ key: d, props: obj[d] });
+
+      if (decs && decs.length) {
         if (!accum) accum = {};
-        accum[decorator] = dec;
+        accum[decorator] = decs;
       }
       return accum;
     },
@@ -158,97 +165,97 @@ export function getDbDecorators<T extends Model>(
   );
 }
 
-/**
- * @summary Retrieves the decorators for an object's properties prefixed by {@param prefixes} recursively
- * @param model
- * @param accum
- * @param prefixes
- *
- * @function getAllPropertyDecoratorsRecursive
- * @memberOf module:db-decorators.Repository
- */
-export const getAllPropertyDecoratorsRecursive = function <T extends Model>(
-  model: T,
-  accum: { [indexer: string]: any[] } | undefined,
-  ...prefixes: string[]
-): { [indexer: string]: any[] } | undefined {
-  const accumulator = accum || {};
-  const mergeDecorators = function (decs: { [indexer: string]: any[] }) {
-    const pushOrSquash = (key: string, ...values: any[]) => {
-      values.forEach((val) => {
-        let match: any;
-        if (
-          !(match = accumulator[key].find((e) => e.key === val.key)) ||
-          match.props.operation !== val.props.operation
-        ) {
-          accumulator[key].push(val);
-          return;
-        }
+// /**
+//  * @summary Retrieves the decorators for an object's properties prefixed by {@param prefixes} recursively
+//  * @param model
+//  * @param accum
+//  * @param prefixes
+//  *
+//  * @function getAllPropertyDecoratorsRecursive
+//  * @memberOf module:db-decorators.Repository
+//  */
+// export const getAllPropertyDecoratorsRecursive = function <T extends Model>(
+//   model: T,
+//   accum: { [indexer: string]: any[] } | undefined,
+//   ...prefixes: string[]
+// ): { [indexer: string]: any[] } | undefined {
+//   const accumulator = accum || {};
+//   const mergeDecorators = function (decs: { [indexer: string]: any[] }) {
+//     const pushOrSquash = (key: string, ...values: any[]) => {
+//       values.forEach((val) => {
+//         let match: any;
+//         if (
+//           !(match = accumulator[key].find((e) => e.key === val.key)) ||
+//           match.props.operation !== val.props.operation
+//         ) {
+//           accumulator[key].push(val);
+//           return;
+//         }
 
-        if (val.key === ModelKeys.TYPE) return;
+//         if (val.key === ModelKeys.TYPE) return;
 
-        const { handlers, operation } = val.props;
+//         const { handlers, operation } = val.props;
 
-        if (
-          !operation ||
-          !operation.match(
-            new RegExp(
-              `^(:?${OperationKeys.ON}|${OperationKeys.AFTER})(:?${OperationKeys.CREATE}|${OperationKeys.READ}|${OperationKeys.UPDATE}|${OperationKeys.DELETE})$`
-            )
-          )
-        ) {
-          accumulator[key].push(val);
-          return;
-        }
+//         if (
+//           !operation ||
+//           !operation.match(
+//             new RegExp(
+//               `^(:?${OperationKeys.ON}|${OperationKeys.AFTER})(:?${OperationKeys.CREATE}|${OperationKeys.READ}|${OperationKeys.UPDATE}|${OperationKeys.DELETE})$`
+//             )
+//           )
+//         ) {
+//           accumulator[key].push(val);
+//           return;
+//         }
 
-        const accumHandlers = match.props.handlers;
+//         const accumHandlers = match.props.handlers;
 
-        Object.entries(handlers).forEach(([clazz, handlerDef]) => {
-          if (!(clazz in accumHandlers)) {
-            accumHandlers[clazz] = handlerDef;
-            return;
-          }
+//         Object.entries(handlers).forEach(([clazz, handlerDef]) => {
+//           if (!(clazz in accumHandlers)) {
+//             accumHandlers[clazz] = handlerDef;
+//             return;
+//           }
 
-          Object.entries(handlerDef as object).forEach(
-            ([handlerProp, handler]) => {
-              if (!(handlerProp in accumHandlers[clazz])) {
-                accumHandlers[clazz][handlerProp] = handler;
-                return;
-              }
+//           Object.entries(handlerDef as object).forEach(
+//             ([handlerProp, handler]) => {
+//               if (!(handlerProp in accumHandlers[clazz])) {
+//                 accumHandlers[clazz][handlerProp] = handler;
+//                 return;
+//               }
 
-              Object.entries(handler as object).forEach(
-                ([handlerKey, argsObj]) => {
-                  if (!(handlerKey in accumHandlers[clazz][handlerProp])) {
-                    accumHandlers[clazz][handlerProp][handlerKey] = argsObj;
-                    return;
-                  }
-                  console.warn(
-                    `Skipping handler registration for ${clazz} under prop ${handlerProp} because handler is the same`
-                  );
-                }
-              );
-            }
-          );
-        });
-      });
-    };
+//               Object.entries(handler as object).forEach(
+//                 ([handlerKey, argsObj]) => {
+//                   if (!(handlerKey in accumHandlers[clazz][handlerProp])) {
+//                     accumHandlers[clazz][handlerProp][handlerKey] = argsObj;
+//                     return;
+//                   }
+//                   console.warn(
+//                     `Skipping handler registration for ${clazz} under prop ${handlerProp} because handler is the same`
+//                   );
+//                 }
+//               );
+//             }
+//           );
+//         });
+//       });
+//     };
 
-    Object.entries(decs).forEach(([key, value]) => {
-      accumulator[key] = accumulator[key] || [];
-      pushOrSquash(key, ...value);
-    });
-  };
+//     Object.entries(decs).forEach(([key, value]) => {
+//       accumulator[key] = accumulator[key] || [];
+//       pushOrSquash(key, ...value);
+//     });
+//   };
 
-  const decs: { [indexer: string]: any[] } | undefined =
-    Reflection.getAllPropertyDecorators(model, ...prefixes);
-  if (decs) mergeDecorators(decs);
+//   const decs: { [indexer: string]: any[] } | undefined =
+//     Reflection.getAllPropertyDecorators(model, ...prefixes);
+//   if (decs) mergeDecorators(decs);
 
-  if (Object.getPrototypeOf(model) === Object.prototype) return accumulator;
+//   if (Object.getPrototypeOf(model) === Object.prototype) return accumulator;
 
-  // const name = model.constructor.name;
-  const proto = Object.getPrototypeOf(model);
-  if (!proto) return accumulator;
-  // if (proto.constructor && proto.constructor.name === name)
-  //     proto = Object.getPrototypeOf(proto)
-  return getAllPropertyDecoratorsRecursive(proto, accumulator, ...prefixes);
-};
+//   // const name = model.constructor.name;
+//   const proto = Object.getPrototypeOf(model);
+//   if (!proto) return accumulator;
+//   // if (proto.constructor && proto.constructor.name === name)
+//   //     proto = Object.getPrototypeOf(proto)
+//   return getAllPropertyDecoratorsRecursive(proto, accumulator, ...prefixes);
+// };

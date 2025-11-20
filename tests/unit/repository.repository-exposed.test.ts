@@ -1,11 +1,12 @@
 import "reflect-metadata";
 import { Model } from "@decaf-ts/decorator-validation";
 import { Repository } from "../../src/repository/Repository";
-import * as identity from "../../src/identity/utils";
 import * as utils from "../../src/repository/utils";
 import { InternalError, ValidationError } from "../../src/repository/errors";
+import { id } from "../../src/identity";
 
 class Rm extends Model<true> {
+  @id()
   id?: string;
   v?: number;
   constructor(data?: Partial<Rm>) {
@@ -50,15 +51,7 @@ class RepoExposed extends Repository<Rm> {
 }
 
 describe("Repository specific prefix logic", () => {
-  let pkSpy: jest.SpyInstance;
   let enforceSpy: jest.SpyInstance;
-
-  beforeAll(() => {
-    pkSpy = jest
-      .spyOn(identity, "findPrimaryKey" as any)
-      .mockReturnValue({ id: "id", props: {} });
-  });
-  afterAll(() => pkSpy.mockRestore());
 
   beforeEach(() => {
     enforceSpy = jest

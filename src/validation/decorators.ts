@@ -1,9 +1,8 @@
 import "./validation";
 import {
   date,
-  Decoration,
+  innerValidationDecorator,
   Model,
-  propMetadata,
   required,
   type,
   Validation,
@@ -14,10 +13,15 @@ import { DBOperations, OperationKeys } from "../operations/constants";
 import { after, on, onCreateUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
 import { SerializationError } from "../repository/errors";
-import { apply, metadata } from "@decaf-ts/reflection";
 import { Repository } from "../repository";
 import { Context } from "../repository/Context";
 import { RepositoryFlags } from "../repository/types";
+import {
+  Decoration,
+  propMetadata,
+  apply,
+  metadata,
+} from "@decaf-ts/decoration";
 
 /**
  * @description Prevents a property from being modified after initial creation.
@@ -30,13 +34,17 @@ import { RepositoryFlags } from "../repository/types";
 export function readonly(
   message: string = DEFAULT_ERROR_MESSAGES.READONLY.INVALID
 ) {
-  const key = Validation.updateKey(DBKeys.READONLY);
+  const key = DBKeys.READONLY;
+  const meta = {
+    message: message,
+    description: `defines the attribute as readOnly`,
+    async: false,
+  };
   return Decoration.for(key)
-    .define(
-      propMetadata(key, {
-        message: message,
-      })
-    )
+    .define({
+      decorator: innerValidationDecorator,
+      args: [readonly, key, meta],
+    })
     .apply();
 }
 
@@ -243,7 +251,7 @@ export function serialize() {
   return apply(
     onCreateUpdate(serializeOnCreateUpdate),
     after(DBOperations.ALL, serializeAfterAll),
-    type([String.name, Object.name]),
-    metadata(Repository.key(DBKeys.SERIALIZE), {})
+    type([String, Object]),
+    metadata(DBKeys.SERIALIZE, {})
   );
 }

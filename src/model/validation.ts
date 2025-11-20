@@ -1,7 +1,6 @@
 import {
   ConditionalAsync,
-  DecoratorMetadataAsync,
-  getValidationDecorators,
+  DEFAULT_ERROR_MESSAGES,
   Model,
   ModelConditionalAsync,
   ModelErrorDefinition,
@@ -12,9 +11,8 @@ import {
   ValidationKeys,
   ValidationPropertyDecoratorDefinition,
 } from "@decaf-ts/decorator-validation";
-import { Reflection } from "@decaf-ts/reflection";
 import { UpdateValidationKeys, UpdateValidator } from "../validation";
-import { findModelId } from "../identity";
+import { Constructor, Metadata } from "@decaf-ts/decoration";
 
 /**
  * @description
@@ -40,29 +38,27 @@ import { findModelId } from "../identity";
 export function getValidatableUpdateProps<M extends Model>(
   model: M,
   propsToIgnore: string[]
-): ValidationPropertyDecoratorDefinition[] {
-  const decoratedProperties: ValidationPropertyDecoratorDefinition[] = [];
+): any[] {
+  const decoratedProperties: any[] = [];
   for (const prop in model) {
     if (
-      Object.prototype.hasOwnProperty.call(model, prop) &&
-      !propsToIgnore.includes(prop)
-    ) {
-      const validationPropertyDefinition = getValidationDecorators(
-        model,
-        prop,
-        UpdateValidationKeys.REFLECT
-      );
+      !Object.prototype.hasOwnProperty.call(model, prop) ||
+      propsToIgnore.includes(prop)
+    )
+      continue;
 
-      const listDecorator = getValidationDecorators(
-        model,
-        prop
-      ).decorators.find(({ key }) => key === ValidationKeys.LIST);
+    const decorators =
+      Metadata.validationFor(model.constructor as Constructor, prop) || {};
 
-      if (listDecorator)
-        validationPropertyDefinition.decorators.push(listDecorator);
+    // Intentionally leaving this part commented out until all tests are complete
+    // const listDecorator = getValidationDecorators(model, prop).decorators.find(
+    //   ({ key }) => key === ValidationKeys.LIST
+    // );
 
-      decoratedProperties.push(validationPropertyDefinition);
-    }
+    // if (listDecorator)
+    //   validationPropertyDefinition.decorators.push(listDecorator);
+
+    decoratedProperties.push({ prop, decorators });
   }
 
   return decoratedProperties;
@@ -75,7 +71,7 @@ export function validateDecorator<
   newModel: M,
   oldModel: M,
   prop: string,
-  decorator: DecoratorMetadataAsync,
+  decorator: any,
   async?: Async
 ): ConditionalAsync<Async, string | undefined> {
   const validator: UpdateValidator = Validation.get(
@@ -90,10 +86,9 @@ export function validateDecorator<
   if (!validator.updateHasErrors) return toConditionalPromise(undefined, async);
 
   // skip async decorators if validateDecorators is called synchronously (async = false)
-  if (!async && decorator.props.async)
-    return toConditionalPromise(undefined, async);
+  if (!async && decorator.async) return toConditionalPromise(undefined, async);
 
-  const decoratorProps = Object.values(decorator.props) || {};
+  const decoratorProps = Object.values(decorator) || {};
 
   // const context = PathProxyEngine.create(obj, {
   //   ignoreUndefined: true,
@@ -116,14 +111,15 @@ export function validateDecorators<
   newModel: M,
   oldModel: M,
   prop: string,
-  decorators: DecoratorMetadataAsync[],
+  decorators: any,
   async?: Async
 ): ConditionalAsync<Async, Record<string, string>> | undefined {
   const result: Record<string, string | Promise<string>> = {};
 
-  for (const decorator of decorators) {
+  for (const decoratorKey in decorators) {
+    const decorator = { ...decorators[decoratorKey], key: decoratorKey };
     // skip async decorators if validateDecorators is called synchronously (async = false)
-    if (!async && decorator.props.async) continue;
+    if (!async && decorator.async) continue;
 
     let validationErrors = validateDecorator(
       newModel,
@@ -147,11 +143,9 @@ export function validateDecorators<
       const oldValues =
         oldPropValue instanceof Set ? [...oldPropValue] : oldPropValue;
 
-      if (newValues && newValues.length > 0) {
+      if (newValues?.length) {
         const types =
-          decorator.props.class ||
-          decorator.props.clazz ||
-          decorator.props.customTypes;
+          decorator.class || decorator.clazz || decorator.customTypes;
 
         const allowedTypes = [types].flat().map((t) => {
           t = typeof t === "function" && !t.name ? t() : t;
@@ -161,15 +155,15 @@ export function validateDecorators<
 
         const errs = newValues.map((childValue: any) => {
           // find by id so the list elements order doesn't matter
-          const id = findModelId(childValue as any, true);
+          const id = Model.pk(childValue as any, true);
           if (!id) return "Failed to find model id";
 
-          const oldModel = oldValues.find(
-            (el: any) => id === findModelId(el, true)
+          const oldListModel = oldValues.find(
+            (el: any) => id === Model.pk(el as any, true)
           );
 
           if (Model.isModel(childValue)) {
-            return childValue.hasErrors(oldModel);
+            return childValue.hasErrors(oldListModel);
           }
 
           return allowedTypes.includes(typeof childValue)
@@ -216,7 +210,7 @@ export function validateDecorators<
  * @param {M} oldModel - The original model version
  * @param {M} newModel - The updated model version
  * @param {boolean} async - A flag indicating whether validation should be asynchronous.
- * @param {...string[]} exceptions - Properties to exclude from validation
+ * @param {...string[]} propsToIgnore - Properties to exclude from validation
  * @return {ModelErrorDefinition|undefined} Error definition if validation fails, undefined otherwise
  * @function validateCompare
  * @memberOf module:db-decorators
@@ -227,7 +221,7 @@ export function validateDecorators<
  *   participant Reflection
  *   participant Validation
  *
- *   Caller->>validateCompare: oldModel, newModel, exceptions
+ *   Caller->>validateCompare: oldModel, newModel, propsToIgnore
  *   validateCompare->>Reflection: get decorated properties
  *   Reflection-->>validateCompare: property decorators
  *   loop For each decorated property
@@ -244,37 +238,32 @@ export function validateCompare<M extends Model<any>>(
   oldModel: M,
   newModel: M,
   async: boolean,
-  ...exceptions: string[]
+  ...propsToIgnore: string[]
 ): ModelConditionalAsync<M> {
-  const decoratedProperties: ValidationPropertyDecoratorDefinition[] =
-    getValidatableUpdateProps(newModel, exceptions);
+  const ValidatableUpdateProps = getValidatableUpdateProps(
+    newModel,
+    propsToIgnore
+  );
 
   const result: Record<string, any> = {};
-
   const nestedErrors: Record<string, any> = {};
-  for (const { prop, decorators } of decoratedProperties) {
+
+  for (const { prop, decorators } of ValidatableUpdateProps) {
     const propKey = String(prop);
-    let propValue = (newModel as any)[prop];
+    const propValue = (newModel as any)[prop];
 
-    if (!decorators?.length) continue;
-
-    // Get the default type validator
-    const designTypeDec = decorators.find((d) =>
-      [ModelKeys.TYPE, ValidationKeys.TYPE].includes(d.key as any)
+    const { designTypes, designType } = Metadata.getPropDesignTypes(
+      newModel.constructor as any,
+      prop as keyof M
     );
-    if (!designTypeDec) continue;
-
-    const designType = designTypeDec.props.name;
+    if (!designTypes) continue;
 
     // Handle array or Set types and enforce the presence of @list decorator
-    if ([Array.name, Set.name].includes(designType)) {
-      const { decorators } = Reflection.getPropertyDecorators(
-        ValidationKeys.REFLECT,
-        newModel,
-        propKey
-      ) as unknown as ValidationPropertyDecoratorDefinition;
-
-      if (!decorators.some((d) => d.key === ValidationKeys.LIST)) {
+    if (designTypes.some((t) => [Array.name, Set.name].includes(t))) {
+      if (
+        !decorators ||
+        !Object.keys(decorators).includes(ValidationKeys.LIST)
+      ) {
         result[propKey] = {
           [ValidationKeys.TYPE]: `Array or Set property '${propKey}' requires a @list decorator`,
         };
@@ -286,38 +275,37 @@ export function validateCompare<M extends Model<any>>(
         !(Array.isArray(propValue) || propValue instanceof Set)
       ) {
         result[propKey] = {
-          [ValidationKeys.TYPE]: `Property '${String(prop)}' must be either an array or a Set`,
+          [ValidationKeys.TYPE]: `Property '${String(prop)}' must be either an Array or a Set`,
         };
         continue;
       }
-
-      // Remove design:type decorator, since @list decorator already ensures type
-      for (let i = decorators.length - 1; i >= 0; i--) {
-        if (decorators[i].key === ModelKeys.TYPE) {
-          decorators.splice(i, 1);
-        }
-      }
-      propValue = propValue instanceof Set ? [...propValue] : propValue;
     }
 
+    // TODO: Check validateDecorators method partially working. Complete check pending.
     const propErrors: Record<string, any> =
       validateDecorators(newModel, oldModel, propKey, decorators, async) || {};
 
-    // Check for nested properties.
+    // Check for nested model.
     // To prevent unnecessary processing, "propValue" must be defined and validatable
     const isConstr = Model.isPropertyModel(newModel, propKey);
-    // if propValue !== undefined, null
-    if (propValue && isConstr) {
-      const instance: Model = propValue;
-      const isInvalidModel =
-        typeof instance !== "object" ||
-        !instance.hasErrors ||
-        typeof instance.hasErrors !== "function";
+    const hasPropValue = propValue !== null && propValue !== undefined;
 
-      if (isInvalidModel) {
-        // propErrors[ValidationKeys.TYPE] =
-        //   "Model should be validatable but it's not.";
-        console.warn("Model should be validatable but it's not.");
+    if (hasPropValue && isConstr) {
+      const instance = propValue as Model;
+
+      const Constr = (Array.isArray(designType) ? designType : [designType])
+        .map((d) => {
+          if (typeof d === "function" && !d.name) d = d();
+          return Model.get(d.name || d);
+        })
+        .find((d) => !!d) as any;
+
+      // Ensure instance is of the expected model class.
+      if (!Constr || !(instance instanceof Constr)) {
+        propErrors[ValidationKeys.TYPE] = !Constr
+          ? `Unable to verify type consistency, missing model registry for ${designTypes.toString()} on prop ${propKey}`
+          : `Value must be an instance of ${Constr.name}`;
+        delete propErrors[ModelKeys.TYPE]; // remove duplicate type error
       } else {
         nestedErrors[propKey] = instance.hasErrors((oldModel as any)[prop]);
       }
