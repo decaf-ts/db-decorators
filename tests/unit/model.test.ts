@@ -14,7 +14,7 @@ import { ValidationError } from "../../src/repository/errors";
 import { IRepository } from "../../src/interfaces/IRepository";
 import { Injectables } from "@decaf-ts/injectable-decorators";
 import { id } from "../../src";
-import { Constructor, Metadata } from "@decaf-ts/decoration";
+import { Metadata } from "@decaf-ts/decoration";
 
 @model()
 class InnerTestModel extends Model {
