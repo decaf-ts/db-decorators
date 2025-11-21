@@ -15,11 +15,14 @@ import {
 import { Operations } from "./Operations";
 import { Model } from "@decaf-ts/decorator-validation";
 import { IRepository } from "../interfaces";
-import { RepositoryFlags } from "../repository/types";
-import { Context } from "../repository/Context";
 import { InternalError } from "../repository/errors";
-import { getHandlerArgs } from "../repository/utils";
-import { propMetadata, apply, metadata, Metadata } from "@decaf-ts/decoration";
+import {
+  propMetadata,
+  apply,
+  metadata,
+  Metadata,
+  Constructor,
+} from "@decaf-ts/decoration";
 
 /**
  * @description Represents sorting parameters for grouping decorators
@@ -44,13 +47,13 @@ const DefaultGroupSort: GroupSort = { priority: defaultPriority };
  * @description DecoratorObject type definition
  * @summary Defines the structure of an object used to represent a decorator in the context of database operations.
  * @typedef {Object} DecoratorObject
- * @property {OperationHandler<any, any, any, any, any>} handler - The handler function to be executed during the operation
+ * @property {OperationHandler<any, any, any>} handler - The handler function to be executed during the operation
  * @property {object} data - Optional metadata to be passed to the handler function
  * @property {string} prop - The property key to which the decorator is applied
  * @category Type Definitions
  */
 export type DecoratorObject = {
-  handler: OperationHandler<any, any, any, any, any>;
+  handler: OperationHandler<any, any, any>;
   data: Record<string, any>[];
   prop: string[];
 };
@@ -59,19 +62,46 @@ export type DecoratorObject = {
  * @description Internal function to register operation handlers
  * @summary Registers an operation handler for a specific operation key on a target property
  * @param {OperationKeys} op - The operation key to handle
- * @param {OperationHandler<any, any, any, any, any>} handler - The handler function to register
+ * @param {OperationHandler<any, any, any>} handler - The handler function to register
  * @return {PropertyDecorator} A decorator that registers the handler
  * @function handle
  * @category Property Decorators
  */
-function handle(
-  op: OperationKeys,
-  handler: OperationHandler<any, any, any, any, any>
-) {
+function handle(op: OperationKeys, handler: OperationHandler<any, any, any>) {
   return (target: any, propertyKey: string) => {
     Operations.register(handler, op, target, propertyKey);
   };
 }
+
+/**
+ * @summary retrieves the arguments for the handler
+ * @param {any} dec the decorator
+ * @param {string} prop the property name
+ * @param {{}} m the model
+ * @param {{}} [accum] accumulator used for internal recursiveness
+ *
+ * @function getHandlerArgs
+ * @memberOf module:db-decorators.Repository
+ */
+export const getHandlerArgs = function (
+  dec: any,
+  prop: string,
+  m: Constructor<any>,
+  accum?: Record<string, { args: string[] }>
+): Record<string, { args: string[] }> | void {
+  const name = m.constructor.name;
+  if (!name) throw new InternalError("Could not determine model class");
+  accum = accum || {};
+
+  if (dec.props.handlers[name] && dec.props.handlers[name][prop])
+    accum = { ...dec.props.handlers[name][prop], ...accum };
+
+  let proto = Object.getPrototypeOf(m);
+  if (proto === Object.prototype) return accum;
+  if (proto.constructor.name === name) proto = Object.getPrototypeOf(proto);
+
+  return getHandlerArgs(dec, prop, proto, accum);
+};
 
 /**
  * @description Retrieves decorator objects for handling database operations
@@ -90,10 +120,8 @@ function handle(
  */
 export function getHandlersDecorators<
   M extends Model<true | false>,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V extends object = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
 >(
   model: Model,
   decorators: Record<string, DecoratorMetadata[]>,
@@ -104,8 +132,11 @@ export function getHandlersDecorators<
     const decs: DecoratorMetadata[] = decorators[prop];
     for (const dec of decs) {
       const { key } = dec!;
-      const handlers: OperationHandler<M, R, V, F, C>[] | undefined =
-        Operations.get<M, R, V, F, C>(model, prop, prefix + key);
+      const handlers: OperationHandler<M, R, V>[] | undefined = Operations.get<
+        M,
+        R,
+        V
+      >(model, prop, prefix + key);
       if (!handlers || !handlers.length)
         throw new InternalError(
           `Could not find registered handler for the operation ${prefix + key} under property ${prop}`
@@ -225,8 +256,8 @@ export function sortDecorators(
  */
 export function onCreateUpdate<V = object>(
   handler:
-    | GeneralOperationHandler<any, any, V, any, any>
-    | GeneralUpdateOperationHandler<any, any, V, any, any>,
+    | GeneralOperationHandler<any, any, V>
+    | GeneralUpdateOperationHandler<any, any, V>,
   data?: V,
   groupsort?: GroupSort
 ) {
@@ -243,7 +274,7 @@ export function onCreateUpdate<V = object>(
  * @category Property Decorators
  */
 export function onUpdate<V = object>(
-  handler: UpdateOperationHandler<any, any, V, any>,
+  handler: UpdateOperationHandler<any, any, V>,
   data?: V,
   groupsort?: GroupSort
 ) {
@@ -253,14 +284,14 @@ export function onUpdate<V = object>(
  * @description Decorator for handling create operations
  * @summary Defines a behavior to execute during create operations
  * @template V - Type for metadata, defaults to object
- * @param {GeneralOperationHandler<any, any, V, any, any>} handler - The method called upon the operation
+ * @param {GeneralOperationHandler<any, any, V>} handler - The method called upon the operation
  * @param {V} [data] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function onCreate
  * @category Property Decorators
  */
 export function onCreate<V = object>(
-  handler: GeneralOperationHandler<any, any, V, any, any>,
+  handler: GeneralOperationHandler<any, any, V>,
   data?: V,
   groupsort?: GroupSort
 ) {
@@ -271,14 +302,14 @@ export function onCreate<V = object>(
  * @description Decorator for handling read operations
  * @summary Defines a behavior to execute during read operations
  * @template V - Type for metadata, defaults to object
- * @param {IdOperationHandler<any, any, V, any, any>} handler - The method called upon the operation
+ * @param {IdOperationHandler<any, any, V>} handler - The method called upon the operation
  * @param {V} [data] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function onRead
  * @category Property Decorators
  */
 export function onRead<V = object>(
-  handler: IdOperationHandler<any, any, V, any, any>,
+  handler: IdOperationHandler<any, any, V>,
   data: V,
   groupsort?: GroupSort
 ) {
@@ -296,7 +327,7 @@ export function onRead<V = object>(
  * @category Property Decorators
  */
 export function onDelete<V = object>(
-  handler: OperationHandler<any, any, V, any, any>,
+  handler: OperationHandler<any, any, V>,
   data: V,
   groupsort?: GroupSort
 ) {
@@ -314,7 +345,7 @@ export function onDelete<V = object>(
  * @category Property Decorators
  */
 export function onAny<V = object>(
-  handler: OperationHandler<any, any, V, any, any>,
+  handler: OperationHandler<any, any, V>,
   data: V,
   groupsort?: GroupSort
 ) {
@@ -340,7 +371,7 @@ export function onAny<V = object>(
  */
 export function on<V = object>(
   op: OperationKeys[] = DBOperations.ALL,
-  handler: OperationHandler<any, any, V, any, any>,
+  handler: OperationHandler<any, any, V>,
   data?: V,
   groupsort?: GroupSort
 ) {
@@ -350,7 +381,7 @@ export function on<V = object>(
  * @description Decorator for handling post-create and post-update operations
  * @summary Defines a behavior to execute after both create and update operations
  * @template V - Type for metadata, defaults to object
- * @param {StandardOperationHandler<any, any, V, any, any> | UpdateOperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {StandardOperationHandler<any, any, V> | UpdateOperationHandler<any, any, V, any, any>} handler - The method called after the operation
  * @param {V} [data] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function afterCreateUpdate
@@ -358,8 +389,8 @@ export function on<V = object>(
  */
 export function afterCreateUpdate<V = object>(
   handler:
-    | StandardOperationHandler<any, any, V, any, any>
-    | UpdateOperationHandler<any, any, V, any, any>,
+    | StandardOperationHandler<any, any, V>
+    | UpdateOperationHandler<any, any, V>,
   data: V,
   groupsort?: GroupSort
 ) {
@@ -370,14 +401,14 @@ export function afterCreateUpdate<V = object>(
  * @description Decorator for handling post-update operations
  * @summary Defines a behavior to execute after update operations
  * @template V - Type for metadata, defaults to object
- * @param {UpdateOperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {UpdateOperationHandler<any, any, V>} handler - The method called after the operation
  * @param {V} [data] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function afterUpdate
  * @category Property Decorators
  */
 export function afterUpdate<V = object>(
-  handler: UpdateOperationHandler<any, any, V, any, any>,
+  handler: UpdateOperationHandler<any, any, V>,
   data: V,
   groupsort?: GroupSort
 ) {
@@ -388,14 +419,14 @@ export function afterUpdate<V = object>(
  * @description Decorator for handling post-create operations
  * @summary Defines a behavior to execute after create operations
  * @template V - Type for metadata, defaults to object
- * @param {StandardOperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {StandardOperationHandler<any, any, V>} handler - The method called after the operation
  * @param {V} [data] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function afterCreate
  * @category Property Decorators
  */
 export function afterCreate<V = object>(
-  handler: StandardOperationHandler<any, any, V, any, any>,
+  handler: StandardOperationHandler<any, any, V>,
   data: V,
   groupsort?: GroupSort
 ) {
@@ -413,7 +444,7 @@ export function afterCreate<V = object>(
  * @category Property Decorators
  */
 export function afterRead<V = object>(
-  handler: StandardOperationHandler<any, any, V, any, any>,
+  handler: StandardOperationHandler<any, any, V>,
   data?: V,
   groupsort?: GroupSort
 ) {
@@ -430,7 +461,7 @@ export function afterRead<V = object>(
  * @category Property Decorators
  */
 export function afterDelete<V = object>(
-  handler: StandardOperationHandler<any, any, V, any, any>,
+  handler: StandardOperationHandler<any, any, V>,
   data?: V,
   groupsort?: GroupSort
 ) {
@@ -441,14 +472,14 @@ export function afterDelete<V = object>(
  * @description Decorator for handling post-operation for all operation types
  * @summary Defines a behavior to execute after any database operation
  * @template V - Type for metadata, defaults to object
- * @param {StandardOperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {StandardOperationHandler<any, any, V>} handler - The method called after the operation
  * @param {V} [data] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function afterAny
  * @category Property Decorators
  */
 export function afterAny<V = object>(
-  handler: StandardOperationHandler<any, any, V, any, any>,
+  handler: StandardOperationHandler<any, any, V>,
   data?: V,
   groupsort?: GroupSort
 ) {
@@ -460,7 +491,7 @@ export function afterAny<V = object>(
  * @summary Defines a behavior to execute after specified database operations
  * @template V - Type for metadata, defaults to object
  * @param {OperationKeys[] | DBOperations} [op=DBOperations.ALL] - One or more operation types to handle
- * @param {OperationHandler<any, any, V, any, any>} handler - The method called after the operation
+ * @param {OperationHandler<any, any, Vy>} handler - The method called after the operation
  * @param {V} [data] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function after
@@ -474,7 +505,7 @@ export function afterAny<V = object>(
  */
 export function after<V = object>(
   op: OperationKeys[] = DBOperations.ALL,
-  handler: OperationHandler<any, any, V, any, any>,
+  handler: OperationHandler<any, any, V>,
   data?: V,
   groupsort?: GroupSort
 ) {
@@ -487,7 +518,7 @@ export function after<V = object>(
  * @template V - Type for metadata, defaults to object
  * @param {OperationKeys.ON | OperationKeys.AFTER} baseOp - Whether the handler runs during or after the operation
  * @param {OperationKeys[]} [operation=DBOperations.ALL] - The specific operations to handle
- * @param {OperationHandler<any, any, V, any, any>} handler - The handler function to execute
+ * @param {OperationHandler<any, any, V>} handler - The handler function to execute
  * @param {V} [dataToAdd] - Optional metadata to pass to the handler
  * @return {PropertyDecorator} A decorator that can be applied to class properties
  * @function operation
@@ -512,7 +543,7 @@ export function after<V = object>(
 export function operation<V = object>(
   baseOp: OperationKeys.ON | OperationKeys.AFTER,
   operation: OperationKeys[] = DBOperations.ALL,
-  handler: OperationHandler<any, any, V, any, any>,
+  handler: OperationHandler<any, any, V>,
   dataToAdd?: V,
   groupsort: GroupSort = DefaultGroupSort
 ) {

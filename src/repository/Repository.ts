@@ -1,11 +1,12 @@
-import { enforceDBDecorators } from "./utils";
+import { enforceDBDecorators, reduceErrorsToPrint } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError, ValidationError } from "./errors";
 import { BaseRepository } from "./BaseRepository";
 import { Model } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
-import { RepositoryFlags } from "./types";
+import { PrimaryKeyType, RepositoryFlags } from "./types";
 import { Constructor } from "@decaf-ts/decoration";
+import { IRepository } from "../interfaces/index";
 
 /**
  * @description Concrete repository implementation with validation support.
@@ -47,9 +48,8 @@ import { Constructor } from "@decaf-ts/decoration";
  */
 export abstract class Repository<
   M extends Model<boolean>,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
-> extends BaseRepository<M, F, C> {
+  C extends Context<any> = Context<RepositoryFlags>,
+> extends BaseRepository<M, C> {
   protected constructor(clazz?: Constructor<M>) {
     super(clazz);
   }
@@ -67,14 +67,14 @@ export abstract class Repository<
   protected override async createPrefix(
     model: M,
     ...args: any[]
-  ): Promise<[M, ...any[]]> {
-    const contextArgs = await Context.args(
+  ): Promise<[M, ...any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.CREATE,
       this.class,
       args
     );
     model = new this.class(model);
-    await enforceDBDecorators(
+    await enforceDBDecorators<M, IRepository<M, C>, any>(
       this,
       contextArgs.context,
       model,
@@ -101,8 +101,8 @@ export abstract class Repository<
   protected override async createAllPrefix(
     models: M[],
     ...args: any[]
-  ): Promise<any[]> {
-    const contextArgs = await Context.args(
+  ): Promise<[M[], ...any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.CREATE,
       this.class,
       args
@@ -110,7 +110,7 @@ export abstract class Repository<
     await Promise.all(
       models.map(async (m) => {
         m = new this.class(m);
-        await enforceDBDecorators(
+        await enforceDBDecorators<M, IRepository<M, C>, any>(
           this,
           contextArgs.context,
           m,
@@ -125,17 +125,7 @@ export abstract class Repository<
       models.map((m) => Promise.resolve(m.hasErrors()))
     );
 
-    const errors = modelsValidation.reduce(
-      (accum: string | undefined, e, i) => {
-        if (e)
-          accum =
-            typeof accum === "string"
-              ? accum + `\n - ${i}: ${e.toString()}`
-              : ` - ${i}: ${e.toString()}`;
-        return accum;
-      },
-      undefined
-    );
+    const errors = reduceErrorsToPrint(modelsValidation);
 
     if (errors) throw new ValidationError(errors);
     return [models, ...contextArgs.args];
@@ -156,8 +146,8 @@ export abstract class Repository<
   protected override async updatePrefix(
     model: M,
     ...args: any[]
-  ): Promise<[M, ...args: any[]]> {
-    const contextArgs = await Context.args(
+  ): Promise<[M, ...args: any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.UPDATE,
       this.class,
       args
@@ -170,9 +160,9 @@ export abstract class Repository<
 
     const oldModel: M = await this.read(pk);
 
-    model = this.merge(oldModel, model);
+    model = Model.merge(oldModel, model, this.class);
 
-    await enforceDBDecorators(
+    await enforceDBDecorators<M, IRepository<M, C>, any>(
       this,
       contextArgs.context,
       model,
@@ -198,8 +188,11 @@ export abstract class Repository<
    * @throws {InternalError} If any model doesn't have a primary key value
    * @throws {ValidationError} If any model fails validation, with details about which models failed
    */
-  protected override async updateAllPrefix(models: M[], ...args: any[]) {
-    const contextArgs = await Context.args(
+  protected override async updateAllPrefix(
+    models: M[],
+    ...args: any[]
+  ): Promise<[M[], ...any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.UPDATE,
       this.class,
       args
@@ -213,10 +206,10 @@ export abstract class Repository<
       return id as string;
     });
     const oldModels: M[] = await this.readAll(ids, ...contextArgs.args);
-    models = models.map((m, i) => this.merge(oldModels[i], m));
+    models = models.map((m, i) => Model.merge(oldModels[i], m, this.class));
     await Promise.all(
       models.map((m, i) =>
-        enforceDBDecorators(
+        enforceDBDecorators<M, IRepository<M, C>, any>(
           this,
           contextArgs.context,
           m,
@@ -231,30 +224,30 @@ export abstract class Repository<
       models.map((m, i) => Promise.resolve(m.hasErrors(oldModels[i] as any)))
     );
 
-    const errors = modelsValidation.reduce(
-      (accum: string | undefined, e, i) => {
-        if (e)
-          accum =
-            typeof accum === "string"
-              ? accum + `\n - ${i}: ${e.toString()}`
-              : ` - ${i}: ${e.toString()}`;
-        return accum;
-      },
-      undefined
-    );
+    const errors = reduceErrorsToPrint(modelsValidation);
 
     if (errors) throw new ValidationError(errors);
     return [models, ...contextArgs.args];
   }
-  //
-  // /**
-  //  * @description Creates a reflection key for database operations.
-  //  * @summary Generates a key for storing metadata in the reflection system by prefixing
-  //  * the provided key with the database reflection prefix.
-  //  * @param {string} key - The base key to prefix
-  //  * @return {string} The prefixed reflection key
-  //  */
-  // static key(key: string) {
-  //   return DBKeys.REFLECT + key;
-  // }
+
+  protected override async readPrefix(
+    key: PrimaryKeyType,
+    ...args: any[]
+  ): Promise<[PrimaryKeyType, ...any[], C]> {
+    return super.readPrefix(key, ...args);
+  }
+
+  protected override async readAllPrefix(
+    keys: PrimaryKeyType[],
+    ...args: any[]
+  ): Promise<[PrimaryKeyType[], ...any[], C]> {
+    return super.readAllPrefix(keys, ...args);
+  }
+
+  protected override async deleteAllPrefix(
+    keys: PrimaryKeyType[],
+    ...args: any[]
+  ): Promise<[PrimaryKeyType[], ...any[], C]> {
+    return super.deleteAllPrefix(keys, ...args);
+  }
 }

@@ -1,11 +1,12 @@
 import { ContextArgs } from "./utils";
-import { Contextual } from "../interfaces/Contextual";
+import { Contextual, FlagsOf } from "../interfaces/Contextual";
 import { OperationKeys } from "../operations/constants";
 import { Model } from "@decaf-ts/decorator-validation";
 import { DefaultRepositoryFlags } from "./constants";
 import { ObjectAccumulator } from "typed-object-accumulator";
-import { RepositoryFlags } from "./types";
+import { LoggerOf, RepositoryFlags } from "./types";
 import { Constructor } from "@decaf-ts/decoration";
+import { Logging } from "@decaf-ts/logging";
 
 /**
  * @description Factory type for creating context instances.
@@ -14,8 +15,8 @@ import { Constructor } from "@decaf-ts/decoration";
  * @typedef {Function} ContextFactory
  * @memberOf module:db-decorators
  */
-export type ContextFactory<F extends RepositoryFlags> = <C extends Context<F>>(
-  arg: Omit<F, "timestamp">
+export type ContextFactory<C extends Context<any>> = (
+  arg: Partial<Omit<FlagsOf<C>, "timestamp">>
 ) => C;
 
 /**
@@ -26,13 +27,16 @@ export type ContextFactory<F extends RepositoryFlags> = <C extends Context<F>>(
  * @memberOf module:db-decorators
  */
 export const DefaultContextFactory: ContextFactory<any> = <
-  F extends RepositoryFlags,
+  F extends RepositoryFlags<any>,
   C extends Context<F>,
 >(
-  arg: Omit<F, "timestamp">
+  arg: Partial<Omit<F, "timestamp">>
 ) => {
   return new Context<F>().accumulate(
-    Object.assign({}, arg, { timestamp: new Date() }) as F
+    Object.assign({}, arg, {
+      timestamp: new Date(),
+      logger: arg.logger || Logging.get(),
+    }) as F
   ) as C;
 };
 
@@ -94,7 +98,7 @@ export const DefaultContextFactory: ContextFactory<any> = <
  *   end
  *   Ctx-->>C: requested value
  */
-export class Context<F extends RepositoryFlags> {
+export class Context<F extends RepositoryFlags<any>> {
   constructor() {
     Object.defineProperty(this, "cache", {
       value: new ObjectAccumulator<F>(),
@@ -106,8 +110,8 @@ export class Context<F extends RepositoryFlags> {
 
   static factory: ContextFactory<any> = DefaultContextFactory;
 
-  readonly cache: RepositoryFlags & ObjectAccumulator<any> =
-    new ObjectAccumulator() as unknown as RepositoryFlags &
+  readonly cache: RepositoryFlags<any> & ObjectAccumulator<any> =
+    new ObjectAccumulator() as unknown as RepositoryFlags<any> &
       ObjectAccumulator<any>;
 
   /**
@@ -115,7 +119,7 @@ export class Context<F extends RepositoryFlags> {
    * @summary Merges the provided value object with the existing context state,
    * creating a new immutable cache state.
    */
-  accumulate<V extends object>(value: V) {
+  accumulate<V extends object>(value: V): Context<F & V> {
     Object.defineProperty(this, "cache", {
       value: (this.cache as ObjectAccumulator<any>).accumulate(value),
       writable: false,
@@ -123,6 +127,10 @@ export class Context<F extends RepositoryFlags> {
       configurable: true,
     });
     return this as unknown as Context<F & V>;
+  }
+
+  get logger(): LoggerOf<F> {
+    return (this.cache as any).logger;
   }
 
   get timestamp() {
@@ -151,9 +159,9 @@ export class Context<F extends RepositoryFlags> {
   /**
    * @description Creates a child context from another context
    */
-  static childFrom<F extends RepositoryFlags, C extends Context<F>>(
+  static childFrom<C extends Context<any>>(
     context: C,
-    overrides?: Partial<F>
+    overrides?: Partial<FlagsOf<C>>
   ): C {
     return Context.factory(
       Object.assign({}, (context as any).cache, overrides || {})
@@ -163,17 +171,13 @@ export class Context<F extends RepositoryFlags> {
   /**
    * @description Creates a new context from operation parameters
    */
-  static async from<
-    M extends Model,
-    F extends RepositoryFlags,
-    C extends Context<F>,
-  >(
+  static async from<M extends Model, C extends Context<any>>(
     operation:
       | OperationKeys.CREATE
       | OperationKeys.READ
       | OperationKeys.UPDATE
       | OperationKeys.DELETE,
-    overrides: Partial<F>,
+    overrides: Partial<FlagsOf<C>>,
     model: Constructor<M>,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...args: any[]
@@ -182,6 +186,7 @@ export class Context<F extends RepositoryFlags> {
       Object.assign({}, DefaultRepositoryFlags as RepositoryFlags, overrides, {
         operation: operation,
         model: model,
+        logger: overrides.logger || (Logging.get() as LoggerOf<any>),
       })
     ) as C;
   }
@@ -189,11 +194,7 @@ export class Context<F extends RepositoryFlags> {
   /**
    * @description Prepares arguments for context operations
    */
-  static async args<
-    M extends Model<any>,
-    C extends Context<F>,
-    F extends RepositoryFlags,
-  >(
+  static async args<M extends Model<any>, C extends Context<any>>(
     operation:
       | OperationKeys.CREATE
       | OperationKeys.READ
@@ -201,15 +202,15 @@ export class Context<F extends RepositoryFlags> {
       | OperationKeys.DELETE,
     model: Constructor<M>,
     args: any[],
-    contextual?: Contextual<F>,
-    overrides?: Partial<F>
-  ): Promise<ContextArgs<F, C>> {
+    contextual?: Contextual<C>,
+    overrides?: Partial<FlagsOf<C>>
+  ): Promise<ContextArgs<C>> {
     const last = args.pop();
 
     async function getContext() {
       if (contextual)
         return contextual.context(operation, overrides || {}, model, ...args);
-      return Context.from(operation, overrides || {}, model, ...args);
+      return Context.from<M, C>(operation, overrides || {}, model, ...args);
     }
 
     let c: C;
@@ -227,6 +228,6 @@ export class Context<F extends RepositoryFlags> {
       args.push(c);
     }
 
-    return { context: c, args: args };
+    return { context: c, args: args as [...any[], C] };
   }
 }

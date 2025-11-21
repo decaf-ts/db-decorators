@@ -1,7 +1,6 @@
 import { Model, ModelConstructor } from "@decaf-ts/decorator-validation";
 import { BulkCrudOperator } from "./BulkCrudOperator";
-import { RepositoryFlags } from "../repository/types";
-import { Context } from "../repository";
+import { Context, RepositoryFlags } from "../repository";
 
 /**
  * @description Repository interface for database operations
@@ -12,17 +11,18 @@ import { Context } from "../repository";
  * @interface IRepository
  * @memberOf module:db-decorators
  */
+
 export interface IRepository<
   M extends Model<true | false>,
-  F extends RepositoryFlags = RepositoryFlags,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  C extends Context<F> = Context<F>,
+  C extends Context<any> = Context<RepositoryFlags>,
 > extends BulkCrudOperator<M> {
   /**
    * @description The constructor of the model class
    * @summary Reference to the model class constructor used to create new instances
    */
   readonly class: ModelConstructor<M>;
-
-  readonly pk: keyof M;
 }
+
+export type ContextOf<R extends IRepository<any, any>> =
+  R extends IRepository<any, infer C> ? C : never;

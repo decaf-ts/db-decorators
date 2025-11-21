@@ -113,10 +113,45 @@ Model.prototype.segregate = function segregate<M extends Model>(
   throw new Error("Cannot get the value of the pk from the constructor");
 }.bind(Model);
 
+(Model as any).pkProps = function <M extends Model>(
+  model: Constructor<M>
+): any {
+  return Metadata.get(
+    model,
+    Metadata.key(DBKeys.ID, Model.pk(model) as string)
+  );
+}.bind(Model);
+
 (Model as any).isTransient = function isTransient<M extends Model>(
   model: M | Constructor<M>
 ): boolean {
   return Metadata.isTransient(model);
+}.bind(Model);
+
+/**
+ * @description Merges two model instances into a new instance.
+ * @summary Creates a new model instance by combining properties from an old model and a new model.
+ * Properties from the new model override properties from the old model if they are defined.
+ * @template {M} - Type extending Model
+ * @param {M} oldModel - The original model instance
+ * @param {M} model - The new model instance with updated properties
+ * @return {M} A new model instance with merged properties
+ */
+(Model as any).merge = function merge<M extends Model>(
+  oldModel: M,
+  newModel: M,
+  constructor?: Constructor<M>
+): M {
+  constructor = constructor || (oldModel.constructor as Constructor<M>);
+  const extract = (model: M) =>
+    Object.entries(model).reduce((accum: Record<string, any>, [key, val]) => {
+      if (typeof val !== "undefined") accum[key] = val;
+      return accum;
+    }, {});
+
+  return new constructor(
+    Object.assign({}, extract(oldModel), extract(newModel))
+  );
 }.bind(Model);
 
 (Metadata as any).saveOperation = function <M extends Model>(

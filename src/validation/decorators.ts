@@ -11,10 +11,8 @@ import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
 import { DEFAULT_ERROR_MESSAGES } from "./constants";
 import { DBOperations, OperationKeys } from "../operations/constants";
 import { after, on, onCreateUpdate } from "../operations/decorators";
-import { IRepository } from "../interfaces/IRepository";
+import { ContextOf, IRepository } from "../interfaces/IRepository";
 import { SerializationError } from "../repository/errors";
-import { Context } from "../repository/Context";
-import { RepositoryFlags } from "../repository/types";
 import {
   Decoration,
   propMetadata,
@@ -64,11 +62,15 @@ export function readonly(
  */
 export async function timestampHandler<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
->(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {
+>(
+  this: R,
+  context: ContextOf<R>,
+  data: V,
+  key: keyof M,
+  model: M
+): Promise<void> {
   (model as any)[key] = context.timestamp;
 }
 
@@ -169,11 +171,15 @@ export function timestamp(
  */
 export async function serializeOnCreateUpdate<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
->(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {
+>(
+  this: R,
+  context: ContextOf<R>,
+  data: V,
+  key: keyof M,
+  model: M
+): Promise<void> {
   if (!model[key]) return;
   try {
     model[key] = JSON.stringify(model[key]) as M[keyof M];
@@ -202,11 +208,15 @@ export async function serializeOnCreateUpdate<
  */
 export async function serializeAfterAll<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
->(this: R, context: C, data: V, key: keyof M, model: M): Promise<void> {
+>(
+  this: R,
+  context: ContextOf<R>,
+  data: V,
+  key: keyof M,
+  model: M
+): Promise<void> {
   if (!model[key]) return;
   if (typeof model[key] !== "string") return;
 

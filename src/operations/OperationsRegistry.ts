@@ -3,8 +3,6 @@ import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 import { Operations } from "./Operations";
 import { Model } from "@decaf-ts/decorator-validation";
-import { Context } from "../repository";
-import { RepositoryFlags } from "../repository/types";
 
 /**
  * @description Registry for database operation handlers
@@ -36,7 +34,7 @@ export class OperationsRegistry {
     string,
     Record<
       string | symbol,
-      Record<string, Record<string, OperationHandler<any, any, any, any, any>>>
+      Record<string, Record<string, OperationHandler<any, any, any>>>
     >
   > = {};
 
@@ -46,26 +44,18 @@ export class OperationsRegistry {
    * @template M - Model type extending Model
    * @template R - Repository type extending IRepository
    * @template V - Metadata type
-   * @template F - Repository flags extending RepositoryFlags
-   * @template C - Context type extending Context<F>
    * @param {string | Record<string, any>} target - The target class name or object
    * @param {string} propKey - The property key to get handlers for
    * @param {string} operation - The operation key to get handlers for
    * @param {OperationHandler[]} [accum] - Accumulator for recursive calls
    * @return {OperationHandler[] | undefined} Array of handlers or undefined if none found
    */
-  get<
-    M extends Model,
-    R extends IRepository<M, F, C>,
-    V,
-    F extends RepositoryFlags,
-    C extends Context<F>,
-  >(
+  get<M extends Model, R extends IRepository<M, any>, V>(
     target: string | Record<string, any>,
     propKey: string,
     operation: string,
-    accum?: OperationHandler<M, R, V, F, C>[]
-  ): OperationHandler<M, R, V, F, C>[] | undefined {
+    accum?: OperationHandler<M, R, V>[]
+  ): OperationHandler<M, R, V>[] | undefined {
     accum = accum || [];
     let name;
     try {
@@ -86,7 +76,7 @@ export class OperationsRegistry {
     let proto = Object.getPrototypeOf(target);
     if (proto.constructor.name === name) proto = Object.getPrototypeOf(proto);
 
-    return this.get<M, R, V, F, C>(proto, propKey, operation, accum);
+    return this.get<M, R, V>(proto, propKey, operation, accum);
   }
 
   /**
@@ -103,14 +93,8 @@ export class OperationsRegistry {
    * @param {string | symbol} propKey - The property key to register the handler for
    * @return {void}
    */
-  register<
-    M extends Model,
-    R extends IRepository<M, F, C>,
-    V,
-    F extends RepositoryFlags,
-    C extends Context<F>,
-  >(
-    handler: OperationHandler<M, R, V, F, C>,
+  register<M extends Model, R extends IRepository<M, any>, V>(
+    handler: OperationHandler<M, R, V>,
     operation: OperationKeys,
     target: M,
     propKey: string | symbol

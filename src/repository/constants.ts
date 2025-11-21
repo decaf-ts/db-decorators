@@ -7,7 +7,10 @@ import { RepositoryFlags } from "./types";
  * @const DefaultRepositoryFlags
  * @memberOf module:db-decorators
  */
-export const DefaultRepositoryFlags: Omit<RepositoryFlags, "timestamp"> = {
+export const DefaultRepositoryFlags: Omit<
+  RepositoryFlags,
+  "timestamp" | "logger"
+> = {
   parentContext: undefined,
   childContexts: [],
   ignoredValidationProperties: [],

@@ -1,7 +1,8 @@
 import { Context } from "./Context";
-import { Model } from "@decaf-ts/decorator-validation";
+import { ExtendedMetadata, Model } from "@decaf-ts/decorator-validation";
 import { OperationKeys } from "../operations";
 import { Constructor } from "@decaf-ts/decoration";
+import { Logger } from "@decaf-ts/logging";
 
 /**
  * @description Type utility for ensuring model extension.
@@ -32,7 +33,7 @@ export type ModelExtension<M extends Model = Model> = M extends Model
  * @property {boolean} rebuildWithTransient - Whether to include transient properties when rebuilding models
  * @memberOf module:db-decorators
  */
-export interface RepositoryFlags {
+export interface RepositoryFlags<LOG extends Logger = Logger> {
   parentContext?: Context<any>;
   childContexts?: Context<any>[];
   callArgs?: any[];
@@ -46,4 +47,16 @@ export interface RepositoryFlags {
   operation?: OperationKeys;
   breakOnHandlerError: boolean;
   rebuildWithTransient: boolean;
+  logger: LOG;
 }
+
+export type LoggerOf<R extends RepositoryFlags<any> | Context<any>> =
+  R extends RepositoryFlags<infer L>
+    ? L
+    : R extends Context<infer L>
+      ? L
+      : never;
+
+export type PrimaryKeyType = string | number | bigint;
+
+export type InferredPrimaryKeyType<M extends Model> = ExtendedMetadata<M>;

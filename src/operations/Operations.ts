@@ -3,8 +3,6 @@ import { OperationHandler } from "./types";
 import { OperationsRegistry } from "./OperationsRegistry";
 import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces";
-import { Context } from "../repository";
-import { RepositoryFlags } from "../repository/types";
 
 /**
  * @description Static utility class for database operation management
@@ -13,15 +11,13 @@ import { RepositoryFlags } from "../repository/types";
  * @template M - Model type
  * @template R - Repository type
  * @template V - Metadata type
- * @template F - Repository flags
- * @template C - Context type
  * @example
  * // Register a handler for a create operation
  * Operations.register(myHandler, OperationKeys.CREATE, targetModel, 'propertyName');
- * 
+ *
  * // Get handlers for a specific operation
  * const handlers = Operations.get(targetModel.constructor.name, 'propertyName', 'onCreate');
- * 
+ *
  * @mermaid
  * classDiagram
  *   class Operations {
@@ -42,10 +38,10 @@ export class Operations {
   /**
    * @description Gets a unique name for an operation handler
    * @summary Returns the name of the handler function or generates a hash if name is not available
-   * @param {OperationHandler<any, any, any, any, any>} handler - The handler function to get the name for
+   * @param {OperationHandler<any, any, any>} handler - The handler function to get the name for
    * @return {string} The name of the handler or a generated hash
    */
-  static getHandlerName(handler: OperationHandler<any, any, any, any, any>) {
+  static getHandlerName(handler: OperationHandler<any, any, any>) {
     if (handler.name) return handler.name;
 
     console.warn(
@@ -77,22 +73,12 @@ export class Operations {
    * @param {string} operation - The operation key to get handlers for
    * @return {any} The registered handlers for the specified target, property, and operation
    */
-  static get<
-    M extends Model,
-    R extends IRepository<M, F, C>,
-    V = object,
-    F extends RepositoryFlags = RepositoryFlags,
-    C extends Context<F> = Context<F>,
-  >(
+  static get<M extends Model, R extends IRepository<M, any>, V = object>(
     targetName: string | Record<string, any>,
     propKey: string,
     operation: string
   ) {
-    return Operations.registry.get<M, R, V, F, C>(
-      targetName,
-      propKey,
-      operation
-    );
+    return Operations.registry.get<M, R, V>(targetName, propKey, operation);
   }
 
   /**

@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { OperationKeys } from "../../src/operations/constants";
-import { getDbDecorators, getHandlerArgs } from "../../src/repository/utils";
+import { getDbDecorators } from "../../src/repository/utils";
+import { getHandlerArgs } from "../../src/index";
 
 describe("repository/utils", () => {
   describe("getDbDecorators", () => {

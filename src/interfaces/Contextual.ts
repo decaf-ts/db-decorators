@@ -1,6 +1,8 @@
 import { OperationKeys } from "../operations";
 import { Context } from "../repository";
-import { RepositoryFlags } from "../repository/types";
+
+export type FlagsOf<C extends Context<any>> =
+  C extends Context<infer T> ? T : never;
 
 /**
  * @description Interface for context-aware operations
@@ -10,10 +12,7 @@ import { RepositoryFlags } from "../repository/types";
  * @interface Contextual
  * @memberOf module:db-decorators
  */
-export interface Contextual<
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
-> {
+export interface Contextual<C extends Context<any> = Context<any>> {
   /**
    * @description Creates a context for a specific operation
    * @summary Generates an operation-specific context with custom flags
@@ -28,8 +27,9 @@ export interface Contextual<
       | OperationKeys.CREATE
       | OperationKeys.READ
       | OperationKeys.UPDATE
-      | OperationKeys.DELETE,
-    overrides: Partial<F>,
+      | OperationKeys.DELETE
+      | string,
+    overrides: Partial<FlagsOf<C>>,
     ...args: any[]
   ): Promise<C>;
 }

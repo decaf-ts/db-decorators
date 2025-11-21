@@ -18,7 +18,7 @@ class U extends Model<boolean> {
 
 class ExposedBaseRepo extends BaseRepository<U> {
   constructor() {
-    super(U as any);
+    super(U);
   }
   // implement abstract methods trivially
   async create(m: U): Promise<U> {
@@ -84,7 +84,7 @@ class ExposedBaseRepo extends BaseRepository<U> {
     return super.deleteAllSuffix(ms, c);
   }
   mergePublic(oldM: U, m: U) {
-    return this.merge(oldM, m);
+    return Model.merge(oldM, m, this.class);
   }
 }
 
@@ -97,17 +97,6 @@ describe("BaseRepository protected methods coverage", () => {
       .mockResolvedValue(undefined as any);
   });
   afterEach(() => enforceSpy.mockRestore());
-
-  test("pk getter triggers findPrimaryKey and pkProps caches", async () => {
-    const repo = new ExposedBaseRepo();
-    // access pk twice to exercise cache path
-    const pk1 = repo.pk;
-    const props = (repo as any).pkProps; // getter indirectly uses this.pk
-    const pk2 = repo.pk;
-    expect(pk1).toBe("id");
-    expect(pk2).toBe("id");
-    expect(props).toBeDefined();
-  });
 
   test("createPrefix and createSuffix enforce decorators (ON/AFTER)", async () => {
     const repo = new ExposedBaseRepo();

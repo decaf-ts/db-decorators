@@ -1,11 +1,9 @@
 import { DBKeys, DefaultSeparator } from "./constants";
 import { Hashing, Model, type } from "@decaf-ts/decorator-validation";
 import { onCreate, onCreateUpdate, onUpdate } from "../operations/decorators";
-import { IRepository } from "../interfaces/IRepository";
+import { ContextOf, IRepository } from "../interfaces/IRepository";
 import { InternalError } from "../repository/errors";
-import { Context } from "../repository/Context";
 import { CrudOperations, GroupSort, OperationKeys } from "../operations";
-import { RepositoryFlags } from "../repository/types";
 import {
   Decoration,
   propMetadata,
@@ -32,11 +30,16 @@ import {
  */
 export function hashOnCreateUpdate<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V extends object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
->(this: R, context: C, data: V, key: keyof M, model: M, oldModel?: M): void {
+>(
+  this: R,
+  context: ContextOf<R>,
+  data: V,
+  key: keyof M,
+  model: M,
+  oldModel?: M
+): void {
   if (typeof model[key] === "undefined") return;
   const hash = Hashing.hash((model as any)[key]);
   if (oldModel && (model as any)[key] === hash) return;
@@ -96,11 +99,9 @@ export type ComposedFromMetadata = {
  */
 export function composedFromCreateUpdate<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V extends ComposedFromMetadata,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
->(this: R, context: C, data: V, key: keyof M, model: M) {
+>(this: R, context: ContextOf<R>, data: V, key: keyof M, model: M) {
   try {
     const { args, type, prefix, suffix, separator } = data;
     const composed = args.map((arg: string) => {
@@ -252,11 +253,9 @@ export function composed(
 export function versionCreateUpdate(operation: CrudOperations) {
   return function versionCreateUpdate<
     M extends Model,
-    R extends IRepository<M, F, C>,
+    R extends IRepository<M>,
     V extends object,
-    F extends RepositoryFlags = RepositoryFlags,
-    C extends Context<F> = Context<F>,
-  >(this: R, context: C, data: V, key: keyof M, model: M) {
+  >(this: R, context: ContextOf<R>, data: V, key: keyof M, model: M) {
     try {
       switch (operation) {
         case OperationKeys.CREATE:

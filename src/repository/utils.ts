@@ -1,9 +1,8 @@
-import { IRepository } from "../interfaces/IRepository";
+import { ContextOf, IRepository } from "../interfaces/IRepository";
 import { ModelOperations, OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
-import { Model } from "@decaf-ts/decorator-validation";
+import { Model, ModelErrorDefinition } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
-import { RepositoryFlags } from "./types";
 import {
   getHandlersDecorators,
   groupDecorators,
@@ -23,43 +22,23 @@ import { Constructor, Metadata } from "@decaf-ts/decoration";
  * @property {any[]} args - The operation arguments
  * @memberOf module:db-decorators
  */
-export type ContextArgs<
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
-> = {
+export type ContextArgs<C extends Context<any>> = {
   context: C;
-  args: any[];
+  args: [...any[], C];
 };
 
-/**
- * @summary retrieves the arguments for the handler
- * @param {any} dec the decorator
- * @param {string} prop the property name
- * @param {{}} m the model
- * @param {{}} [accum] accumulator used for internal recursiveness
- *
- * @function getHandlerArgs
- * @memberOf module:db-decorators.Repository
- */
-export const getHandlerArgs = function (
-  dec: any,
-  prop: string,
-  m: Constructor<any>,
-  accum?: Record<string, { args: string[] }>
-): Record<string, { args: string[] }> | void {
-  const name = m.constructor.name;
-  if (!name) throw new InternalError("Could not determine model class");
-  accum = accum || {};
-
-  if (dec.props.handlers[name] && dec.props.handlers[name][prop])
-    accum = { ...dec.props.handlers[name][prop], ...accum };
-
-  let proto = Object.getPrototypeOf(m);
-  if (proto === Object.prototype) return accum;
-  if (proto.constructor.name === name) proto = Object.getPrototypeOf(proto);
-
-  return getHandlerArgs(dec, prop, proto, accum);
-};
+export function reduceErrorsToPrint(
+  errors: (ModelErrorDefinition | undefined)[]
+): string | undefined {
+  return errors.reduce((accum: string | undefined, e, i) => {
+    if (e)
+      accum =
+        typeof accum === "string"
+          ? accum + `\n - ${i}: ${e.toString()}`
+          : ` - ${i}: ${e.toString()}`;
+    return accum;
+  }, undefined);
+}
 
 /**
  *
@@ -76,13 +55,11 @@ export const getHandlerArgs = function (
  */
 export async function enforceDBDecorators<
   M extends Model<true | false>,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V extends object = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
 >(
   repo: R,
-  context: C,
+  context: ContextOf<R>,
   model: M,
   operation: string,
   prefix: string,
@@ -111,9 +88,9 @@ export async function enforceDBDecorators<
       args.push(oldModel);
     }
     try {
-      await (dec.handler as UpdateOperationHandler<M, R, V, F, C>).apply(
+      await (dec.handler as UpdateOperationHandler<M, R, V>).apply(
         repo,
-        args as [C, V, keyof M, M, M]
+        args as [ContextOf<R>, V, keyof M, M, M]
       );
     } catch (e: unknown) {
       const msg = `Failed to execute handler ${dec.handler.name} for ${dec.prop} on ${model.constructor.name} due to error: ${e}`;
@@ -164,98 +141,3 @@ export function getDbDecorators<T extends Model>(
     undefined
   );
 }
-
-// /**
-//  * @summary Retrieves the decorators for an object's properties prefixed by {@param prefixes} recursively
-//  * @param model
-//  * @param accum
-//  * @param prefixes
-//  *
-//  * @function getAllPropertyDecoratorsRecursive
-//  * @memberOf module:db-decorators.Repository
-//  */
-// export const getAllPropertyDecoratorsRecursive = function <T extends Model>(
-//   model: T,
-//   accum: { [indexer: string]: any[] } | undefined,
-//   ...prefixes: string[]
-// ): { [indexer: string]: any[] } | undefined {
-//   const accumulator = accum || {};
-//   const mergeDecorators = function (decs: { [indexer: string]: any[] }) {
-//     const pushOrSquash = (key: string, ...values: any[]) => {
-//       values.forEach((val) => {
-//         let match: any;
-//         if (
-//           !(match = accumulator[key].find((e) => e.key === val.key)) ||
-//           match.props.operation !== val.props.operation
-//         ) {
-//           accumulator[key].push(val);
-//           return;
-//         }
-
-//         if (val.key === ModelKeys.TYPE) return;
-
-//         const { handlers, operation } = val.props;
-
-//         if (
-//           !operation ||
-//           !operation.match(
-//             new RegExp(
-//               `^(:?${OperationKeys.ON}|${OperationKeys.AFTER})(:?${OperationKeys.CREATE}|${OperationKeys.READ}|${OperationKeys.UPDATE}|${OperationKeys.DELETE})$`
-//             )
-//           )
-//         ) {
-//           accumulator[key].push(val);
-//           return;
-//         }
-
-//         const accumHandlers = match.props.handlers;
-
-//         Object.entries(handlers).forEach(([clazz, handlerDef]) => {
-//           if (!(clazz in accumHandlers)) {
-//             accumHandlers[clazz] = handlerDef;
-//             return;
-//           }
-
-//           Object.entries(handlerDef as object).forEach(
-//             ([handlerProp, handler]) => {
-//               if (!(handlerProp in accumHandlers[clazz])) {
-//                 accumHandlers[clazz][handlerProp] = handler;
-//                 return;
-//               }
-
-//               Object.entries(handler as object).forEach(
-//                 ([handlerKey, argsObj]) => {
-//                   if (!(handlerKey in accumHandlers[clazz][handlerProp])) {
-//                     accumHandlers[clazz][handlerProp][handlerKey] = argsObj;
-//                     return;
-//                   }
-//                   console.warn(
-//                     `Skipping handler registration for ${clazz} under prop ${handlerProp} because handler is the same`
-//                   );
-//                 }
-//               );
-//             }
-//           );
-//         });
-//       });
-//     };
-
-//     Object.entries(decs).forEach(([key, value]) => {
-//       accumulator[key] = accumulator[key] || [];
-//       pushOrSquash(key, ...value);
-//     });
-//   };
-
-//   const decs: { [indexer: string]: any[] } | undefined =
-//     Reflection.getAllPropertyDecorators(model, ...prefixes);
-//   if (decs) mergeDecorators(decs);
-
-//   if (Object.getPrototypeOf(model) === Object.prototype) return accumulator;
-
-//   // const name = model.constructor.name;
-//   const proto = Object.getPrototypeOf(model);
-//   if (!proto) return accumulator;
-//   // if (proto.constructor && proto.constructor.name === name)
-//   //     proto = Object.getPrototypeOf(proto)
-//   return getAllPropertyDecoratorsRecursive(proto, accumulator, ...prefixes);
-// };

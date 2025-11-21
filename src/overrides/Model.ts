@@ -4,7 +4,7 @@ import "@decaf-ts/decorator-validation";
 declare module "@decaf-ts/decorator-validation" {
   export interface Model {
     isTransient(): boolean;
-    segregate<M extends Model>(
+    segregate<M extends Model<boolean>>(
       this: M
     ): { model: M; transient?: Record<keyof M, M[keyof M]> };
   }
@@ -26,9 +26,21 @@ declare module "@decaf-ts/decorator-validation" {
      *       const idProp = Model.pk(newModel);
      *       const id = Model.pk(newModel, true);
      */
-    function pk<M>(model: M | Constructor<M>, keyValue?: boolean): any;
+    function pk<M extends Model<boolean>>(model: M | Constructor<M>): keyof M;
+    function pk<M extends Model<boolean>>(
+      model: M,
+      keyValue: boolean
+    ): M[keyof M];
+    function pk<M extends Model<boolean>>(
+      model: M | Constructor<M>,
+      keyValue?: boolean
+    ): keyof M | M[keyof M];
 
-    function isTransient<M extends Model>(model: M | Constructor<M>): boolean;
+    function pkProps<M extends Model<boolean>>(model: Constructor<M>): any;
+
+    function isTransient<M extends Model<boolean>>(
+      model: M | Constructor<M>
+    ): boolean;
     /**
      * @description Separates transient properties from a model
      * @summary Extracts properties marked as transient into a separate object
@@ -58,8 +70,21 @@ declare module "@decaf-ts/decorator-validation" {
      *     modelToTransient-->>Caller: {model, transient}
      *   end
      */
-    function segregate<M extends Model>(
+    function segregate<M extends Model<boolean>>(
       model: M
     ): { model: M; transient?: Record<keyof M, M[keyof M]> };
+    /**
+     * @description Merges two model instances into a new instance.
+     * @summary Creates a new model instance by combining properties from an old model and a new model.
+     * Properties from the new model override properties from the old model if they are defined.
+     * @param {M} oldModel - The original model instance
+     * @param {M} model - The new model instance with updated properties
+     * @return {M} A new model instance with merged properties
+     */
+    function merge<M extends Model<boolean>>(
+      oldModel: M,
+      newModel: M,
+      constructor?: Constructor<M>
+    ): M;
   }
 }

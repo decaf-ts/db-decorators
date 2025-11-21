@@ -1,4 +1,5 @@
 import { CrudOperator } from "./CrudOperator";
+import { PrimaryKeyType } from "../repository/index";
 
 /**
  * @description Interface for bulk CRUD operations
@@ -22,11 +23,11 @@ export interface BulkCrudOperator<M> extends CrudOperator<M> {
    * @description Retrieves multiple model instances from the database by their keys
    * @summary Bulk operation to read multiple models at once
    * @template M - The model type
-   * @param {(string[]|number[])} keys - Array of primary keys to retrieve
+   * @param {(PrimaryKeyType[])} keys - Array of primary keys to retrieve
    * @param {...any[]} args - Additional arguments
    * @return {Promise<M[]>} Promise resolving to the retrieved model instances
    */
-  readAll(keys: string[] | number[], ...args: any[]): Promise<M[]>;
+  readAll(keys: PrimaryKeyType[], ...args: any[]): Promise<M[]>;
 
   /**
    * @description Updates multiple model instances in the database
@@ -42,9 +43,9 @@ export interface BulkCrudOperator<M> extends CrudOperator<M> {
    * @description Deletes multiple model instances from the database by their keys
    * @summary Bulk operation to delete multiple models at once
    * @template M - The model type
-   * @param {(string[]|number[])} keys - Array of primary keys to delete
+   * @param {(PrimaryKeyType[])} keys - Array of primary keys to delete
    * @param {...any[]} args - Additional arguments
    * @return {Promise<M[]>} Promise resolving to the deleted model instances
    */
-  deleteAll(keys: string[] | number[], ...args: any[]): Promise<M[]>;
+  deleteAll(keys: PrimaryKeyType[], ...args: any[]): Promise<M[]>;
 }

@@ -1,8 +1,6 @@
 import { OperationKeys } from "./constants";
-import { IRepository } from "../interfaces/IRepository";
+import { ContextOf, IRepository } from "../interfaces/IRepository";
 import { Model } from "@decaf-ts/decorator-validation";
-import { Context } from "../repository/Context";
-import { RepositoryFlags } from "../repository/types";
 
 /**
  * @description Metadata for database operations
@@ -32,26 +30,22 @@ export type OperationMetadata<V> = {
  */
 export type OperationHandler<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
 > =
-  | StandardOperationHandler<M, R, V, F, C>
-  | UpdateOperationHandler<M, R, V, F, C>
-  | IdOperationHandler<M, R, V, F, C>
-  | GroupOperationHandler<M, R, V, F, C>
-  | GroupUpdateOperationHandler<M, R, V, F, C>;
+  | StandardOperationHandler<M, R, V>
+  | UpdateOperationHandler<M, R, V>
+  | IdOperationHandler<M, R, V>
+  | GroupOperationHandler<M, R, V>
+  | GroupUpdateOperationHandler<M, R, V>;
 
 export type StandardOperationHandler<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
 > = (
   this: R,
-  context: C,
+  context: ContextOf<R>,
   metadata: V,
   key: keyof M,
   model: M
@@ -59,13 +53,11 @@ export type StandardOperationHandler<
 
 export type IdOperationHandler<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
 > = (
   this: R,
-  context: C,
+  context: ContextOf<R>,
   decorator: V,
   key: keyof M,
   id: string
@@ -73,13 +65,11 @@ export type IdOperationHandler<
 
 export type UpdateOperationHandler<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
 > = (
   this: R,
-  context: C,
+  context: ContextOf<R>,
   decorator: V,
   key: keyof M,
   model: M,
@@ -88,13 +78,11 @@ export type UpdateOperationHandler<
 
 export type GroupOperationHandler<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
 > = (
   this: R,
-  context: C,
+  context: ContextOf<R>,
   metadata: V[],
   keys: (keyof M)[],
   model: M
@@ -102,13 +90,11 @@ export type GroupOperationHandler<
 
 export type GroupUpdateOperationHandler<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
 > = (
   this: R,
-  context: C,
+  context: ContextOf<R>,
   decorator: V[],
   keys: (keyof M)[],
   model: M,
@@ -129,13 +115,9 @@ export type GroupUpdateOperationHandler<
  */
 export type GeneralOperationHandler<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
-> =
-  | StandardOperationHandler<M, R, V, F, C>
-  | GroupOperationHandler<M, R, V, F, C>;
+> = StandardOperationHandler<M, R, V> | GroupOperationHandler<M, R, V>;
 
 /**
  * @description General handler type for group update database operations
@@ -150,10 +132,6 @@ export type GeneralOperationHandler<
  */
 export type GeneralUpdateOperationHandler<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
-> =
-  | UpdateOperationHandler<M, R, V, F, C>
-  | GroupUpdateOperationHandler<M, R, V, F, C>;
+> = UpdateOperationHandler<M, R, V> | GroupUpdateOperationHandler<M, R, V>;

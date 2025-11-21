@@ -1,14 +1,13 @@
 import "../overrides";
 import { IRepository } from "../interfaces/IRepository";
 import { Model } from "@decaf-ts/decorator-validation";
-import { enforceDBDecorators } from "./utils";
+import { ContextArgs, enforceDBDecorators } from "./utils";
 import { OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
 import { wrapMethodWithContext } from "./wrappers";
 import { Context } from "./Context";
-import { RepositoryFlags } from "./types";
-import { Constructor, Metadata } from "@decaf-ts/decoration";
-import { DBKeys } from "../model/constants";
+import { PrimaryKeyType } from "./types";
+import { Constructor } from "@decaf-ts/decoration";
 
 /**
  * @description Base repository implementation providing CRUD operations for models.
@@ -103,13 +102,10 @@ import { DBKeys } from "../model/constants";
  */
 export abstract class BaseRepository<
   M extends Model<boolean>,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
-> implements IRepository<M, F, C>
+  C extends Context<any>,
+> implements IRepository<M, C>
 {
   private readonly _class!: Constructor<M>;
-  private _pk!: keyof M;
-  private _pkProps!: any;
 
   /**
    * @description Gets the model class constructor.
@@ -129,15 +125,8 @@ export abstract class BaseRepository<
    * If not already determined, it finds the primary key using the model's decorators.
    * @return The name of the primary key property
    */
-  get pk(): keyof M {
-    if (!this._pk) {
-      this._pk = Model.pk(this.class);
-      this._pkProps = Metadata.get(
-        this.class as any,
-        Metadata.key(DBKeys.ID, this._pk as string)
-      );
-    }
-    return this._pk;
+  protected get pk(): keyof M {
+    return Model.pk(this.class);
   }
 
   /**
@@ -147,11 +136,7 @@ export abstract class BaseRepository<
    * @return {any} The properties of the primary key
    */
   protected get pkProps(): any {
-    if (!this._pkProps) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const pk = this.pk;
-    }
-    return this._pkProps;
+    return Model.pkProps(this.class);
   }
 
   protected constructor(clazz?: Constructor<M>) {
@@ -200,14 +185,17 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the create operation
    * @return A promise that resolves to an array containing the prepared model and context arguments
    */
-  protected async createPrefix(model: M, ...args: any[]) {
-    const contextArgs = await Context.args<M, C, F>(
+  protected async createPrefix(
+    model: M,
+    ...args: any[]
+  ): Promise<[M, ...any[], C]> {
+    const contextArgs: ContextArgs<C> = await Context.args<M, C>(
       OperationKeys.CREATE,
       this.class,
       args
     );
     model = new this.class(model);
-    await enforceDBDecorators<M, typeof this, any, F, C>(
+    await enforceDBDecorators<M, IRepository<M, C>, any>(
       this,
       contextArgs.context,
       model,
@@ -225,8 +213,8 @@ export abstract class BaseRepository<
    * @param {C} context - The context for the operation
    * @return {Promise<M>} A promise that resolves to the processed model instance
    */
-  protected async createSuffix(model: M, context: C) {
-    await enforceDBDecorators<M, typeof this, any, F, C>(
+  protected async createSuffix(model: M, context: C): Promise<M> {
+    await enforceDBDecorators<M, IRepository<M, C>, any>(
       this,
       context,
       model,
@@ -245,8 +233,11 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the create operation
    * @return  A promise that resolves to an array containing the prepared models and context arguments
    */
-  protected async createAllPrefix(models: M[], ...args: any[]) {
-    const contextArgs = await Context.args<M, C, F>(
+  protected async createAllPrefix(
+    models: M[],
+    ...args: any[]
+  ): Promise<[M[], ...any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.CREATE,
       this.class,
       args
@@ -254,7 +245,7 @@ export abstract class BaseRepository<
     await Promise.all(
       models.map(async (m) => {
         m = new this.class(m);
-        await enforceDBDecorators<M, typeof this, any, F, C>(
+        await enforceDBDecorators<M, IRepository<M, C>, any>(
           this,
           contextArgs.context,
           m,
@@ -275,10 +266,10 @@ export abstract class BaseRepository<
    * @param {C} context - The context for the operation
    * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
    */
-  protected async createAllSuffix(models: M[], context: C) {
+  protected async createAllSuffix(models: M[], context: C): Promise<M[]> {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators<M, typeof this, any, F, C>(
+        enforceDBDecorators<M, IRepository<M, C>, any>(
           this,
           context,
           m,
@@ -294,11 +285,11 @@ export abstract class BaseRepository<
    * @description Retrieves a model instance from the repository by its primary key.
    * @summary Fetches a model instance from the underlying data store using its primary key.
    * This method must be implemented by concrete repository classes.
-   * @param {string | number} key - The primary key of the model to retrieve
+   * @param {PrimaryKeyType} key - The primary key of the model to retrieve
    * @param {any[]} args - Additional arguments for the read operation
    * @return {Promise<M>} A promise that resolves to the retrieved model instance
    */
-  abstract read(key: string | number, ...args: any[]): Promise<M>;
+  abstract read(key: PrimaryKeyType, ...args: any[]): Promise<M>;
 
   /**
    * @description Retrieves multiple model instances from the repository by their primary keys.
@@ -308,7 +299,7 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the read operation
    * @return {Promise<M[]>} A promise that resolves to an array of retrieved model instances
    */
-  async readAll(keys: string[] | number[], ...args: any[]): Promise<M[]> {
+  async readAll(keys: PrimaryKeyType[], ...args: any[]): Promise<M[]> {
     return await Promise.all(keys.map((id) => this.read(id, ...args)));
   }
 
@@ -320,8 +311,8 @@ export abstract class BaseRepository<
    * @param {C} context - The context for the operation
    * @return {Promise<M>} A promise that resolves to the processed model instance
    */
-  protected async readSuffix(model: M, context: C) {
-    await enforceDBDecorators<M, typeof this, any, F, C>(
+  protected async readSuffix(model: M, context: C): Promise<M> {
+    await enforceDBDecorators<M, IRepository<M, C>, any>(
       this,
       context,
       model,
@@ -340,15 +331,18 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the read operation
    * @return A promise that resolves to an array containing the key and context arguments
    */
-  protected async readPrefix(key: string, ...args: any[]) {
-    const contextArgs = await Context.args<M, C, F>(
+  protected async readPrefix(
+    key: PrimaryKeyType,
+    ...args: any[]
+  ): Promise<[PrimaryKeyType, ...any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.READ,
       this.class,
       args
     );
     const model: M = new this.class();
     model[this.pk] = key as any;
-    await enforceDBDecorators<M, typeof this, any, F, C>(
+    await enforceDBDecorators<M, IRepository<M, C>, any>(
       this,
       contextArgs.context,
       model,
@@ -367,8 +361,11 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the read operation
    * @return A promise that resolves to an array containing the keys and context arguments
    */
-  protected async readAllPrefix(keys: string[] | number[], ...args: any[]) {
-    const contextArgs = await Context.args<M, C, F>(
+  protected async readAllPrefix(
+    keys: PrimaryKeyType[],
+    ...args: any[]
+  ): Promise<[PrimaryKeyType[], ...any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.READ,
       this.class,
       args
@@ -377,7 +374,7 @@ export abstract class BaseRepository<
       keys.map(async (k) => {
         const m = new this.class();
         m[this.pk] = k as any;
-        return enforceDBDecorators<M, typeof this, any, F, C>(
+        return enforceDBDecorators<M, IRepository<M, C>, any>(
           this,
           contextArgs.context,
           m,
@@ -397,12 +394,12 @@ export abstract class BaseRepository<
    * @param {C} context - The context for the operation
    * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
    */
-  protected async readAllSuffix(models: M[], context: C) {
+  protected async readAllSuffix(models: M[], context: C): Promise<M[]> {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators<M, typeof this, any, F, C>(
+        enforceDBDecorators<M, typeof this, any>(
           this,
-          context,
+          context as any,
           m,
           OperationKeys.READ,
           OperationKeys.AFTER
@@ -442,8 +439,8 @@ export abstract class BaseRepository<
    * @param {C} context - The context for the operation
    * @return {Promise<M>} A promise that resolves to the processed model instance
    */
-  protected async updateSuffix(model: M, context: C) {
-    await enforceDBDecorators<M, typeof this, any, F, C>(
+  protected async updateSuffix(model: M, context: C): Promise<M> {
+    await enforceDBDecorators<M, IRepository<M, C>, any>(
       this,
       context,
       model,
@@ -462,8 +459,11 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the update operation
    * @return A promise that resolves to an array containing the prepared model and context arguments
    */
-  protected async updatePrefix(model: M, ...args: any[]) {
-    const contextArgs = await Context.args<M, C, F>(
+  protected async updatePrefix(
+    model: M,
+    ...args: any[]
+  ): Promise<[M, ...any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.UPDATE,
       this.class,
       args
@@ -474,7 +474,7 @@ export abstract class BaseRepository<
         `No value for the Id is defined under the property ${this.pk as string}`
       );
     const oldModel = await this.read(id as string);
-    await enforceDBDecorators<M, typeof this, any, F, C>(
+    await enforceDBDecorators<M, IRepository<M, C>, any>(
       this,
       contextArgs.context,
       model,
@@ -494,8 +494,11 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the update operation
    * @return A promise that resolves to an array containing the prepared models and context arguments
    */
-  protected async updateAllPrefix(models: M[], ...args: any[]) {
-    const contextArgs = await Context.args<M, C, F>(
+  protected async updateAllPrefix(
+    models: M[],
+    ...args: any[]
+  ): Promise<[M[], ...any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.UPDATE,
       this.class,
       args
@@ -503,7 +506,7 @@ export abstract class BaseRepository<
     await Promise.all(
       models.map((m) => {
         m = new this.class(m);
-        enforceDBDecorators<M, typeof this, any, F, C>(
+        enforceDBDecorators<M, IRepository<M, C>, any>(
           this,
           contextArgs.context,
           m,
@@ -524,10 +527,10 @@ export abstract class BaseRepository<
    * @param {C} context - The context for the operation
    * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
    */
-  protected async updateAllSuffix(models: M[], context: C) {
+  protected async updateAllSuffix(models: M[], context: C): Promise<M[]> {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators<M, typeof this, any, F, C>(
+        enforceDBDecorators<M, IRepository<M, C>, any>(
           this,
           context,
           m,
@@ -547,7 +550,7 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the delete operation
    * @return {Promise<M>} A promise that resolves to the deleted model instance
    */
-  abstract delete(key: string | number, ...args: any[]): Promise<M>;
+  abstract delete(key: PrimaryKeyType, ...args: any[]): Promise<M>;
 
   /**
    * @description Deletes multiple model instances from the repository by their primary keys.
@@ -557,7 +560,7 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the delete operation
    * @return {Promise<M[]>} A promise that resolves to an array of deleted model instances
    */
-  async deleteAll(keys: string[] | number[], ...args: any[]): Promise<M[]> {
+  async deleteAll(keys: PrimaryKeyType[], ...args: any[]): Promise<M[]> {
     return Promise.all(keys.map((k) => this.delete(k, ...args)));
   }
 
@@ -569,8 +572,8 @@ export abstract class BaseRepository<
    * @param {C} context - The context for the operation
    * @return {Promise<M>} A promise that resolves to the processed model instance
    */
-  protected async deleteSuffix(model: M, context: C) {
-    await enforceDBDecorators<M, typeof this, any, F, C>(
+  protected async deleteSuffix(model: M, context: C): Promise<M> {
+    await enforceDBDecorators<M, IRepository<M, C>, any>(
       this,
       context,
       model,
@@ -589,14 +592,17 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the delete operation
    * @return A promise that resolves to an array containing the key and context arguments
    */
-  protected async deletePrefix(key: any, ...args: any[]) {
-    const contextArgs = await Context.args<M, C, F>(
+  protected async deletePrefix(
+    key: PrimaryKeyType,
+    ...args: any[]
+  ): Promise<[PrimaryKeyType, ...any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.DELETE,
       this.class,
       args
     );
     const model = await this.read(key, ...contextArgs.args);
-    await enforceDBDecorators<M, typeof this, any, F, C>(
+    await enforceDBDecorators<M, IRepository<M, C>, any>(
       this,
       contextArgs.context,
       model,
@@ -615,8 +621,11 @@ export abstract class BaseRepository<
    * @param {any[]} args - Additional arguments for the delete operation
    * @return A promise that resolves to an array containing the keys and context arguments
    */
-  protected async deleteAllPrefix(keys: string[] | number[], ...args: any[]) {
-    const contextArgs = await Context.args<M, C, F>(
+  protected async deleteAllPrefix(
+    keys: PrimaryKeyType[],
+    ...args: any[]
+  ): Promise<[PrimaryKeyType[], ...any[], C]> {
+    const contextArgs = await Context.args<M, C>(
       OperationKeys.DELETE,
       this.class,
       args
@@ -624,7 +633,7 @@ export abstract class BaseRepository<
     const models = await this.readAll(keys, ...contextArgs.args);
     await Promise.all(
       models.map(async (m) => {
-        return enforceDBDecorators<M, typeof this, any, F, C>(
+        return enforceDBDecorators<M, IRepository<M, C>, any>(
           this,
           contextArgs.context,
           m,
@@ -644,10 +653,10 @@ export abstract class BaseRepository<
    * @param {C} context - The context for the operation
    * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
    */
-  protected async deleteAllSuffix(models: M[], context: C) {
+  protected async deleteAllSuffix(models: M[], context: C): Promise<M[]> {
     await Promise.all(
       models.map((m) =>
-        enforceDBDecorators<M, typeof this, any, F, C>(
+        enforceDBDecorators<M, IRepository<M, C>, any>(
           this,
           context,
           m,
@@ -660,29 +669,11 @@ export abstract class BaseRepository<
   }
 
   /**
-   * @description Merges two model instances into a new instance.
-   * @summary Creates a new model instance by combining properties from an old model and a new model.
-   * Properties from the new model override properties from the old model if they are defined.
-   * @param {M} oldModel - The original model instance
-   * @param {M} model - The new model instance with updated properties
-   * @return {M} A new model instance with merged properties
-   */
-  protected merge(oldModel: M, model: M): M {
-    const extract = (model: M) =>
-      Object.entries(model).reduce((accum: Record<string, any>, [key, val]) => {
-        if (typeof val !== "undefined") accum[key] = val;
-        return accum;
-      }, {});
-
-    return new this.class(Object.assign({}, extract(oldModel), extract(model)));
-  }
-
-  /**
    * @description Returns a string representation of the repository.
    * @summary Creates a string that identifies this repository by the name of its model class.
    * @return {string} A string representation of the repository
    */
-  toString() {
+  toString(): string {
     return `${this.class.name} Repository`;
   }
 }
