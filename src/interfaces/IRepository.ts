@@ -13,7 +13,7 @@ import { Context, RepositoryFlags } from "../repository";
  */
 
 export interface IRepository<
-  M extends Model<true | false>,
+  M extends Model<boolean>,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   C extends Context<any> = Context<RepositoryFlags>,
 > extends BulkCrudOperator<M> {

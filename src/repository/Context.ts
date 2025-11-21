@@ -4,7 +4,12 @@ import { OperationKeys } from "../operations/constants";
 import { Model } from "@decaf-ts/decorator-validation";
 import { DefaultRepositoryFlags } from "./constants";
 import { ObjectAccumulator } from "typed-object-accumulator";
-import { LoggerOf, RepositoryFlags } from "./types";
+import {
+  FlagsOfContext,
+  LoggerOfContext,
+  LoggerOfFlags,
+  RepositoryFlags,
+} from "./types";
 import { Constructor } from "@decaf-ts/decoration";
 import { Logging } from "@decaf-ts/logging";
 
@@ -98,7 +103,7 @@ export const DefaultContextFactory: ContextFactory<any> = <
  *   end
  *   Ctx-->>C: requested value
  */
-export class Context<F extends RepositoryFlags<any>> {
+export class Context<F extends RepositoryFlags<any> = RepositoryFlags> {
   constructor() {
     Object.defineProperty(this, "cache", {
       value: new ObjectAccumulator<F>(),
@@ -129,7 +134,7 @@ export class Context<F extends RepositoryFlags<any>> {
     return this as unknown as Context<F & V>;
   }
 
-  get logger(): LoggerOf<F> {
+  get logger(): LoggerOfFlags<F> {
     return (this.cache as any).logger;
   }
 
@@ -177,7 +182,7 @@ export class Context<F extends RepositoryFlags<any>> {
       | OperationKeys.READ
       | OperationKeys.UPDATE
       | OperationKeys.DELETE,
-    overrides: Partial<FlagsOf<C>>,
+    overrides: Partial<FlagsOfContext<C>>,
     model: Constructor<M>,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...args: any[]
@@ -186,7 +191,7 @@ export class Context<F extends RepositoryFlags<any>> {
       Object.assign({}, DefaultRepositoryFlags as RepositoryFlags, overrides, {
         operation: operation,
         model: model,
-        logger: overrides.logger || (Logging.get() as LoggerOf<any>),
+        logger: overrides.logger || (Logging.get() as LoggerOfContext<C>),
       })
     ) as C;
   }
