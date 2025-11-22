@@ -3,8 +3,7 @@ import { ExtendedMetadata, Model } from "@decaf-ts/decorator-validation";
 import { OperationKeys } from "../operations";
 import { Constructor } from "@decaf-ts/decoration";
 import { Logger } from "@decaf-ts/logging";
-import { ContextOf, IRepository } from "../interfaces/index";
-import { Repository } from "./Repository";
+import { IRepository } from "../interfaces/index";
 
 /**
  * @description Type utility for ensuring model extension.
@@ -67,6 +66,9 @@ export type ContextOfRepository<R extends IRepository<any, any>> =
 
 export type LoggerOfRepository<R extends IRepository<any, any>> =
   LoggerOfContext<ContextOfRepository<R>>;
+
+export type FlagsOfRepository<R extends IRepository<any, any>> =
+  R extends IRepository<any, infer C> ? FlagsOfContext<C> : never;
 
 export type PrimaryKeyType = string | number | bigint;
 

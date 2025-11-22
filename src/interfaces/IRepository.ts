@@ -23,6 +23,3 @@ export interface IRepository<
    */
   readonly class: ModelConstructor<M>;
 }
-
-export type ContextOf<R extends IRepository<any, any>> =
-  R extends IRepository<any, infer C> ? C : never;

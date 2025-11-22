@@ -8,7 +8,6 @@ import { Constructor } from "@decaf-ts/decoration";
 
 export class RamRepository<M extends Model> extends Repository<
   M,
-  RepositoryFlags,
   Context<RepositoryFlags>
 > {
   protected ram: Record<string, M> = {};

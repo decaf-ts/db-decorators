@@ -16,7 +16,7 @@ class U extends Model<boolean> {
   }
 }
 
-class ExposedBaseRepo extends BaseRepository<U> {
+class ExposedBaseRepo extends BaseRepository<U, any> {
   constructor() {
     super(U);
   }

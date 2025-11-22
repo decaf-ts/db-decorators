@@ -7,9 +7,8 @@ import { IRepository } from "../../src/interfaces/IRepository";
 import { RamRepository } from "./RamRepository";
 import { InternalError } from "../../src/repository/errors";
 import { Injectables } from "@decaf-ts/injectable-decorators";
-import { id } from "../../src";
+import { ContextOfRepository, id } from "../../src";
 import { Context } from "../../src/repository/Context";
-import { RepositoryFlags } from "../../src/repository/types";
 
 describe("Operations decorators", () => {
   describe("on", () => {
@@ -20,51 +19,71 @@ describe("Operations decorators", () => {
     class Handler {
       static async handler<
         M extends Model,
-        R extends IRepository<M, F, C>,
+        R extends IRepository<M, any>,
         V extends object,
-        F extends RepositoryFlags = RepositoryFlags,
-        C extends Context<F> = Context<F>,
-      >(this: R, context: C, data: V, key: keyof M, model: M) {
+      >(
+        this: R,
+        context: ContextOfRepository<R>,
+        data: V,
+        key: keyof M,
+        model: M
+      ) {
         (model as { [indexer: string]: any })[key as string] = "test";
       }
 
       static async otherHandler<
         M extends Model,
-        R extends IRepository<M, F, C>,
+        R extends IRepository<M, any>,
         V extends object,
-        F extends RepositoryFlags = RepositoryFlags,
-        C extends Context<F> = Context<F>,
-      >(this: R, context: C, data: V, key: keyof M, model: M) {
+      >(
+        this: R,
+        context: ContextOfRepository<R>,
+        data: V,
+        key: keyof M,
+        model: M
+      ) {
         model[key] = "test2" as M[keyof M];
       }
 
       static async yetAnotherHandler<
         M extends Model,
-        R extends IRepository<M, F, C>,
+        R extends IRepository<M, any>,
         V extends object,
-        F extends RepositoryFlags = RepositoryFlags,
-        C extends Context<F> = Context<F>,
-      >(this: R, context: C, data: V, key: keyof M, model: M) {
+      >(
+        this: R,
+        context: ContextOfRepository<R>,
+        data: V,
+        key: keyof M,
+        model: M
+      ) {
         model[key] = new Date() as M[keyof M];
       }
 
       static async argHandler<
         M extends Model,
-        R extends IRepository<M, F, C>,
+        R extends IRepository<M, any>,
         V extends { arg1: string; arg2: string },
-        F extends RepositoryFlags = RepositoryFlags,
-        C extends Context<F> = Context<F>,
-      >(this: R, context: C, data: V, key: keyof M, model: M) {
+      >(
+        this: R,
+        context: ContextOfRepository<R>,
+        data: V,
+        key: keyof M,
+        model: M
+      ) {
         model[key] = (data.arg1 + data.arg2) as M[keyof M];
       }
 
       static async anotherArgHandler<
         M extends Model,
-        R extends IRepository<M, F, C>,
+        R extends IRepository<M, any>,
         V extends { dateDif: number },
-        F extends RepositoryFlags = RepositoryFlags,
-        C extends Context<F> = Context<F>,
-      >(this: R, context: C, data: V, key: keyof M, model: M) {
+      >(
+        this: R,
+        context: ContextOfRepository<R>,
+        data: V,
+        key: keyof M,
+        model: M
+      ) {
         const currentDate: Date | undefined = model[key] as Date | undefined;
         if (!currentDate) throw new InternalError("date not provided");
         model[key] = currentDate.setFullYear(

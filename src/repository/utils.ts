@@ -1,4 +1,4 @@
-import { ContextOf, IRepository } from "../interfaces/IRepository";
+import { IRepository } from "../interfaces/IRepository";
 import { ModelOperations, OperationKeys } from "../operations/constants";
 import { InternalError } from "./errors";
 import { Model, ModelErrorDefinition } from "@decaf-ts/decorator-validation";
@@ -10,6 +10,7 @@ import {
 } from "../operations/decorators";
 import { UpdateOperationHandler } from "../operations/types";
 import { Constructor, Metadata } from "@decaf-ts/decoration";
+import { ContextOfRepository } from "./types";
 
 /**
  * @description Context arguments for repository operations.
@@ -59,7 +60,7 @@ export async function enforceDBDecorators<
   V extends object = object,
 >(
   repo: R,
-  context: ContextOf<R>,
+  context: ContextOfRepository<R>,
   model: M,
   operation: string,
   prefix: string,
@@ -90,7 +91,7 @@ export async function enforceDBDecorators<
     try {
       await (dec.handler as UpdateOperationHandler<M, R, V>).apply(
         repo,
-        args as [ContextOf<R>, V, keyof M, M, M]
+        args as [ContextOfRepository<R>, V, keyof M, M, M]
       );
     } catch (e: unknown) {
       const msg = `Failed to execute handler ${dec.handler.name} for ${dec.prop} on ${model.constructor.name} due to error: ${e}`;

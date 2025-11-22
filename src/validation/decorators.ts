@@ -11,7 +11,7 @@ import { DBKeys, DEFAULT_TIMESTAMP_FORMAT } from "../model/constants";
 import { DEFAULT_ERROR_MESSAGES } from "./constants";
 import { DBOperations, OperationKeys } from "../operations/constants";
 import { after, on, onCreateUpdate } from "../operations/decorators";
-import { ContextOf, IRepository } from "../interfaces/IRepository";
+import { IRepository } from "../interfaces/IRepository";
 import { SerializationError } from "../repository/errors";
 import {
   Decoration,
@@ -19,6 +19,7 @@ import {
   apply,
   metadata,
 } from "@decaf-ts/decoration";
+import { ContextOfRepository } from "../repository/index";
 
 /**
  * @description Prevents a property from being modified after initial creation.
@@ -66,7 +67,7 @@ export async function timestampHandler<
   V,
 >(
   this: R,
-  context: ContextOf<R>,
+  context: ContextOfRepository<R>,
   data: V,
   key: keyof M,
   model: M
@@ -175,7 +176,7 @@ export async function serializeOnCreateUpdate<
   V,
 >(
   this: R,
-  context: ContextOf<R>,
+  context: ContextOfRepository<R>,
   data: V,
   key: keyof M,
   model: M
@@ -212,7 +213,7 @@ export async function serializeAfterAll<
   V,
 >(
   this: R,
-  context: ContextOf<R>,
+  context: ContextOfRepository<R>,
   data: V,
   key: keyof M,
   model: M

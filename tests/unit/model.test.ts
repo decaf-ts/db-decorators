@@ -11,7 +11,6 @@ import type { ModelArg } from "@decaf-ts/decorator-validation";
 import { readonly } from "../../src/validation/decorators";
 import { RamRepository } from "./RamRepository";
 import { ValidationError } from "../../src/repository/errors";
-import { IRepository } from "../../src/interfaces/IRepository";
 import { Injectables } from "@decaf-ts/injectable-decorators";
 import { id } from "../../src";
 import { Metadata } from "@decaf-ts/decoration";
@@ -159,7 +158,7 @@ describe(`DB extended Model`, function () {
       );
     });
 
-    let manager: IRepository<OuterTestModel, any>;
+    let manager: OuterTestModelRepo;
 
     let created: OuterTestModel;
 

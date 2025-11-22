@@ -1,9 +1,8 @@
 import { model, Model, required } from "@decaf-ts/decorator-validation";
 import type { ModelArg } from "@decaf-ts/decorator-validation";
 import { RamRepository } from "./RamRepository";
-import { RepositoryFlags } from "../../src/repository/types";
+import { ContextOfRepository } from "../../src/repository/types";
 import { IRepository } from "../../src/interfaces/IRepository";
-import { Context } from "../../src/repository/Context";
 import { id } from "../../src/identity/decorators";
 import { on } from "../../src/operations/decorators";
 import { DBOperations } from "../../src/operations/constants";
@@ -17,14 +16,19 @@ const METADATA = "__metadata";
 
 function saveGroupSort<
   M extends Model,
-  R extends IRepository<M, F, C>,
+  R extends IRepository<M, any>,
   V = object,
-  F extends RepositoryFlags = RepositoryFlags,
-  C extends Context<F> = Context<F>,
->(this: R, context: C, metadata: V[], keys: (keyof M)[], model: M) {
+>(
+  this: R,
+  context: ContextOfRepository<R>,
+  metadata: V[],
+  keys: (keyof M)[],
+  model: M
+) {
   keys.forEach((k, i) => {
     const newMetadata = {
       ["priority_" + (k as string)]: globals.counter,
+      // @ts-expect-error
       ["group_" + (k as string)]: metadata[i].igroup,
     };
     globals.counter++;

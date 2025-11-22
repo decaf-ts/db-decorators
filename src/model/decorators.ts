@@ -1,7 +1,7 @@
 import { DBKeys, DefaultSeparator } from "./constants";
 import { Hashing, Model, type } from "@decaf-ts/decorator-validation";
 import { onCreate, onCreateUpdate, onUpdate } from "../operations/decorators";
-import { ContextOf, IRepository } from "../interfaces/IRepository";
+import { IRepository } from "../interfaces/IRepository";
 import { InternalError } from "../repository/errors";
 import { CrudOperations, GroupSort, OperationKeys } from "../operations";
 import {
@@ -10,6 +10,7 @@ import {
   apply,
   Metadata,
 } from "@decaf-ts/decoration";
+import { ContextOfRepository } from "../repository/index";
 
 /**
  * @description Hashes a property value during create or update operations
@@ -34,7 +35,7 @@ export function hashOnCreateUpdate<
   V extends object,
 >(
   this: R,
-  context: ContextOf<R>,
+  context: ContextOfRepository<R>,
   data: V,
   key: keyof M,
   model: M,
@@ -101,7 +102,7 @@ export function composedFromCreateUpdate<
   M extends Model,
   R extends IRepository<M, any>,
   V extends ComposedFromMetadata,
->(this: R, context: ContextOf<R>, data: V, key: keyof M, model: M) {
+>(this: R, context: ContextOfRepository<R>, data: V, key: keyof M, model: M) {
   try {
     const { args, type, prefix, suffix, separator } = data;
     const composed = args.map((arg: string) => {
@@ -255,7 +256,7 @@ export function versionCreateUpdate(operation: CrudOperations) {
     M extends Model,
     R extends IRepository<M>,
     V extends object,
-  >(this: R, context: ContextOf<R>, data: V, key: keyof M, model: M) {
+  >(this: R, context: ContextOfRepository<R>, data: V, key: keyof M, model: M) {
     try {
       switch (operation) {
         case OperationKeys.CREATE:

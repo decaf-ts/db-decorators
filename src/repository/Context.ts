@@ -181,7 +181,8 @@ export class Context<F extends RepositoryFlags<any> = RepositoryFlags> {
       | OperationKeys.CREATE
       | OperationKeys.READ
       | OperationKeys.UPDATE
-      | OperationKeys.DELETE,
+      | OperationKeys.DELETE
+      | string,
     overrides: Partial<FlagsOfContext<C>>,
     model: Constructor<M>,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -204,7 +205,8 @@ export class Context<F extends RepositoryFlags<any> = RepositoryFlags> {
       | OperationKeys.CREATE
       | OperationKeys.READ
       | OperationKeys.UPDATE
-      | OperationKeys.DELETE,
+      | OperationKeys.DELETE
+      | string,
     model: Constructor<M>,
     args: any[],
     contextual?: Contextual<C>,

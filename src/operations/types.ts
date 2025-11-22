@@ -1,6 +1,7 @@
 import { OperationKeys } from "./constants";
-import { ContextOf, IRepository } from "../interfaces/IRepository";
+import { IRepository } from "../interfaces/IRepository";
 import { Model } from "@decaf-ts/decorator-validation";
+import { ContextOfRepository } from "../repository/index";
 
 /**
  * @description Metadata for database operations
@@ -45,7 +46,7 @@ export type StandardOperationHandler<
   V = object,
 > = (
   this: R,
-  context: ContextOf<R>,
+  context: ContextOfRepository<R>,
   metadata: V,
   key: keyof M,
   model: M
@@ -57,7 +58,7 @@ export type IdOperationHandler<
   V = object,
 > = (
   this: R,
-  context: ContextOf<R>,
+  context: ContextOfRepository<R>,
   decorator: V,
   key: keyof M,
   id: string
@@ -69,7 +70,7 @@ export type UpdateOperationHandler<
   V = object,
 > = (
   this: R,
-  context: ContextOf<R>,
+  context: ContextOfRepository<R>,
   decorator: V,
   key: keyof M,
   model: M,
@@ -82,7 +83,7 @@ export type GroupOperationHandler<
   V = object,
 > = (
   this: R,
-  context: ContextOf<R>,
+  context: ContextOfRepository<R>,
   metadata: V[],
   keys: (keyof M)[],
   model: M
@@ -94,7 +95,7 @@ export type GroupUpdateOperationHandler<
   V = object,
 > = (
   this: R,
-  context: ContextOf<R>,
+  context: ContextOfRepository<R>,
   decorator: V[],
   keys: (keyof M)[],
   model: M,
