@@ -48,6 +48,8 @@ export interface RepositoryFlags<LOG extends Logger = Logger> {
   operation?: OperationKeys;
   breakOnHandlerError: boolean;
   rebuildWithTransient: boolean;
+  ignoreValidation: boolean;
+  ignoreHandlers: boolean | string | RegExp;
   logger: LOG;
 }
 

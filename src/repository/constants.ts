@@ -20,4 +20,6 @@ export const DefaultRepositoryFlags: Omit<
   operation: undefined,
   breakOnHandlerError: true,
   rebuildWithTransient: true,
+  ignoreValidation: false,
+  ignoreHandlers: true,
 };

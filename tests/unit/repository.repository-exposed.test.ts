@@ -1,9 +1,14 @@
 import "reflect-metadata";
 import { Model } from "@decaf-ts/decorator-validation";
-import { Repository } from "../../src/repository/Repository";
+import {
+  Context,
+  Repository as DbRepository,
+  RepositoryFlags,
+} from "../../src/repository";
 import * as utils from "../../src/repository/utils";
 import { InternalError, ValidationError } from "../../src/repository/errors";
 import { id } from "../../src/identity";
+import { OperationKeys } from "../../src/operations/constants";
 
 class Rm extends Model<true> {
   @id()
@@ -19,7 +24,7 @@ class Rm extends Model<true> {
   }
 }
 
-class RepoExposed extends Repository<Rm> {
+class RepoExposed extends DbRepository<Rm> {
   constructor() {
     super(Rm as any);
   }
@@ -48,6 +53,15 @@ class RepoExposed extends Repository<Rm> {
   async xUpdateAllPrefix(ms: Rm[], ...args: any[]) {
     return super.updateAllPrefix(ms, ...args);
   }
+}
+
+async function contextFor(
+  operation: OperationKeys,
+  overrides: Partial<RepositoryFlags>
+) {
+  return (await Context.from(operation, overrides, Rm as any)) as Context<
+    RepositoryFlags
+  >;
 }
 
 describe("Repository specific prefix logic", () => {
@@ -124,5 +138,97 @@ describe("Repository specific prefix logic", () => {
     await expect(
       repo.xUpdateAllPrefix([new Rm({ id: "1" }), new Rm({}) as any])
     ).rejects.toThrow(InternalError);
+  });
+
+  test("createPrefix skips validation when ignoreValidation flag is set", async () => {
+    const repo = new RepoExposed();
+    const ctx = await contextFor(OperationKeys.CREATE, {
+      ignoreValidation: true,
+    });
+    const spy = jest
+      .spyOn(Rm.prototype, "hasErrors")
+      .mockResolvedValue("invalid");
+    await expect(
+      repo.xCreatePrefix(new Rm({ id: "1" }), ctx)
+    ).resolves.toBeDefined();
+    spy.mockRestore();
+  });
+
+  test("createAllPrefix skips validation when ignoreValidation flag is set", async () => {
+    const repo = new RepoExposed();
+    const ctx = await contextFor(OperationKeys.CREATE, {
+      ignoreValidation: true,
+    });
+    const spy = jest
+      .spyOn(Rm.prototype, "hasErrors")
+      .mockResolvedValue("invalid");
+    await expect(
+      repo.xCreateAllPrefix([new Rm({ id: "1" })], ctx)
+    ).resolves.toBeDefined();
+    spy.mockRestore();
+  });
+
+  test("updatePrefix skips validation when ignoreValidation flag is set", async () => {
+    const repo = new RepoExposed();
+    const ctx = await contextFor(OperationKeys.UPDATE, {
+      ignoreValidation: true,
+    });
+    const spy = jest
+      .spyOn(Rm.prototype, "hasErrors")
+      .mockResolvedValue("invalid");
+    await expect(
+      repo.xUpdatePrefix(new Rm({ id: "1", v: 2 }), ctx)
+    ).resolves.toBeDefined();
+    spy.mockRestore();
+  });
+
+  test("updateAllPrefix skips validation when ignoreValidation flag is set", async () => {
+    const repo = new RepoExposed();
+    const ctx = await contextFor(OperationKeys.UPDATE, {
+      ignoreValidation: true,
+    });
+    const spy = jest
+      .spyOn(Rm.prototype, "hasErrors")
+      .mockResolvedValue("invalid");
+    await expect(
+      repo.xUpdateAllPrefix([new Rm({ id: "1" })], ctx)
+    ).resolves.toBeDefined();
+    spy.mockRestore();
+  });
+
+  test("createAllPrefix skips decorator enforcement when ignoreHandlers is false", async () => {
+    const repo = new RepoExposed();
+    const ctx = await contextFor(OperationKeys.CREATE, {
+      ignoreHandlers: false,
+    });
+    await repo.xCreateAllPrefix([new Rm({ id: "1" })], ctx);
+    const ons = enforceSpy.mock.calls.filter(
+      (c) => c[3] === OperationKeys.CREATE && c[4] === OperationKeys.ON
+    );
+    expect(ons.length).toBe(0);
+  });
+
+  test("updatePrefix skips decorator enforcement when ignoreHandlers is false", async () => {
+    const repo = new RepoExposed();
+    const ctx = await contextFor(OperationKeys.UPDATE, {
+      ignoreHandlers: false,
+    });
+    await repo.xUpdatePrefix(new Rm({ id: "1" }), ctx);
+    const ons = enforceSpy.mock.calls.filter(
+      (c) => c[3] === OperationKeys.UPDATE && c[4] === OperationKeys.ON
+    );
+    expect(ons.length).toBe(0);
+  });
+
+  test("updateAllPrefix skips decorator enforcement when ignoreHandlers is false", async () => {
+    const repo = new RepoExposed();
+    const ctx = await contextFor(OperationKeys.UPDATE, {
+      ignoreHandlers: false,
+    });
+    await repo.xUpdateAllPrefix([new Rm({ id: "1" })], ctx);
+    const ons = enforceSpy.mock.calls.filter(
+      (c) => c[3] === OperationKeys.UPDATE && c[4] === OperationKeys.ON
+    );
+    expect(ons.length).toBe(0);
   });
 });

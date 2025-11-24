@@ -74,16 +74,19 @@ export abstract class Repository<
       args
     );
     model = new this.class(model);
-    await enforceDBDecorators<M, IRepository<M, C>, any>(
-      this,
-      contextArgs.context,
-      model,
-      OperationKeys.CREATE,
-      OperationKeys.ON
-    );
+    if (contextArgs.context.get("ignoreHandlers") !== false)
+      await enforceDBDecorators<M, IRepository<M, C>, any>(
+        this,
+        contextArgs.context,
+        model,
+        OperationKeys.CREATE,
+        OperationKeys.ON
+      );
 
-    const errors = await Promise.resolve(model.hasErrors());
-    if (errors) throw new ValidationError(errors.toString());
+    if (!contextArgs.context.get("ignoreValidation")) {
+      const errors = await Promise.resolve(model.hasErrors());
+      if (errors) throw new ValidationError(errors.toString());
+    }
 
     return [model, ...contextArgs.args];
   }
@@ -107,27 +110,34 @@ export abstract class Repository<
       this.class,
       args
     );
-    await Promise.all(
+    const shouldRunHandlers =
+      contextArgs.context.get("ignoreHandlers") !== false;
+    const shouldValidate = !contextArgs.context.get("ignoreValidation");
+
+    models = await Promise.all(
       models.map(async (m) => {
-        m = new this.class(m);
-        await enforceDBDecorators<M, IRepository<M, C>, any>(
-          this,
-          contextArgs.context,
-          m,
-          OperationKeys.CREATE,
-          OperationKeys.ON
-        );
-        return m;
+        const model = new this.class(m);
+        if (shouldRunHandlers)
+          await enforceDBDecorators<M, IRepository<M, C>, any>(
+            this,
+            contextArgs.context,
+            model,
+            OperationKeys.CREATE,
+            OperationKeys.ON
+          );
+        return model;
       })
     );
 
-    const modelsValidation = await Promise.all(
-      models.map((m) => Promise.resolve(m.hasErrors()))
-    );
+    if (shouldValidate) {
+      const modelsValidation = await Promise.all(
+        models.map((m) => Promise.resolve(m.hasErrors()))
+      );
 
-    const errors = reduceErrorsToPrint(modelsValidation);
+      const errors = reduceErrorsToPrint(modelsValidation);
 
-    if (errors) throw new ValidationError(errors);
+      if (errors) throw new ValidationError(errors);
+    }
     return [models, ...contextArgs.args];
   }
 
@@ -152,6 +162,9 @@ export abstract class Repository<
       this.class,
       args
     );
+    const shouldRunHandlers =
+      contextArgs.context.get("ignoreHandlers") !== false;
+    const shouldValidate = !contextArgs.context.get("ignoreValidation");
     const pk = (model as any)[this.pk];
     if (!pk)
       throw new InternalError(
@@ -162,17 +175,20 @@ export abstract class Repository<
 
     model = Model.merge(oldModel, model, this.class);
 
-    await enforceDBDecorators<M, IRepository<M, C>, any>(
-      this,
-      contextArgs.context,
-      model,
-      OperationKeys.UPDATE,
-      OperationKeys.ON,
-      oldModel
-    );
+    if (shouldRunHandlers)
+      await enforceDBDecorators<M, IRepository<M, C>, any>(
+        this,
+        contextArgs.context,
+        model,
+        OperationKeys.UPDATE,
+        OperationKeys.ON,
+        oldModel
+      );
 
-    const errors = await Promise.resolve(model.hasErrors(oldModel as any));
-    if (errors) throw new ValidationError(errors.toString());
+    if (shouldValidate) {
+      const errors = await Promise.resolve(model.hasErrors(oldModel as any));
+      if (errors) throw new ValidationError(errors.toString());
+    }
     return [model, ...contextArgs.args];
   }
 
@@ -197,6 +213,9 @@ export abstract class Repository<
       this.class,
       args
     );
+    const shouldRunHandlers =
+      contextArgs.context.get("ignoreHandlers") !== false;
+    const shouldValidate = !contextArgs.context.get("ignoreValidation");
     const ids = models.map((m) => {
       const id = m[this.pk];
       if (typeof id === "undefined")
@@ -207,26 +226,29 @@ export abstract class Repository<
     });
     const oldModels: M[] = await this.readAll(ids, ...contextArgs.args);
     models = models.map((m, i) => Model.merge(oldModels[i], m, this.class));
-    await Promise.all(
-      models.map((m, i) =>
-        enforceDBDecorators<M, IRepository<M, C>, any>(
-          this,
-          contextArgs.context,
-          m,
-          OperationKeys.UPDATE,
-          OperationKeys.ON,
-          oldModels[i]
+    if (shouldRunHandlers)
+      await Promise.all(
+        models.map((m, i) =>
+          enforceDBDecorators<M, IRepository<M, C>, any>(
+            this,
+            contextArgs.context,
+            m,
+            OperationKeys.UPDATE,
+            OperationKeys.ON,
+            oldModels[i]
+          )
         )
-      )
-    );
+      );
 
-    const modelsValidation = await Promise.all(
-      models.map((m, i) => Promise.resolve(m.hasErrors(oldModels[i] as any)))
-    );
+    if (shouldValidate) {
+      const modelsValidation = await Promise.all(
+        models.map((m, i) => Promise.resolve(m.hasErrors(oldModels[i] as any)))
+      );
 
-    const errors = reduceErrorsToPrint(modelsValidation);
+      const errors = reduceErrorsToPrint(modelsValidation);
 
-    if (errors) throw new ValidationError(errors);
+      if (errors) throw new ValidationError(errors);
+    }
     return [models, ...contextArgs.args];
   }
 
