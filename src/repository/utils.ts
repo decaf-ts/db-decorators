@@ -12,17 +12,6 @@ import { UpdateOperationHandler } from "../operations/types";
 import { Constructor, Metadata } from "@decaf-ts/decoration";
 import { ContextOfRepository } from "./types";
 
-/**
- * @description Context arguments for repository operations.
- * @summary Represents the context and arguments for repository operations.
- * This type is used to pass context and arguments between repository methods.
- * @template F - The repository flags type, defaults to RepositoryFlags
- * @template C - The context type, defaults to Context<F>
- * @typedef {Object} ContextArgs
- * @property {C} context - The operation context
- * @property {any[]} args - The operation arguments
- * @memberOf module:db-decorators
- */
 export type ContextArgs<C extends Context<any>> = {
   context: C;
   args: [...any[], C];

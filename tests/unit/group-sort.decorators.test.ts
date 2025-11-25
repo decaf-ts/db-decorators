@@ -28,7 +28,7 @@ function saveGroupSort<
   keys.forEach((k, i) => {
     const newMetadata = {
       ["priority_" + (k as string)]: globals.counter,
-      // @ts-expect-error
+      // @ts-expect-error becaseu
       ["group_" + (k as string)]: metadata[i].igroup,
     };
     globals.counter++;
