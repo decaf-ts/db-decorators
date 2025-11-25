@@ -18,19 +18,22 @@ export function prefixMethod(
   prefix: (...args: any[]) => any,
   afterName?: string
 ) {
-  async function wrapper(this: any, ...args: any[]) {
-    const results = await Promise.resolve(prefix.call(this, ...args));
-    return Promise.resolve(after.apply(this, results));
-  }
-  const wrapped = wrapper.bind(obj);
   const name = afterName ? afterName : after.name;
-  Object.defineProperty(wrapped, "name", {
-    enumerable: true,
-    configurable: true,
-    writable: false,
-    value: name,
-  });
-  obj[name] = wrapped;
+ 
+  obj[name] = new Proxy(obj[name], {
+      apply: async (target, thisArg, argArray) => {
+        let results = prefix.call(thisArg, ...argArray);
+        if(results instanceof Promise)
+          results = await results;
+        
+        results = target.call(thisArg, ...results);
+
+        if(results instanceof Promise)
+          results = await results;
+
+        return results;
+      },
+    });
 }
 
 /**
@@ -50,19 +53,21 @@ export function suffixMethod(
   suffix: (...args: any[]) => any,
   beforeName?: string
 ) {
-  async function wrapper(this: any, ...args: any[]) {
-    const results = await Promise.resolve(before.call(this, ...args));
-    return suffix.call(this, ...results);
-  }
-  const wrapped = wrapper.bind(obj);
-  const name = beforeName ? beforeName : before.name;
-  Object.defineProperty(wrapped, "name", {
-    enumerable: true,
-    configurable: true,
-    writable: false,
-    value: name,
-  });
-  obj[name] = wrapped;
+    const name = beforeName ? beforeName : before.name;
+    obj[name] = new Proxy(obj[name], {
+        apply: async (target, thisArg, argArray) => {
+          let results = target.call(thisArg, ...argArray);
+          if(results instanceof Promise)
+            results = await results;
+          
+          results = suffix.call(thisArg, ...results);
+
+          if(results instanceof Promise)
+            results = await results;
+
+          return results;
+        },
+    });
 }
 
 /**
@@ -94,7 +99,7 @@ export function wrapMethodWithContext(
       const context = transformedArgs[transformedArgs.length - 1] as any;
       if (!(context instanceof Context))
         throw new InternalError("Missing a context");
-      let results = await target.call(thisArg, ...transformedArgs);
+      let results = target.call(thisArg, ...transformedArgs);
       if (results instanceof Promise) results = await results;
       results = after.call(thisArg, results, context);
       if (results instanceof Promise) results = await results;
