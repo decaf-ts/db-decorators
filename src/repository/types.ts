@@ -51,6 +51,7 @@ export interface RepositoryFlags<LOG extends Logger = Logger> {
   ignoreValidation: boolean;
   ignoreHandlers: boolean | string | RegExp;
   logger: LOG;
+  correlationId?: string;
 }
 
 export type LoggerOfFlags<R extends RepositoryFlags<any>> =
