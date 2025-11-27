@@ -3,6 +3,7 @@
 
 The db-decorators library provides a comprehensive set of TypeScript decorators and utilities for database operations. It implements the repository pattern with support for model definition, validation, identity management, and operation hooks. The library enables developers to define database models with decorators, perform CRUD operations with validation, and customize behavior during database operations through operation hooks.
 
+> Release docs refreshed on 2025-11-26. See [workdocs/reports/RELEASE_NOTES.md](./workdocs/reports/RELEASE_NOTES.md) for ticket summaries.
 
 ![Licence](https://img.shields.io/github/license/decaf-ts/db-decorators.svg?style=plastic)
 ![GitHub language count](https://img.shields.io/github/languages/count/decaf-ts/db-decorators?style=plastic)
@@ -625,6 +626,9 @@ console.log("Empty ID:", emptyId);
   - strategy;
   - builder;
   - etc;
+
+## Release Documentation Hooks
+Stay aligned with the automated release pipeline by reviewing [Release Notes](./workdocs/reports/RELEASE_NOTES.md) and [Dependencies](./workdocs/reports/DEPENDENCIES.md) after trying these recipes (updated on 2025-11-26).
 
 
 ### Related
