@@ -126,7 +126,8 @@ export function timestamp(
   operation: OperationKeys[] = DBOperations.CREATE_UPDATE as unknown as OperationKeys[],
   format: string = DEFAULT_TIMESTAMP_FORMAT
 ) {
-  const key = Validation.updateKey(DBKeys.TIMESTAMP);
+  const decorationKey = DBKeys.TIMESTAMP;
+  const updateValidationKey = Validation.updateKey(DBKeys.TIMESTAMP);
 
   function ts(operation: OperationKeys[], format: string) {
     const decorators: any[] = [
@@ -140,14 +141,14 @@ export function timestamp(
     ];
     if (operation.indexOf(OperationKeys.UPDATE) !== -1)
       decorators.push(
-        propMetadata(key, {
+        propMetadata(updateValidationKey, {
           message: DEFAULT_ERROR_MESSAGES.TIMESTAMP.INVALID,
         })
       );
     else decorators.push(readonly());
     return apply(...decorators);
   }
-  return Decoration.for(key)
+  return Decoration.for(decorationKey)
     .define({
       decorator: ts,
       args: [operation, format],

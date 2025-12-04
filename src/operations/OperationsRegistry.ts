@@ -3,6 +3,7 @@ import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
 import { Operations } from "./Operations";
 import { Model } from "@decaf-ts/decorator-validation";
+import { Constructor, Decoration, Metadata } from "@decaf-ts/decoration";
 
 /**
  * @description Registry for database operation handlers
@@ -34,7 +35,10 @@ export class OperationsRegistry {
     string,
     Record<
       string | symbol,
-      Record<string, Record<string, OperationHandler<any, any, any>>>
+      Record<
+        string,
+        Record<string, Record<string, OperationHandler<any, any, any>>>
+      >
     >
   > = {};
 
@@ -57,24 +61,32 @@ export class OperationsRegistry {
     accum?: OperationHandler<M, R, V>[]
   ): OperationHandler<M, R, V>[] | undefined {
     accum = accum || [];
-    let name;
-    try {
-      name = typeof target === "string" ? target : target.constructor.name;
-      accum.unshift(
-        ...Object.values(this.cache[name][propKey][operation] || [])
+    const owner = this.resolveOwner(target);
+    const name = this.resolveTargetName(target, owner);
+
+    if (name) {
+      const handlers = this.selectHandlers<M, R, V>(
+        name,
+        propKey,
+        operation,
+        owner
       );
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (e: unknown) {
-      if (
-        typeof target === "string" ||
-        target === Object.prototype ||
-        Object.getPrototypeOf(target) === Object.prototype
-      )
-        return accum;
+      if (handlers?.length) {
+        accum.unshift(...handlers);
+      }
+    } else if (
+      typeof target === "string" ||
+      target === Object.prototype ||
+      Object.getPrototypeOf(target) === Object.prototype
+    ) {
+      return accum;
     }
 
     let proto = Object.getPrototypeOf(target);
-    if (proto.constructor.name === name) proto = Object.getPrototypeOf(proto);
+    if (!proto) return accum;
+    if (proto.constructor && proto.constructor.name === name)
+      proto = Object.getPrototypeOf(proto);
+    if (!proto) return accum;
 
     return this.get<M, R, V>(proto, propKey, operation, accum);
   }
@@ -101,12 +113,67 @@ export class OperationsRegistry {
   ): void {
     const name = target.constructor.name;
     const handlerName = Operations.getHandlerName(handler);
+    const flavour = this.resolveFlavour(target.constructor as Constructor);
 
     if (!this.cache[name]) this.cache[name] = {};
     if (!this.cache[name][propKey]) this.cache[name][propKey] = {};
     if (!this.cache[name][propKey][operation])
       this.cache[name][propKey][operation] = {};
-    if (this.cache[name][propKey][operation][handlerName]) return;
-    this.cache[name][propKey][operation][handlerName] = handler;
+    if (!this.cache[name][propKey][operation][flavour])
+      this.cache[name][propKey][operation][flavour] = {};
+    if (this.cache[name][propKey][operation][flavour][handlerName]) return;
+    this.cache[name][propKey][operation][flavour][handlerName] = handler;
+  }
+
+  private resolveOwner(
+    target: string | Record<string, any>
+  ): Constructor | undefined {
+    if (!target || typeof target === "string") return undefined;
+    if (typeof target === "function") return target as Constructor;
+    return target.constructor as Constructor;
+  }
+
+  private resolveTargetName(
+    target: string | Record<string, any>,
+    owner?: Constructor
+  ): string | undefined {
+    if (typeof target === "string") return target;
+    return owner?.name;
+  }
+
+  private resolveFlavour(target?: Constructor): string {
+    if (!target) return Decoration.defaultFlavour;
+    try {
+      return Metadata.flavourOf(target);
+    } catch {
+      return Decoration.defaultFlavour;
+    }
+  }
+
+  private selectHandlers<M extends Model, R extends IRepository<M, any>, V>(
+    name: string,
+    propKey: string,
+    operation: string,
+    owner?: Constructor
+  ): OperationHandler<M, R, V>[] | undefined {
+    const byOperation = this.cache[name]?.[propKey]?.[operation];
+    if (!byOperation) return undefined;
+    const flavour = this.resolveFlavour(owner);
+    const bucket =
+      byOperation[flavour] ||
+      byOperation[Decoration.defaultFlavour] ||
+      this.firstBucket(byOperation);
+    if (!bucket) return undefined;
+    const handlers = Object.values(bucket);
+    return handlers.length ? (handlers as OperationHandler<M, R, V>[]) : undefined;
+  }
+
+  private firstBucket(
+    byOperation: Record<string, Record<string, OperationHandler<any, any, any>>>
+  ): Record<string, OperationHandler<any, any, any>> | undefined {
+    for (const handlers of Object.values(byOperation)) {
+      if (handlers && Object.keys(handlers).length) return handlers;
+    }
+    return undefined;
   }
 }

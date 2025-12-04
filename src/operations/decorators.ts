@@ -143,15 +143,18 @@ export function getHandlersDecorators<
         );
 
       const handlerArgs = getHandlerArgs(dec, prop, model as any);
+      if (!handlerArgs)
+        throw new InternalError("Missing handler arguments for decorators");
 
-      if (!handlerArgs || Object.values(handlerArgs).length !== handlers.length)
-        throw new InternalError("Args and handlers length do not match");
-
-      for (let i = 0; i < handlers.length; i++) {
-        const data = (handlerArgs[handlers[i].name] as Record<string, any>)
-          .data;
+      for (const handler of handlers) {
+        const argsEntry = handlerArgs[handler.name];
+        if (!argsEntry)
+          throw new InternalError(
+            `Missing handler arguments for handler ${handler.name}`
+          );
+        const data = (argsEntry as Record<string, any>).data;
         accum.push({
-          handler: handlers[i],
+          handler,
           data: [data],
           prop: [prop],
         });
