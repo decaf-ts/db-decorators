@@ -14,7 +14,7 @@ import {
   timestamp,
 } from "../../src/index";
 import { RamRepository } from "./RamRepository";
-import { Decoration, Metadata, uses } from "@decaf-ts/decoration";
+import { Decoration, uses } from "@decaf-ts/decoration";
 
 describe("Operation flavours", () => {
   async function otherHandler<
