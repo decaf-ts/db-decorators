@@ -21,5 +21,5 @@ export const DefaultRepositoryFlags: Omit<
   breakOnHandlerError: true,
   rebuildWithTransient: true,
   ignoreValidation: false,
-  ignoreHandlers: true,
+  ignoreHandlers: false,
 };

@@ -59,9 +59,11 @@ async function contextFor(
   operation: OperationKeys,
   overrides: Partial<RepositoryFlags>
 ) {
-  return (await Context.from(operation, overrides, Rm as any)) as Context<
-    RepositoryFlags
-  >;
+  return (await Context.from(
+    operation,
+    overrides,
+    Rm as any
+  )) as Context<RepositoryFlags>;
 }
 
 describe("Repository specific prefix logic", () => {
@@ -196,10 +198,10 @@ describe("Repository specific prefix logic", () => {
     spy.mockRestore();
   });
 
-  test("createAllPrefix skips decorator enforcement when ignoreHandlers is false", async () => {
+  test("createAllPrefix skips decorator enforcement when ignoreHandlers is true", async () => {
     const repo = new RepoExposed();
     const ctx = await contextFor(OperationKeys.CREATE, {
-      ignoreHandlers: false,
+      ignoreHandlers: true,
     });
     await repo.xCreateAllPrefix([new Rm({ id: "1" })], ctx);
     const ons = enforceSpy.mock.calls.filter(
@@ -208,10 +210,10 @@ describe("Repository specific prefix logic", () => {
     expect(ons.length).toBe(0);
   });
 
-  test("updatePrefix skips decorator enforcement when ignoreHandlers is false", async () => {
+  test("updatePrefix skips decorator enforcement when ignoreHandlers is true", async () => {
     const repo = new RepoExposed();
     const ctx = await contextFor(OperationKeys.UPDATE, {
-      ignoreHandlers: false,
+      ignoreHandlers: true,
     });
     await repo.xUpdatePrefix(new Rm({ id: "1" }), ctx);
     const ons = enforceSpy.mock.calls.filter(
@@ -220,10 +222,10 @@ describe("Repository specific prefix logic", () => {
     expect(ons.length).toBe(0);
   });
 
-  test("updateAllPrefix skips decorator enforcement when ignoreHandlers is false", async () => {
+  test("updateAllPrefix skips decorator enforcement when ignoreHandlers is true", async () => {
     const repo = new RepoExposed();
     const ctx = await contextFor(OperationKeys.UPDATE, {
-      ignoreHandlers: false,
+      ignoreHandlers: true,
     });
     await repo.xUpdateAllPrefix([new Rm({ id: "1" })], ctx);
     const ons = enforceSpy.mock.calls.filter(

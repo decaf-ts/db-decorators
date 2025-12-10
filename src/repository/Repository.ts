@@ -74,7 +74,7 @@ export abstract class Repository<
       args
     );
     model = new this.class(model);
-    if (contextArgs.context.get("ignoreHandlers") !== false)
+    if (!contextArgs.context.get("ignoreHandlers"))
       await enforceDBDecorators<M, IRepository<M, C>, any>(
         this,
         contextArgs.context,
@@ -110,14 +110,13 @@ export abstract class Repository<
       this.class,
       args
     );
-    const shouldRunHandlers =
-      contextArgs.context.get("ignoreHandlers") !== false;
-    const shouldValidate = !contextArgs.context.get("ignoreValidation");
+    const ignoreHandlers = contextArgs.context.get("ignoreHandlers");
+    const ignoreValidate = contextArgs.context.get("ignoreValidation");
 
     models = await Promise.all(
       models.map(async (m) => {
         const model = new this.class(m);
-        if (shouldRunHandlers)
+        if (!ignoreHandlers)
           await enforceDBDecorators<M, IRepository<M, C>, any>(
             this,
             contextArgs.context,
@@ -129,7 +128,7 @@ export abstract class Repository<
       })
     );
 
-    if (shouldValidate) {
+    if (!ignoreValidate) {
       const modelsValidation = await Promise.all(
         models.map((m) => Promise.resolve(m.hasErrors()))
       );
@@ -162,9 +161,8 @@ export abstract class Repository<
       this.class,
       args
     );
-    const shouldRunHandlers =
-      contextArgs.context.get("ignoreHandlers") !== false;
-    const shouldValidate = !contextArgs.context.get("ignoreValidation");
+    const ignoreHandlers = contextArgs.context.get("ignoreHandlers");
+    const ignoreValidate = contextArgs.context.get("ignoreValidation");
     const pk = (model as any)[this.pk];
     if (!pk)
       throw new InternalError(
@@ -175,7 +173,7 @@ export abstract class Repository<
 
     model = Model.merge(oldModel, model, this.class);
 
-    if (shouldRunHandlers)
+    if (!ignoreHandlers)
       await enforceDBDecorators<M, IRepository<M, C>, any>(
         this,
         contextArgs.context,
@@ -185,7 +183,7 @@ export abstract class Repository<
         oldModel
       );
 
-    if (shouldValidate) {
+    if (!ignoreValidate) {
       const errors = await Promise.resolve(model.hasErrors(oldModel as any));
       if (errors) throw new ValidationError(errors.toString());
     }
@@ -213,9 +211,8 @@ export abstract class Repository<
       this.class,
       args
     );
-    const shouldRunHandlers =
-      contextArgs.context.get("ignoreHandlers") !== false;
-    const shouldValidate = !contextArgs.context.get("ignoreValidation");
+    const ignoreHandlers = contextArgs.context.get("ignoreHandlers");
+    const ignoreValidate = contextArgs.context.get("ignoreValidation");
     const ids = models.map((m) => {
       const id = m[this.pk];
       if (typeof id === "undefined")
@@ -226,7 +223,7 @@ export abstract class Repository<
     });
     const oldModels: M[] = await this.readAll(ids, ...contextArgs.args);
     models = models.map((m, i) => Model.merge(oldModels[i], m, this.class));
-    if (shouldRunHandlers)
+    if (!ignoreHandlers)
       await Promise.all(
         models.map((m, i) =>
           enforceDBDecorators<M, IRepository<M, C>, any>(
@@ -240,7 +237,7 @@ export abstract class Repository<
         )
       );
 
-    if (shouldValidate) {
+    if (!ignoreValidate) {
       const modelsValidation = await Promise.all(
         models.map((m, i) => Promise.resolve(m.hasErrors(oldModels[i] as any)))
       );
