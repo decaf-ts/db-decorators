@@ -1,5 +1,6 @@
 import { Constructor } from "@decaf-ts/decoration";
 import "@decaf-ts/decorator-validation";
+import { ComposedFromMetadata } from "../model/index";
 
 declare module "@decaf-ts/decorator-validation" {
   export interface Model {
@@ -86,5 +87,15 @@ declare module "@decaf-ts/decorator-validation" {
       newModel: M,
       constructor?: Constructor<M>
     ): M;
+
+    function composed<M extends Model<boolean>>(model: Constructor<M>): boolean;
+    function composed<M extends Model<boolean>>(
+      model: Constructor<M> | M,
+      prop: keyof M
+    ): ComposedFromMetadata | undefined;
+    function composed<M extends Model<boolean>>(
+      model: Constructor<M> | M,
+      prop?: keyof M
+    ): boolean | ComposedFromMetadata | undefined;
   }
 }

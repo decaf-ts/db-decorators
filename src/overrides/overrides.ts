@@ -8,6 +8,7 @@ import { Constructor, Metadata } from "@decaf-ts/decoration";
 import { DBKeys } from "../model/constants";
 import { ModelOperations } from "../operations/constants";
 import { SerializationError } from "../repository/errors";
+import { ComposedFromMetadata } from "../model/index";
 
 Model.prototype.isTransient = function (): boolean {
   return Metadata.isTransient(this);
@@ -126,6 +127,17 @@ Model.prototype.segregate = function segregate<M extends Model>(
   model: M | Constructor<M>
 ): boolean {
   return Metadata.isTransient(model);
+}.bind(Model);
+
+(Model as any).composed = function composed<M extends Model<boolean>>(
+  model: Constructor<M> | M,
+  prop?: keyof M
+): boolean | ComposedFromMetadata | undefined {
+  const constr =
+    model instanceof Model ? (model.constructor as Constructor<M>) : model;
+  if (prop)
+    return Metadata.get(constr, Metadata.key(DBKeys.COMPOSED, prop as string));
+  return !!Metadata.get(constr, DBKeys.COMPOSED);
 }.bind(Model);
 
 /**
