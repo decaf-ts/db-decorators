@@ -148,23 +148,40 @@ function composedFrom(
   suffix = "",
   groupsort: GroupSort = { priority: 55 }
 ) {
-  return function composeFrom(target: object, property?: any) {
-    const data: ComposedFromMetadata = {
-      args: args,
-      hashResult: hashResult,
-      separator: separator,
-      type: type,
-      prefix: prefix,
-      suffix: suffix,
-    };
+  function composedFrom(
+    args: string[],
+    hashResult: boolean,
+    separator: string,
+    type: "keys" | "values",
+    prefix: string,
+    suffix: string,
+    groupsort: GroupSort
+  ) {
+    return function composeFrom(target: object, property?: any) {
+      const data: ComposedFromMetadata = {
+        args: args,
+        hashResult: hashResult,
+        separator: separator,
+        type: type,
+        prefix: prefix,
+        suffix: suffix,
+      };
 
-    const decorators = [
-      onCreateUpdate(composedFromCreateUpdate, data, groupsort),
-      propMetadata(Metadata.key(DBKeys.COMPOSED, property), data),
-    ];
-    if (hashResult) decorators.push(hash());
-    return apply(...decorators)(target, property);
-  };
+      const decorators = [
+        onCreateUpdate(composedFromCreateUpdate, data, groupsort),
+        propMetadata(Metadata.key(DBKeys.COMPOSED, property), data),
+      ];
+      if (hashResult) decorators.push(hash());
+      return apply(...decorators)(target, property);
+    };
+  }
+
+  return Decoration.for(DBKeys.COMPOSED)
+    .define({
+      decorator: composedFrom,
+      args: [args, hashResult, separator, type, prefix, suffix, groupsort],
+    })
+    .apply();
 }
 
 /**
