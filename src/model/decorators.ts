@@ -80,6 +80,7 @@ export type ComposedFromMetadata = {
   type: "keys" | "values";
   prefix?: string;
   suffix?: string;
+  filterEmpty: boolean | string[];
 };
 
 /**
@@ -104,22 +105,32 @@ export function composedFromCreateUpdate<
   V extends ComposedFromMetadata,
 >(this: R, context: ContextOfRepository<R>, data: V, key: keyof M, model: M) {
   try {
-    const { args, type, prefix, suffix, separator } = data;
-    const composed = args.map((arg: string) => {
-      if (!(arg in model))
-        throw new InternalError(`Property ${arg} not found to compose from`);
-      if (type === "keys") return arg;
-      if (typeof (model as any)[arg] === "undefined")
-        throw new InternalError(
-          `Property ${args} does not contain a value to compose from`
-        );
-      return ((model as any)[arg] as any).toString();
-    });
+    const { args, type, prefix, suffix, separator, filterEmpty, hashResult } =
+      data;
+    const composed = args
+      .map((arg: string) => {
+        if (!(arg in model))
+          throw new InternalError(`Property ${arg} not found to compose from`);
+        if (type === "keys") return arg;
+        if (typeof (model as any)[arg] === "undefined") {
+          if (filterEmpty) {
+            if (!Array.isArray(filterEmpty)) return undefined;
+            if (filterEmpty.includes(arg)) return undefined;
+          }
+          throw new InternalError(
+            `Property ${args} does not contain a value to compose from`
+          );
+        }
+        return ((model as any)[arg] as any).toString();
+      })
+      .filter((a) => (filterEmpty ? !!a : true));
 
     if (prefix) composed.unshift(prefix);
     if (suffix) composed.push(suffix);
 
-    (model as any)[key] = composed.join(separator);
+    (model as any)[key] = hashResult
+      ? Hashing.hash(composed.join(separator))
+      : composed.join(separator);
   } catch (e: any) {
     throw new InternalError(`Failed to compose value: ${e}`);
   }
@@ -143,6 +154,7 @@ function composedFrom(
   args: string[],
   hashResult: boolean = false,
   separator: string = DefaultSeparator,
+  filterEmpty: boolean | string[] = false,
   type: "keys" | "values" = "values",
   prefix = "",
   suffix = "",
@@ -165,6 +177,7 @@ function composedFrom(
         type: type,
         prefix: prefix,
         suffix: suffix,
+        filterEmpty: filterEmpty,
       };
 
       const decorators = [
@@ -200,12 +213,22 @@ function composedFrom(
 export function composedFromKeys(
   args: string[],
   separator: string = DefaultSeparator,
+  filterEmpty: boolean | string[] = false,
   hash: boolean = false,
   prefix = "",
   suffix = "",
   groupsort: GroupSort = { priority: 55 }
 ) {
-  return composedFrom(args, hash, separator, "keys", prefix, suffix, groupsort);
+  return composedFrom(
+    args,
+    hash,
+    separator,
+    filterEmpty,
+    "keys",
+    prefix,
+    suffix,
+    groupsort
+  );
 }
 
 /**
@@ -224,6 +247,7 @@ export function composedFromKeys(
 export function composed(
   args: string[],
   separator: string = DefaultSeparator,
+  filterEmpty: boolean | string[] = false,
   hash: boolean = false,
   prefix = "",
   suffix = "",
@@ -233,6 +257,7 @@ export function composed(
     args,
     hash,
     separator,
+    filterEmpty,
     "values",
     prefix,
     suffix,
