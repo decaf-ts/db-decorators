@@ -53,7 +53,8 @@
   },
   "files": [
     "lib",
-    "dist"
+    "dist",
+    "workdocs/assets/slogans.json"
   ],
   "keywords": [
     "database",
