@@ -1,3 +1,4 @@
+import "@decaf-ts/decoration";
 import type { Constructor } from "@decaf-ts/decoration";
 import type { Model } from "@decaf-ts/decorator-validation";
 
