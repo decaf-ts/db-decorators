@@ -8,6 +8,7 @@ import {
   toConditionalPromise,
   Validation,
   ValidationKeys,
+  getChildNestedPropsToIgnore,
 } from "@decaf-ts/decorator-validation";
 import { UpdateValidator } from "../validation";
 import { Constructor, Metadata } from "@decaf-ts/decoration";
@@ -298,14 +299,38 @@ export function validateCompare<M extends Model<any>>(
         })
         .find((d) => !!d) as any;
 
+      const designTypeNames = (
+        Array.isArray(designType) ? designTypes : [designType]
+      ).map((d: any) => {
+        if (typeof d === "function")
+          return d.name ? d.name.toLowerCase() : d()?.name.toLowerCase();
+        return d.toLowerCase();
+      });
+
       // Ensure instance is of the expected model class.
-      if (!Constr || !(instance instanceof Constr)) {
-        propErrors[ValidationKeys.TYPE] = !Constr
-          ? `Unable to verify type consistency, missing model registry for ${designTypes.toString()} on prop ${propKey}`
-          : `Value must be an instance of ${Constr.name}`;
-        delete propErrors[ModelKeys.TYPE]; // remove duplicate type error
+      if (!Constr || !(propValue instanceof Constr)) {
+        // This is a working solution for validation relations, but must be handled at the core side.
+        // Check if it is a relation and type of primary matches the type of propValue. Do nothing on that case.
+        if (designTypeNames.includes(typeof propValue)) {
+          // do nothing
+          // TODO: This must be improved and handled on the core side
+        } else {
+          // If types don't match throw an error
+          propErrors[ValidationKeys.TYPE] = !Constr
+            ? `Unable to verify type consistency, missing model registry for ${designTypes.toString()} on prop ${propKey}`
+            : `Value must be an instance of ${Constr.name}`;
+          delete propErrors[ModelKeys.TYPE]; // remove duplicate type error
+        }
+        // This is a working solution for validation relations, but must be handled at the core side.
       } else {
-        nestedErrors[propKey] = instance.hasErrors((oldModel as any)[prop]);
+        const nestedPropsToIgnore = getChildNestedPropsToIgnore(
+          propKey,
+          ...propsToIgnore
+        );
+        nestedErrors[propKey] = instance.hasErrors(
+          (oldModel as any)[prop],
+          ...nestedPropsToIgnore
+        );
       }
     }
 
