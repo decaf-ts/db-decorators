@@ -153,18 +153,15 @@ export function validateDecorators<
         });
 
         const errs = newValues.map((childValue: any) => {
-          // find by id so the list elements order doesn't matter
-          const id = Model.pk(childValue as any, true);
-          if (!id) return "Failed to find model id";
-
-          const oldListModel = oldValues.find(
-            (el: any) => id === Model.pk(el as any, true)
-          );
-
           if (Model.isModel(childValue)) {
+            // find by id so the list elements order doesn't matter
+            const id = Model.pk(childValue as any, true);
+            if (!id) return "Failed to find model id";
+            const oldListModel = oldValues.find(
+              (el: any) => id === Model.pk(el as any, true)
+            );
             return childValue.hasErrors(oldListModel);
           }
-
           return allowedTypes.includes(typeof childValue)
             ? undefined
             : "Value has no validatable type";
