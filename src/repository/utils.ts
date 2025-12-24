@@ -85,7 +85,7 @@ export async function enforceDBDecorators<
     } catch (e: unknown) {
       const msg = `Failed to execute handler ${dec.handler.name} for ${dec.prop} on ${model.constructor.name} due to error: ${e}`;
       if (context.get("breakOnHandlerError")) throw new InternalError(msg);
-      console.log(msg);
+      console.error(msg);
     }
   }
 }
