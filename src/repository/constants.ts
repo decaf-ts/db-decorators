@@ -22,4 +22,7 @@ export const DefaultRepositoryFlags: Omit<
   rebuildWithTransient: true,
   ignoreValidation: false,
   ignoreHandlers: false,
+  ignoreDevSafeGuards: false,
+  mergeForUpdate: true,
+  applyUpdateValidation: true,
 };

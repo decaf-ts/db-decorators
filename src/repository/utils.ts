@@ -1,5 +1,9 @@
 import { IRepository } from "../interfaces/IRepository";
-import { ModelOperations, OperationKeys } from "../operations/constants";
+import {
+  BulkCrudOperationKeys,
+  ModelOperations,
+  OperationKeys,
+} from "../operations/constants";
 import { InternalError } from "./errors";
 import { Model, ModelErrorDefinition } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
@@ -72,7 +76,11 @@ export async function enforceDBDecorators<
       model,
     ];
 
-    if (operation === OperationKeys.UPDATE && prefix === OperationKeys.ON) {
+    if (
+      [OperationKeys.UPDATE, BulkCrudOperationKeys.UPDATE_ALL].includes(
+        operation as any
+      )
+    ) {
       if (!oldModel)
         throw new InternalError("Missing old model for update operation");
       args.push(oldModel);
@@ -85,7 +93,7 @@ export async function enforceDBDecorators<
     } catch (e: unknown) {
       const msg = `Failed to execute handler ${dec.handler.name} for ${dec.prop} on ${model.constructor.name} due to error: ${e}`;
       if (context.get("breakOnHandlerError")) throw new InternalError(msg);
-      console.error(msg);
+      context.logger.for(enforceDBDecorators).error(msg);
     }
   }
 }

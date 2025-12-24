@@ -50,6 +50,9 @@ export interface RepositoryFlags<LOG extends Logger = Logger> {
   rebuildWithTransient: boolean;
   ignoreValidation: boolean;
   ignoreHandlers: boolean | string | RegExp;
+  ignoreDevSafeGuards: boolean;
+  mergeForUpdate: boolean;
+  applyUpdateValidation: boolean;
   logger: LOG;
   correlationId?: string;
 }

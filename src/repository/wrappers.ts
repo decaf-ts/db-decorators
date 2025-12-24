@@ -1,5 +1,6 @@
 import { Context } from "./Context";
 import { InternalError } from "./errors";
+import { Model } from "@decaf-ts/decorator-validation";
 
 /**
  * @summary Util method to change a method of an object prefixing it with another
@@ -19,21 +20,19 @@ export function prefixMethod(
   afterName?: string
 ) {
   const name = afterName ? afterName : after.name;
- 
+
   obj[name] = new Proxy(obj[name], {
-      apply: async (target, thisArg, argArray) => {
-        let results = prefix.call(thisArg, ...argArray);
-        if(results instanceof Promise)
-          results = await results;
-        
-        results = target.call(thisArg, ...results);
+    apply: async (target, thisArg, argArray) => {
+      let results = prefix.call(thisArg, ...argArray);
+      if (results instanceof Promise) results = await results;
 
-        if(results instanceof Promise)
-          results = await results;
+      results = target.call(thisArg, ...results);
 
-        return results;
-      },
-    });
+      if (results instanceof Promise) results = await results;
+
+      return results;
+    },
+  });
 }
 
 /**
@@ -53,21 +52,19 @@ export function suffixMethod(
   suffix: (...args: any[]) => any,
   beforeName?: string
 ) {
-    const name = beforeName ? beforeName : before.name;
-    obj[name] = new Proxy(obj[name], {
-        apply: async (target, thisArg, argArray) => {
-          let results = target.call(thisArg, ...argArray);
-          if(results instanceof Promise)
-            results = await results;
-          
-          results = suffix.call(thisArg, ...results);
+  const name = beforeName ? beforeName : before.name;
+  obj[name] = new Proxy(obj[name], {
+    apply: async (target, thisArg, argArray) => {
+      let results = target.call(thisArg, ...argArray);
+      if (results instanceof Promise) results = await results;
 
-          if(results instanceof Promise)
-            results = await results;
+      results = suffix.call(thisArg, ...results);
 
-          return results;
-        },
-    });
+      if (results instanceof Promise) results = await results;
+
+      return results;
+    },
+  });
 }
 
 /**
@@ -102,6 +99,41 @@ export function wrapMethodWithContext(
       let results = target.call(thisArg, ...transformedArgs);
       if (results instanceof Promise) results = await results;
       results = after.call(thisArg, results, context);
+      if (results instanceof Promise) results = await results;
+      return results;
+    },
+  });
+}
+
+export function wrapMethodWithContextForUpdate(
+  obj: any,
+  before: (...args: any[]) => any,
+  method: (...args: any[]) => any,
+  after: (...args: any[]) => any,
+  methodName?: string
+) {
+  const name = methodName ? methodName : method.name;
+  obj[name] = new Proxy(obj[name], {
+    apply: async (target, thisArg, argArray) => {
+      let transformedArgs = before.call(thisArg, ...argArray);
+      if (transformedArgs instanceof Promise)
+        transformedArgs = await transformedArgs;
+      const oldModel = transformedArgs.pop();
+      const context = transformedArgs[transformedArgs.length - 1] as any;
+      if (!(context instanceof Context))
+        throw new InternalError("Missing a context");
+      if (
+        context.get("applyUpdateValidation") &&
+        !context.get("ignoreDevSafeGuards") &&
+        !(oldModel instanceof Model) &&
+        (!Array.isArray(oldModel) || !oldModel.every((o) => o instanceof Model))
+      ) {
+        throw new InternalError(`No previous versions os models found`);
+      }
+
+      let results = target.call(thisArg, ...transformedArgs);
+      if (results instanceof Promise) results = await results;
+      results = after.call(thisArg, results, oldModel, context);
       if (results instanceof Promise) results = await results;
       return results;
     },

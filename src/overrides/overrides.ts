@@ -8,7 +8,7 @@ import { Constructor, Metadata } from "@decaf-ts/decoration";
 import { DBKeys } from "../model/constants";
 import { ModelOperations } from "../operations/constants";
 import { SerializationError } from "../repository/errors";
-import { ComposedFromMetadata } from "../model/index";
+import { ComposedFromMetadata } from "../model/decorators";
 
 Model.prototype.isTransient = function (): boolean {
   return Metadata.isTransient(this);
