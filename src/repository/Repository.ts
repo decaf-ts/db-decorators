@@ -230,13 +230,14 @@ export abstract class Repository<
    * @return {Promise<M>} A promise that resolves to the processed model instance
    */
   protected async createSuffix(model: M, context: C): Promise<M> {
-    await enforceDBDecorators<M, IRepository<M, C>, any>(
-      this,
-      context,
-      model,
-      OperationKeys.CREATE,
-      OperationKeys.AFTER
-    );
+    if (!context.get("ignoreHandlers"))
+      await enforceDBDecorators<M, IRepository<M, C>, any>(
+        this,
+        context,
+        model,
+        OperationKeys.CREATE,
+        OperationKeys.AFTER
+      );
     return model;
   }
 
@@ -297,17 +298,18 @@ export abstract class Repository<
    * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
    */
   protected async createAllSuffix(models: M[], context: C): Promise<M[]> {
-    await Promise.all(
-      models.map((m) =>
-        enforceDBDecorators<M, IRepository<M, C>, any>(
-          this,
-          context,
-          m,
-          OperationKeys.CREATE,
-          OperationKeys.AFTER
+    if (!context.get("ignoreHandlers"))
+      await Promise.all(
+        models.map((m) =>
+          enforceDBDecorators<M, IRepository<M, C>, any>(
+            this,
+            context,
+            m,
+            OperationKeys.CREATE,
+            OperationKeys.AFTER
+          )
         )
-      )
-    );
+      );
     return models;
   }
 
@@ -342,13 +344,14 @@ export abstract class Repository<
    * @return {Promise<M>} A promise that resolves to the processed model instance
    */
   protected async readSuffix(model: M, context: C): Promise<M> {
-    await enforceDBDecorators<M, IRepository<M, C>, any>(
-      this,
-      context,
-      model,
-      OperationKeys.READ,
-      OperationKeys.AFTER
-    );
+    if (!context.get("ignoreHandlers"))
+      await enforceDBDecorators<M, IRepository<M, C>, any>(
+        this,
+        context,
+        model,
+        OperationKeys.READ,
+        OperationKeys.AFTER
+      );
     return model;
   }
 
@@ -425,17 +428,18 @@ export abstract class Repository<
    * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
    */
   protected async readAllSuffix(models: M[], context: C): Promise<M[]> {
-    await Promise.all(
-      models.map((m) =>
-        enforceDBDecorators<M, typeof this, any>(
-          this,
-          context as any,
-          m,
-          OperationKeys.READ,
-          OperationKeys.AFTER
+    if (!context.get("ignoreHandlers"))
+      await Promise.all(
+        models.map((m) =>
+          enforceDBDecorators<M, typeof this, any>(
+            this,
+            context as any,
+            m,
+            OperationKeys.READ,
+            OperationKeys.AFTER
+          )
         )
-      )
-    );
+      );
     return models;
   }
 
@@ -470,14 +474,15 @@ export abstract class Repository<
    * @return {Promise<M>} A promise that resolves to the processed model instance
    */
   protected async updateSuffix(model: M, oldModel: M, context: C): Promise<M> {
-    await enforceDBDecorators<M, IRepository<M, C>, any>(
-      this,
-      context,
-      model,
-      OperationKeys.UPDATE,
-      OperationKeys.AFTER,
-      oldModel
-    );
+    if (!context.get("ignoreHandlers"))
+      await enforceDBDecorators<M, IRepository<M, C>, any>(
+        this,
+        context,
+        model,
+        OperationKeys.UPDATE,
+        OperationKeys.AFTER,
+        oldModel
+      );
     return model;
   }
 
@@ -629,18 +634,19 @@ export abstract class Repository<
       if (!oldModels)
         throw new InternalError("No previous versions of models provided");
     }
-    await Promise.all(
-      models.map((m, i) =>
-        enforceDBDecorators<M, IRepository<M, C>, any>(
-          this,
-          context,
-          m,
-          OperationKeys.UPDATE,
-          OperationKeys.AFTER,
-          oldModels ? oldModels[i] : undefined
+    if (!context.get("ignoreHandlers"))
+      await Promise.all(
+        models.map((m, i) =>
+          enforceDBDecorators<M, IRepository<M, C>, any>(
+            this,
+            context,
+            m,
+            OperationKeys.UPDATE,
+            OperationKeys.AFTER,
+            oldModels ? oldModels[i] : undefined
+          )
         )
-      )
-    );
+      );
     return models;
   }
 
@@ -675,13 +681,14 @@ export abstract class Repository<
    * @return {Promise<M>} A promise that resolves to the processed model instance
    */
   protected async deleteSuffix(model: M, context: C): Promise<M> {
-    await enforceDBDecorators<M, IRepository<M, C>, any>(
-      this,
-      context,
-      model,
-      OperationKeys.DELETE,
-      OperationKeys.AFTER
-    );
+    if (!context.get("ignoreHandlers"))
+      await enforceDBDecorators<M, IRepository<M, C>, any>(
+        this,
+        context,
+        model,
+        OperationKeys.DELETE,
+        OperationKeys.AFTER
+      );
     return model;
   }
 
@@ -756,17 +763,18 @@ export abstract class Repository<
    * @return {Promise<M[]>} A promise that resolves to the array of processed model instances
    */
   protected async deleteAllSuffix(models: M[], context: C): Promise<M[]> {
-    await Promise.all(
-      models.map((m) =>
-        enforceDBDecorators<M, IRepository<M, C>, any>(
-          this,
-          context,
-          m,
-          OperationKeys.DELETE,
-          OperationKeys.AFTER
+    if (!context.get("ignoreHandlers"))
+      await Promise.all(
+        models.map((m) =>
+          enforceDBDecorators<M, IRepository<M, C>, any>(
+            this,
+            context,
+            m,
+            OperationKeys.DELETE,
+            OperationKeys.AFTER
+          )
         )
-      )
-    );
+      );
     return models;
   }
 
