@@ -128,9 +128,15 @@ export function composedFromCreateUpdate<
     if (prefix) composed.unshift(prefix);
     if (suffix) composed.push(suffix);
 
-    (model as any)[key] = hashResult
-      ? Hashing.hash(composed.join(separator))
-      : composed.join(separator);
+    const str: string = composed
+      .map((c: any) => {
+        return typeof c === "object" && c.toString() === "[object Object]"
+          ? JSON.stringify(c)
+          : c;
+      })
+      .join(separator);
+
+    (model as any)[key] = hashResult ? Hashing.hash(str) : str;
   } catch (e: any) {
     throw new InternalError(`Failed to compose value: ${e}`);
   }
