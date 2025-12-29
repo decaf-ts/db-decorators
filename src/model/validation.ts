@@ -314,51 +314,6 @@ export function validateCompare<M extends Model<any>>(
       }
     }
 
-    // if (hasPropValue && isConstr) {
-    //   const instance = propValue as Model;
-
-    //   const Constr = (Array.isArray(designType) ? designType : [designType])
-    //     .map((d) => {
-    //       if (typeof d === "function" && !d.name) d = d();
-    //       return Model.get(d.name || d);
-    //     })
-    //     .find((d) => !!d) as any;
-
-    //   const designTypeNames = (
-    //     Array.isArray(designType) ? designTypes : [designType]
-    //   ).map((d: any) => {
-    //     if (typeof d === "function")
-    //       return d.name ? d.name.toLowerCase() : d()?.name.toLowerCase();
-    //     return d.toLowerCase();
-    //   });
-
-    //   // Ensure instance is of the expected model class.
-    //   if (!Constr || !(propValue instanceof Constr)) {
-    //     // This is a working solution for validation relations, but must be handled at the core side.
-    //     // Check if it is a relation and type of primary matches the type of propValue. Do nothing on that case.
-    //     if (designTypeNames.includes(typeof propValue)) {
-    //       // do nothing
-    //       // TODO: This must be improved and handled on the core side
-    //     } else {
-    //       // If types don't match throw an error
-    //       propErrors[ValidationKeys.TYPE] = !Constr
-    //         ? `Unable to verify type consistency, missing model registry for ${designTypes.toString()} on prop ${propKey}`
-    //         : `Value must be an instance of ${Constr.name}`;
-    //       delete propErrors[ModelKeys.TYPE]; // remove duplicate type error
-    //     }
-    //     // This is a working solution for validation relations, but must be handled at the core side.
-    //   } else {
-    //     const nestedPropsToIgnore = getChildNestedPropsToIgnore(
-    //       propKey,
-    //       ...propsToIgnore
-    //     );
-    //     nestedErrors[propKey] = instance.hasErrors(
-    //       (oldModel as any)[prop],
-    //       ...nestedPropsToIgnore
-    //     );
-    //   }
-    // }
-
     // Add to the result if we have any errors
     // Async mode returns a Promise that resolves to undefined when no errors exist
     if (Object.keys(propErrors).length > 0 || async)
