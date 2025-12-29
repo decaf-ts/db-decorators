@@ -96,7 +96,7 @@ Model.prototype.segregate = function segregate<M extends Model>(
   return result as { model: M; transient?: Record<keyof M, M[keyof M]> };
 };
 
-(Model as any).pk = function <M extends Model>(
+(Model as any).pk = function pk<M extends Model>(
   model: M | Constructor<M>,
   keyValue = false
 ) {
@@ -114,7 +114,7 @@ Model.prototype.segregate = function segregate<M extends Model>(
   throw new Error("Cannot get the value of the pk from the constructor");
 }.bind(Model);
 
-(Model as any).pkProps = function <M extends Model>(
+(Model as any).pkProps = function pkProps<M extends Model>(
   model: Constructor<M>
 ): any {
   return Metadata.get(
@@ -166,7 +166,7 @@ Model.prototype.segregate = function segregate<M extends Model>(
   );
 }.bind(Model);
 
-(Metadata as any).saveOperation = function <M extends Model>(
+(Metadata as any).saveOperation = function saveOperation<M extends Model>(
   model: Constructor<M>,
   propertyKey: string,
   operation: string,
@@ -180,7 +180,7 @@ Model.prototype.segregate = function segregate<M extends Model>(
   );
 }.bind(Metadata);
 
-(Metadata as any).readOperation = function <M extends Model>(
+(Metadata as any).readOperation = function readOperation<M extends Model>(
   model: Constructor<M>,
   propertyKey?: string,
   operation?: string
