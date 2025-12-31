@@ -248,7 +248,7 @@ export function validateCompare<M extends Model<any>>(
     const propKey = String(prop);
     const propValue = (newModel as any)[prop];
 
-    const { designTypes, designType } = Metadata.getPropDesignTypes(
+    const { designTypes } = Metadata.getPropDesignTypes(
       newModel.constructor as any,
       prop as keyof M
     );
@@ -282,7 +282,7 @@ export function validateCompare<M extends Model<any>>(
       validateDecorators(newModel, oldModel, propKey, decorators, async) || {};
 
     // Check for nested model.
-    // To prevent unnecessary processing, "propValue" must be defined and validatable
+    // To prevent unnecessary processing, "propValue" must be defined
     const isConstr = Model.isPropertyModel(newModel, propKey);
     const hasPropValue = propValue !== null && propValue !== undefined;
 
@@ -301,19 +301,8 @@ export function validateCompare<M extends Model<any>>(
 
       // Ensure instance is of the expected model class.
       if (!Constr || !(propValue instanceof Constr)) {
-        // This is a working solution for validation relations, but must be handled at the core side.
-        const shouldIgnoreRelationTypeCheck = (propsToIgnore || []).some(
-          (p) => {
-            if (p === `.${propKey}`) return true;
-            return false;
-          }
-        );
-        if (
-          designTypeNames.includes(typeof propValue) ||
-          shouldIgnoreRelationTypeCheck
-        ) {
+        if (designTypeNames.includes(typeof propValue)) {
           // do nothing
-          // TODO: This must be improved and handled on the core side
         } else {
           // If types don't match throw an error
           propErrors[ValidationKeys.TYPE] = !Constr
@@ -321,7 +310,6 @@ export function validateCompare<M extends Model<any>>(
             : `Value must be an instance of ${Constr.name}`;
           delete propErrors[ModelKeys.TYPE]; // remove duplicate type error
         }
-        // This is a working solution for validation relations, but must be handled at the core side.
       } else {
         const nestedPropsToIgnore = getChildNestedPropsToIgnore(
           propKey,
