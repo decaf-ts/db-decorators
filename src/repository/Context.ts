@@ -168,35 +168,26 @@ export class Context<F extends RepositoryFlags<any> = RepositoryFlags> {
     context: C,
     overrides?: Partial<FlagsOf<C>>
   ): C {
-    // const ContextClass = context.constructor as new () => Context<any>;
-    // const child = new ContextClass();
-    // return child.accumulate(
-    //   Object.assign({}, (context as any).cache, overrides || {})
-    // ) as C;
+    const contextArg = Object.assign(
+      {},
+      (context as any).cache,
+      overrides || {},
+      {
+        timestamp: new Date(),
+        logger: context.logger || Logging.get(),
+      }
+    );
 
-    const c = new Context().accumulate(
-      Object.assign(
-        {},
-        (context as any).cache,
-        overrides || {},
-        context
-        // {
-        //   timestamp: new Date(),
-        //   logger: overrides?.logger || Logging.get(),
-        // }
-      )
-    ) as C;
+    const context1 = context.accumulate(contextArg) as C;
 
-    const context1 = context.accumulate(
-      Object.assign({}, (context as any).cache, overrides || {})
-    ) as C;
+    const context2 = Context.factory(contextArg) as unknown as C;
+    const context3 = new Context().accumulate(contextArg) as C;
 
-    const context2 = Context.factory(
-      Object.assign({}, (context as any).cache, overrides || {}, context)
-    ) as unknown as C;
-    return context.accumulate(
-      Object.assign({}, (context as any).cache, overrides || {})
-    ) as C;
+    const ChildContextClass = context.constructor as Constructor;
+
+    const context4 = new ChildContextClass().accumulate(contextArg) as C;
+
+    return context4;
     // return Context.factory(
     //   Object.assign({}, (context as any).cache, overrides || {})
     // ) as unknown as C;
