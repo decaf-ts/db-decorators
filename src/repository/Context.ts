@@ -168,9 +168,38 @@ export class Context<F extends RepositoryFlags<any> = RepositoryFlags> {
     context: C,
     overrides?: Partial<FlagsOf<C>>
   ): C {
-    return Context.factory(
+    // const ContextClass = context.constructor as new () => Context<any>;
+    // const child = new ContextClass();
+    // return child.accumulate(
+    //   Object.assign({}, (context as any).cache, overrides || {})
+    // ) as C;
+
+    const c = new Context().accumulate(
+      Object.assign(
+        {},
+        (context as any).cache,
+        overrides || {},
+        context
+        // {
+        //   timestamp: new Date(),
+        //   logger: overrides?.logger || Logging.get(),
+        // }
+      )
+    ) as C;
+
+    const context1 = context.accumulate(
       Object.assign({}, (context as any).cache, overrides || {})
+    ) as C;
+
+    const context2 = Context.factory(
+      Object.assign({}, (context as any).cache, overrides || {}, context)
     ) as unknown as C;
+    return context.accumulate(
+      Object.assign({}, (context as any).cache, overrides || {})
+    ) as C;
+    // return Context.factory(
+    //   Object.assign({}, (context as any).cache, overrides || {})
+    // ) as unknown as C;
   }
 
   /**
