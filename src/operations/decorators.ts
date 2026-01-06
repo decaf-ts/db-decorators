@@ -683,3 +683,35 @@ export const BlockOperations = (operations: CrudOperations[]) =>
       return operations.includes(operation);
     }
   )(operations);
+
+/**
+ * @description
+ * Decorator factory that conditionally blocks specific CRUD operations
+ * from being executed on a model or controller.
+ *
+ * @summary
+ * The `BlockOperations` decorator integrates with the `executeIf` mechanism to
+ * associate metadata that defines which CRUD operations should be restricted.
+ * When applied, it registers a conditional handler that evaluates whether a given
+ * operation is included in the list of blocked operations. This enables dynamic,
+ * metadata-driven control over allowed operations in CRUD-based systems.
+ *
+ * @template CrudOperations - Enum or type representing valid CRUD operations.
+ *
+ * @param {function(any[]): boolean} handler - An array of CRUD operations that should be blocked.
+ * The handler will later check if the requested operation is part of this list.
+ *
+ * Returns a decorator that stores metadata indicating which operations are blocked.
+ * The metadata can be inspected or enforced later within the application's lifecycle.
+ *
+ * @function BlockOperationIf
+
+ * @category decorators
+ */
+export const BlockOperationIf = (
+  handler: <P extends any[]>(...params: P) => boolean
+) =>
+  storeHandlerMetadata<[CrudOperations[], CrudOperations]>(
+    OperationKeys.REFLECT + OperationKeys.BLOCK,
+    handler
+  )();
