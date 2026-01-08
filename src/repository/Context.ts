@@ -105,9 +105,9 @@ export const DefaultContextFactory: ContextFactory<any> = <
  *   Ctx-->>C: requested value
  */
 export class Context<F extends ContextFlags<any> = RepositoryFlags<any>> {
-  constructor() {
+  constructor(ctx?: Context<F>) {
     Object.defineProperty(this, "cache", {
-      value: new ObjectAccumulator<F>(),
+      value: ctx ? ctx["cache"] : new ObjectAccumulator<F>(),
       writable: false,
       enumerable: false,
       configurable: true,
