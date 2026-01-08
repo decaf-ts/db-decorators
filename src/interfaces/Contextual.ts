@@ -24,6 +24,7 @@ export interface Contextual<C extends Context<any> = Context<any>> {
    */
   context(
     operation:
+      | ((...args: any[]) => any)
       | OperationKeys.CREATE
       | OperationKeys.READ
       | OperationKeys.UPDATE
