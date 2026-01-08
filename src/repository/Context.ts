@@ -5,6 +5,7 @@ import { Model } from "@decaf-ts/decorator-validation";
 import { DefaultRepositoryFlags } from "./constants";
 import { ObjectAccumulator } from "typed-object-accumulator";
 import {
+  ContextFlags,
   FlagsOfContext,
   LoggerOfContext,
   LoggerOfFlags,
@@ -103,7 +104,7 @@ export const DefaultContextFactory: ContextFactory<any> = <
  *   end
  *   Ctx-->>C: requested value
  */
-export class Context<F extends RepositoryFlags<any> = RepositoryFlags> {
+export class Context<F extends ContextFlags<any> = RepositoryFlags<any>> {
   constructor() {
     Object.defineProperty(this, "cache", {
       value: new ObjectAccumulator<F>(),

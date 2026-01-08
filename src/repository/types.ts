@@ -17,6 +17,11 @@ export type ModelExtension<M extends Model = Model> = M extends Model
   ? M
   : never;
 
+export type ContextFlags<LOG extends Logger> = {
+  logger: LOG;
+  timestamp: Date;
+};
+
 /**
  * @description Configuration flags for repository operations.
  * @summary Defines the configuration options that control repository behavior during operations.
@@ -34,7 +39,8 @@ export type ModelExtension<M extends Model = Model> = M extends Model
  * @property {boolean} rebuildWithTransient - Whether to include transient properties when rebuilding models
  * @memberOf module:db-decorators
  */
-export interface RepositoryFlags<LOG extends Logger = Logger> {
+export interface RepositoryFlags<LOG extends Logger = Logger>
+  extends ContextFlags<LOG> {
   parentContext?: Context<any>;
   childContexts?: Context<any>[];
   callArgs?: any[];
@@ -44,7 +50,6 @@ export interface RepositoryFlags<LOG extends Logger = Logger> {
     | string
     | Constructor<ModelExtension>;
   writeOperation: boolean;
-  timestamp: Date;
   operation?: OperationKeys;
   breakOnHandlerError: boolean;
   rebuildWithTransient: boolean;
@@ -53,13 +58,12 @@ export interface RepositoryFlags<LOG extends Logger = Logger> {
   ignoreDevSafeGuards: boolean;
   mergeForUpdate: boolean;
   applyUpdateValidation: boolean;
-  logger: LOG;
   correlationId?: string;
   allowGenerationOverride: boolean;
 }
 
-export type LoggerOfFlags<R extends RepositoryFlags<any>> =
-  R extends RepositoryFlags<infer L> ? L : never;
+export type LoggerOfFlags<R extends ContextFlags<any>> =
+  R extends ContextFlags<infer L> ? L : never;
 
 export type FlagsOfContext<C extends Context<any>> =
   C extends Context<infer F> ? F : never;
