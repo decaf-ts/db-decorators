@@ -8,6 +8,7 @@ import {
   toConditionalPromise,
   Validation,
   ValidationKeys,
+  getChildNestedPropsToIgnore,
 } from "@decaf-ts/decorator-validation";
 import { UpdateValidator } from "../validation";
 import { Constructor, Metadata } from "@decaf-ts/decoration";
@@ -152,18 +153,15 @@ export function validateDecorators<
         });
 
         const errs = newValues.map((childValue: any) => {
-          // find by id so the list elements order doesn't matter
-          const id = Model.pk(childValue as any, true);
-          if (!id) return "Failed to find model id";
-
-          const oldListModel = oldValues.find(
-            (el: any) => id === Model.pk(el as any, true)
-          );
-
           if (Model.isModel(childValue)) {
+            // find by id so the list elements order doesn't matter
+            const id = Model.pk(childValue as any, true);
+            if (!id) return "Failed to find model id";
+            const oldListModel = oldValues.find(
+              (el: any) => id === Model.pk(el as any, true)
+            );
             return childValue.hasErrors(oldListModel);
           }
-
           return allowedTypes.includes(typeof childValue)
             ? undefined
             : "Value has no validatable type";
@@ -250,7 +248,7 @@ export function validateCompare<M extends Model<any>>(
     const propKey = String(prop);
     const propValue = (newModel as any)[prop];
 
-    const { designTypes, designType } = Metadata.getPropDesignTypes(
+    const { designTypes } = Metadata.getPropDesignTypes(
       newModel.constructor as any,
       prop as keyof M
     );
@@ -284,28 +282,43 @@ export function validateCompare<M extends Model<any>>(
       validateDecorators(newModel, oldModel, propKey, decorators, async) || {};
 
     // Check for nested model.
-    // To prevent unnecessary processing, "propValue" must be defined and validatable
+    // To prevent unnecessary processing, "propValue" must be defined
     const isConstr = Model.isPropertyModel(newModel, propKey);
     const hasPropValue = propValue !== null && propValue !== undefined;
 
     if (hasPropValue && isConstr) {
       const instance = propValue as Model;
 
-      const Constr = (Array.isArray(designType) ? designType : [designType])
-        .map((d) => {
-          if (typeof d === "function" && !d.name) d = d();
-          return Model.get(d.name || d);
-        })
-        .find((d) => !!d) as any;
+      const Constr = designTypes
+        .map((d: any) => Model.get(d.name || d))
+        .find((d: any) => !!d) as any;
+
+      const designTypeNames = designTypes.map((d: any) => {
+        if (typeof d === "function")
+          return d.name ? d.name.toLowerCase() : d()?.name.toLowerCase();
+        return d.toLowerCase();
+      });
 
       // Ensure instance is of the expected model class.
-      if (!Constr || !(instance instanceof Constr)) {
-        propErrors[ValidationKeys.TYPE] = !Constr
-          ? `Unable to verify type consistency, missing model registry for ${designTypes.toString()} on prop ${propKey}`
-          : `Value must be an instance of ${Constr.name}`;
-        delete propErrors[ModelKeys.TYPE]; // remove duplicate type error
+      if (!Constr || !(propValue instanceof Constr)) {
+        if (designTypeNames.includes(typeof propValue)) {
+          // do nothing
+        } else {
+          // If types don't match throw an error
+          propErrors[ValidationKeys.TYPE] = !Constr
+            ? `Unable to verify type consistency, missing model registry for ${designTypes.toString()} on prop ${propKey}`
+            : `Value must be an instance of ${Constr.name}`;
+          delete propErrors[ModelKeys.TYPE]; // remove duplicate type error
+        }
       } else {
-        nestedErrors[propKey] = instance.hasErrors((oldModel as any)[prop]);
+        const nestedPropsToIgnore = getChildNestedPropsToIgnore(
+          propKey,
+          ...propsToIgnore
+        );
+        nestedErrors[propKey] = instance.hasErrors(
+          (oldModel as any)[prop],
+          ...nestedPropsToIgnore
+        );
       }
     }
 
