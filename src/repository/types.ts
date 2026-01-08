@@ -55,6 +55,7 @@ export interface RepositoryFlags<LOG extends Logger = Logger> {
   applyUpdateValidation: boolean;
   logger: LOG;
   correlationId?: string;
+  allowGenerationOverride: boolean;
 }
 
 export type LoggerOfFlags<R extends RepositoryFlags<any>> =

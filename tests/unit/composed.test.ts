@@ -59,6 +59,8 @@ describe("@composed decorator", () => {
     expect(created.withSeparator).toBe("1-test");
     expect(created.withPrefixSuffix).toBe("PRE_1_test_POST");
     expect(created.fromKeys).toBe("id_name");
+
+    expect(Model.generated(ComposedModel, "composedValue")).toBe(true);
   });
 
   it("should hash the composed result when requested", async () => {

@@ -2,7 +2,7 @@ import { DBKeys, DefaultSeparator } from "./constants";
 import { Hashing, Model, type } from "@decaf-ts/decorator-validation";
 import { onCreate, onCreateUpdate, onUpdate } from "../operations/decorators";
 import { IRepository } from "../interfaces/IRepository";
-import { InternalError } from "../repository/errors";
+import { InternalError, ValidationError } from "../repository/errors";
 import { CrudOperations, GroupSort, OperationKeys } from "../operations";
 import {
   Decoration,
@@ -11,6 +11,15 @@ import {
   Metadata,
 } from "@decaf-ts/decoration";
 import { ContextOfRepository } from "../repository/index";
+
+export function generated(type?: string) {
+  return function generated(target: object, prop?: any) {
+    return propMetadata(Metadata.key(DBKeys.GENERATED, prop), type || true)(
+      target,
+      prop
+    );
+  };
+}
 
 /**
  * @description Hashes a property value during create or update operations
@@ -187,6 +196,7 @@ function composedFrom(
       };
 
       const decorators = [
+        generated(DBKeys.COMPOSED),
         onCreateUpdate(composedFromCreateUpdate, data, groupsort),
         propMetadata(Metadata.key(DBKeys.COMPOSED, property), data),
       ];
@@ -306,13 +316,29 @@ export function versionCreateUpdate(operation: CrudOperations) {
     M extends Model,
     R extends IRepository<M>,
     V extends object,
-  >(this: R, context: ContextOfRepository<R>, data: V, key: keyof M, model: M) {
+  >(
+    this: R,
+    context: ContextOfRepository<R>,
+    data: V,
+    key: keyof M,
+    model: M,
+    oldModel?: M
+  ) {
+    if (!Model.shouldGenerate(model, key, context)) return;
     try {
       switch (operation) {
         case OperationKeys.CREATE:
           (model as any)[key] = 1;
           break;
         case OperationKeys.UPDATE:
+          if (
+            context.get("applyUpdateValidation") &&
+            oldModel &&
+            model[key] !== oldModel[key]
+          )
+            throw new ValidationError(
+              `Version mismatch: ${model[key]} !== ${oldModel[key]}`
+            );
           (model as any)[key]++;
           break;
         default:
@@ -335,6 +361,7 @@ export function version() {
   const key = DBKeys.VERSION;
   return Decoration.for(key)
     .define(
+      generated(DBKeys.VERSION),
       type(Number),
       onCreate(versionCreateUpdate(OperationKeys.CREATE)),
       onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),

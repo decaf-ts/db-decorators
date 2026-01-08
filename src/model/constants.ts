@@ -19,6 +19,7 @@ export const DBKeys = {
   TRANSIENT: "transient",
   HASH: "hash",
   COMPOSED: "composed",
+  GENERATED: "generated",
   VERSION: "version",
   ORIGINAL: "__originalObj",
 };

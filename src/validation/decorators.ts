@@ -20,6 +20,7 @@ import {
   metadata,
 } from "@decaf-ts/decoration";
 import { ContextOfRepository } from "../repository/index";
+import { generated } from "../model/decorators";
 
 /**
  * @description Prevents a property from being modified after initial creation.
@@ -131,6 +132,7 @@ export function timestamp(
 
   function ts(operation: OperationKeys[], format: string) {
     const decorators: any[] = [
+      generated(DBKeys.TIMESTAMP),
       date(format, DEFAULT_ERROR_MESSAGES.TIMESTAMP.DATE),
       required(DEFAULT_ERROR_MESSAGES.TIMESTAMP.REQUIRED),
       propMetadata(Validation.key(DBKeys.TIMESTAMP), {

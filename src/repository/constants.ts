@@ -25,4 +25,5 @@ export const DefaultRepositoryFlags: Omit<
   ignoreDevSafeGuards: false,
   mergeForUpdate: true,
   applyUpdateValidation: true,
+  allowGenerationOverride: false,
 };

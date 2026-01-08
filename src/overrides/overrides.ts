@@ -9,6 +9,7 @@ import { DBKeys } from "../model/constants";
 import { ModelOperations } from "../operations/constants";
 import { SerializationError } from "../repository/errors";
 import { ComposedFromMetadata } from "../model/decorators";
+import { Context } from "../repository/index";
 
 Model.prototype.isTransient = function (): boolean {
   return Metadata.isTransient(this);
@@ -200,3 +201,25 @@ Model.prototype.segregate = function segregate<M extends Model>(
     DBKeys.TRANSIENT
   );
 }.bind(Metadata);
+
+(Model as any).generated = function generated<M extends Model>(
+  model: M | Constructor<M>,
+  prop: keyof M
+): boolean | string {
+  return !!Metadata.get(
+    typeof model !== "function" ? (model.constructor as any) : model,
+    Metadata.key(DBKeys.GENERATED, prop as string)
+  );
+}.bind(Model);
+
+(Model as any).shouldGenerate = function shouldGenerate<M extends Model>(
+  model: M,
+  prop: keyof M,
+  ctx: Context<any>
+): boolean {
+  return (
+    !Model.generated(model, prop) &&
+    !ctx.get("allowGenerationOverride") &&
+    typeof model[prop] !== "undefined"
+  );
+}.bind(Model);

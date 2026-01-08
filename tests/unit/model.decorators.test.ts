@@ -14,11 +14,16 @@ import {
   versionCreateUpdate,
   type ComposedFromMetadata,
 } from "../../src/model/decorators";
-import { RepositoryFlags } from "../../src/index";
+import { DefaultRepositoryFlags, RepositoryFlags } from "../../src/index";
 import { Metadata } from "@decaf-ts/decoration";
 
 // Simple type to satisfy generics
-class C<F extends RepositoryFlags = any> extends Context<F> {}
+class C<F extends RepositoryFlags = any> extends Context<F> {
+  constructor() {
+    super();
+    return this.accumulate(DefaultRepositoryFlags);
+  }
+}
 
 describe("model/decorators", () => {
   describe("hashOnCreateUpdate", () => {
@@ -60,6 +65,7 @@ describe("model/decorators", () => {
         type: "keys",
         prefix: "pre",
         suffix: "suf",
+        filterEmpty: false,
       };
       const model: any = { first: "1", second: 2 };
       composedFromCreateUpdate.call(
@@ -118,7 +124,7 @@ describe("model/decorators", () => {
     });
 
     test("composed returns a decorator and when hash=true it composes with hash decorator internally", () => {
-      const dec = composed(["a", "b"], "-", true, "pre", "suf");
+      const dec = composed(["a", "b"], "-", false, true, "pre", "suf");
       expect(typeof dec).toBe("function");
     });
   });

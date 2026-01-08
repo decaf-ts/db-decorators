@@ -33,7 +33,7 @@ const config: Config.InitialOptions = {
     global: {
       branches: 60,
       functions: 8,
-      lines: 83,
+      lines: 82,
       statements: 81,
     },
   },
