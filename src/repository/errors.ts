@@ -30,7 +30,7 @@ export abstract class BaseError extends Error {
   }
 
   override toString(): string {
-    return this.message.replaceAll(/\[.*?Error\]]\s/g, "");
+    return `[${this.name}] ${this.code} | ${this.message.replaceAll(/\[.*?Error\]\[\d+\]\s/g, "")}`;
   }
 }
 
