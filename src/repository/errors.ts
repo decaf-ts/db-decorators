@@ -27,6 +27,10 @@ export abstract class BaseError extends Error {
     this.code = code;
     if (msg instanceof Error) this.stack = msg.stack;
   }
+
+  override toString(): string {
+    return `[${this.name}][${this.code}] ${this.message.replace(/\[.*?Error\]]\s/g, "")}`;
+  }
 }
 
 /**
