@@ -20,16 +20,17 @@
  */
 export abstract class BaseError extends Error {
   readonly code!: number;
+
   protected constructor(name: string, msg: string | Error, code: number) {
     if (msg instanceof BaseError) return msg;
-    const message = `[${name}] ${msg instanceof Error ? msg.message : msg}`;
+    const message = `[${name}][${code}] ${msg instanceof Error ? msg.message : msg}`;
     super(message);
     this.code = code;
     if (msg instanceof Error) this.stack = msg.stack;
   }
 
   override toString(): string {
-    return `[${this.name}][${this.code}] ${this.message.replace(/\[.*?Error\]]\s/g, "")}`;
+    return this.message.replaceAll(/\[.*?Error\]]\s/g, "");
   }
 }
 
