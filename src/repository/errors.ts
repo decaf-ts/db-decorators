@@ -47,8 +47,12 @@ export abstract class BaseError extends Error {
  * @category Errors
  */
 export class BadRequestError extends BaseError {
-  constructor(msg: string | Error, name = BadRequestError.name, code = 400) {
-    super(name, msg, code);
+  constructor(
+    msg: string | Error | unknown,
+    name = BadRequestError.name,
+    code = 400
+  ) {
+    super(name, msg as any, code);
   }
 }
 
@@ -66,7 +70,7 @@ export class BadRequestError extends BaseError {
  * @category Errors
  */
 export class ValidationError extends BadRequestError {
-  constructor(msg: string | Error) {
+  constructor(msg: string | Error | unknown) {
     super(msg, ValidationError.name, 422);
   }
 }
@@ -86,8 +90,12 @@ export class ValidationError extends BadRequestError {
  * @category Errors
  */
 export class InternalError extends BaseError {
-  constructor(msg: string | Error, name = InternalError.name, code = 500) {
-    super(name, msg, code);
+  constructor(
+    msg: string | Error | unknown,
+    name = InternalError.name,
+    code = 500
+  ) {
+    super(name, msg as any, code);
   }
 }
 /**
@@ -106,7 +114,7 @@ export class InternalError extends BaseError {
  * @category Errors
  */
 export class SerializationError extends InternalError {
-  constructor(msg: string | Error) {
+  constructor(msg: string | Error | unknown) {
     super(msg, SerializationError.name, 500);
   }
 }
@@ -126,7 +134,7 @@ export class SerializationError extends InternalError {
  * @category Errors
  */
 export class NotFoundError extends BadRequestError {
-  constructor(msg: string | Error) {
+  constructor(msg: string | Error | unknown) {
     super(msg, NotFoundError.name, 404);
   }
 }
@@ -145,7 +153,7 @@ export class NotFoundError extends BadRequestError {
  * @category Errors
  */
 export class ConflictError extends BadRequestError {
-  constructor(msg: string | Error) {
+  constructor(msg: string | Error | unknown) {
     super(msg, ConflictError.name, 409);
   }
 }
