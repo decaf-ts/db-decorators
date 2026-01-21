@@ -4,6 +4,7 @@ import {
   innerValidationDecorator,
   Model,
   required,
+  Serializer,
   type,
   Validation,
 } from "@decaf-ts/decorator-validation";
@@ -18,6 +19,7 @@ import {
   propMetadata,
   apply,
   metadata,
+  Constructor,
 } from "@decaf-ts/decoration";
 import { ContextOfRepository } from "../repository/index";
 import { generated } from "../model/decorators";
@@ -176,21 +178,21 @@ export function timestamp(
 export async function serializeOnCreateUpdate<
   M extends Model,
   R extends IRepository<M, any>,
-  V,
 >(
   this: R,
   context: ContextOfRepository<R>,
-  data: V,
+  data: { serializer?: Constructor<Serializer<M>> },
   key: keyof M,
   model: M
 ): Promise<void> {
   if (!model[key]) return;
   try {
-    model[key] = JSON.stringify(model[key]) as M[keyof M];
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    model[key] = data.serializer
+      ? (new data.serializer().serialize(model[key] as any) as M[keyof M])
+      : (JSON.stringify(model[key]) as M[keyof M]);
   } catch (e: unknown) {
     throw new SerializationError(
-      `Failed to serialize ${key.toString()} property of model ${model.constructor.name}: e`
+      `Failed to serialize ${key.toString()} property of model ${model.constructor.name}: ${e}`
     );
   }
 }
@@ -213,11 +215,10 @@ export async function serializeOnCreateUpdate<
 export async function serializeAfterAll<
   M extends Model,
   R extends IRepository<M, any>,
-  V,
 >(
   this: R,
   context: ContextOfRepository<R>,
-  data: V,
+  data: { serializer?: Constructor<Serializer<M>> },
   key: keyof M,
   model: M
 ): Promise<void> {
@@ -225,7 +226,9 @@ export async function serializeAfterAll<
   if (typeof model[key] !== "string") return;
 
   try {
-    model[key] = JSON.parse(model[key]);
+    model[key] = data.serializer
+      ? new data.serializer().deserialize(model[key])
+      : JSON.parse(model[key]);
   } catch (e: unknown) {
     throw new SerializationError(
       `Failed to deserialize ${key.toString()} property of model ${model.constructor.name}: ${e}`
@@ -260,11 +263,11 @@ export async function serializeAfterAll<
  *   S->>M: Parse JSON back to object
  *   M->>C: Return model with deserialized property
  */
-export function serialize() {
+export function serialize(serializer?: Constructor<Serializer<any>>) {
   return apply(
-    onCreateUpdate(serializeOnCreateUpdate),
-    after(DBOperations.ALL, serializeAfterAll),
+    onCreateUpdate(serializeOnCreateUpdate, { serializer: serializer }),
+    after(DBOperations.ALL, serializeAfterAll, { serializer: serializer }),
     type([String, Object]),
-    metadata(DBKeys.SERIALIZE, {})
+    metadata(DBKeys.SERIALIZE, { serializer: serializer })
   );
 }
