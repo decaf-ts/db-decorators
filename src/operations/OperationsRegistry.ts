@@ -1,8 +1,8 @@
 import { OperationHandler } from "./types";
 import { OperationKeys } from "./constants";
 import { IRepository } from "../interfaces/IRepository";
-import { Operations } from "./Operations";
-import { Model } from "@decaf-ts/decorator-validation";
+// import { Operations } from "./Operations";
+import { Hashing, Model } from "@decaf-ts/decorator-validation";
 import { Constructor, Decoration, Metadata } from "@decaf-ts/decoration";
 
 /**
@@ -112,7 +112,7 @@ export class OperationsRegistry {
     propKey: string | symbol
   ): void {
     const name = target.constructor.name;
-    const handlerName = Operations.getHandlerName(handler);
+    const handlerName = OperationsRegistry.getHandlerName(handler);
     const flavour = this.resolveFlavour(target.constructor as Constructor);
 
     if (!this.cache[name]) this.cache[name] = {};
@@ -165,7 +165,9 @@ export class OperationsRegistry {
       this.firstBucket(byOperation);
     if (!bucket) return undefined;
     const handlers = Object.values(bucket);
-    return handlers.length ? (handlers as OperationHandler<M, R, V>[]) : undefined;
+    return handlers.length
+      ? (handlers as OperationHandler<M, R, V>[])
+      : undefined;
   }
 
   private firstBucket(
@@ -175,5 +177,20 @@ export class OperationsRegistry {
       if (handlers && Object.keys(handlers).length) return handlers;
     }
     return undefined;
+  }
+
+  /**
+   * @description Gets a unique name for an operation handler
+   * @summary Returns the name of the handler function or generates a hash if name is not available
+   * @param {OperationHandler<any, any, any>} handler - The handler function to get the name for
+   * @return {string} The name of the handler or a generated hash
+   */
+  static getHandlerName(handler: OperationHandler<any, any, any>) {
+    if (handler.name) return handler.name;
+
+    console.warn(
+      "Handler name not defined. A name will be generated, but this is not desirable. please avoid using anonymous functions"
+    );
+    return Hashing.hash(handler.toString());
   }
 }

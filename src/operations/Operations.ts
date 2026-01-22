@@ -1,4 +1,4 @@
-import { Hashing, Model } from "@decaf-ts/decorator-validation";
+import { Model } from "@decaf-ts/decorator-validation";
 import { OperationHandler } from "./types";
 import { OperationsRegistry } from "./OperationsRegistry";
 import { OperationKeys } from "./constants";
@@ -42,12 +42,7 @@ export class Operations {
    * @return {string} The name of the handler or a generated hash
    */
   static getHandlerName(handler: OperationHandler<any, any, any>) {
-    if (handler.name) return handler.name;
-
-    console.warn(
-      "Handler name not defined. A name will be generated, but this is not desirable. please avoid using anonymous functions"
-    );
-    return Hashing.hash(handler.toString());
+    return OperationsRegistry.getHandlerName(handler);
   }
 
   /**
