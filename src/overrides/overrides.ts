@@ -127,7 +127,10 @@ Model.prototype.segregate = function segregate<M extends Model>(
 (Model as any).isTransient = function isTransient<M extends Model>(
   model: M | Constructor<M>
 ): boolean {
-  return Metadata.isTransient(model);
+  return !!Metadata.get(
+    typeof model !== "function" ? (model.constructor as any) : model,
+    DBKeys.TRANSIENT
+  );
 }.bind(Model);
 
 (Model as any).composed = function composed<M extends Model<boolean>>(

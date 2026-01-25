@@ -38,6 +38,16 @@ export abstract class BaseError extends Error {
   }
 }
 
+export class BreakError extends BaseError {
+  constructor(
+    msg: string | Error | unknown,
+    name = BreakError.name,
+    code = 999
+  ) {
+    super(name, msg as any, code);
+  }
+}
+
 /**
  * @description Error (40) thrown when a bad request is received
  * @summary Represents a failure in the input data, typically thrown when a client sends invalid or incomplete data

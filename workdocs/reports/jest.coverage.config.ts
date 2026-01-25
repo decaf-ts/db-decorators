@@ -21,7 +21,7 @@ const config: Config.InitialOptions = {
         filename: "test-report.html",
         openReport: true,
         expand: true,
-        pageTitle: "db-decorators Test Report",
+        pageTitle: "@decaf-ts/db-decorators",
         stripSkippedTest: true,
         darkTheme: true,
         enableMergeData: true,

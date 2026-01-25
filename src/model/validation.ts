@@ -10,7 +10,7 @@ import {
   ValidationKeys,
   getChildNestedPropsToIgnore,
 } from "@decaf-ts/decorator-validation";
-import { UpdateValidator } from "../validation";
+import { UpdateValidator } from "../validation/validators/UpdateValidator";
 import { Constructor, Metadata } from "@decaf-ts/decoration";
 
 /**
