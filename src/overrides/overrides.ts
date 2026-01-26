@@ -220,9 +220,7 @@ Model.prototype.segregate = function segregate<M extends Model>(
   prop: keyof M,
   ctx: Context<any>
 ): boolean {
-  return (
-    !Model.generated(model, prop) &&
-    !ctx.get("allowGenerationOverride") &&
-    typeof model[prop] !== "undefined"
-  );
+  if (ctx.get("allowGenerationOverride") && typeof model[prop] !== "undefined")
+    return false;
+  return true;
 }.bind(Model);

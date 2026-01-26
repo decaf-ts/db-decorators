@@ -75,7 +75,8 @@ export async function timestampHandler<
   key: keyof M,
   model: M
 ): Promise<void> {
-  (model as any)[key] = context.timestamp;
+  if (Model.shouldGenerate(model, key, context))
+    (model as any)[key] = context.timestamp;
 }
 
 /**
