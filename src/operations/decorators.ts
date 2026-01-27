@@ -147,10 +147,11 @@ export function getHandlersDecorators<
         throw new InternalError("Missing handler arguments for decorators");
 
       for (const handler of handlers) {
-        const argsEntry = handlerArgs[handler.name];
+        const handlerName = Operations.getHandlerName(handler);
+        const argsEntry = handlerArgs[handlerName];
         if (!argsEntry)
           throw new InternalError(
-            `Missing handler arguments for handler ${handler.name}`
+            `Missing handler arguments for handler ${handlerName}`
           );
         const data = (argsEntry as Record<string, any>).data;
         accum.push({
