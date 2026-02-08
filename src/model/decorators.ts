@@ -9,6 +9,7 @@ import {
   propMetadata,
   apply,
   Metadata,
+  metadata,
 } from "@decaf-ts/decoration";
 import { ContextOfRepository } from "../repository/index";
 
@@ -380,7 +381,7 @@ export function version() {
 export function transient() {
   return Decoration.for(DBKeys.TRANSIENT)
     .define(function transient(model: any, attribute: any) {
-      propMetadata(DBKeys.TRANSIENT, true)(model.constructor);
+      metadata(DBKeys.TRANSIENT, true)(model.constructor);
       propMetadata(Metadata.key(DBKeys.TRANSIENT, attribute), {})(
         model,
         attribute
