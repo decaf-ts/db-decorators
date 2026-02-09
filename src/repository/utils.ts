@@ -92,13 +92,17 @@ export async function enforceDBDecorators<
       );
     } catch (e: unknown) {
       const msg = `Failed to execute handler ${dec.handler.name} for ${dec.prop} on ${model.constructor.name}`;
-      if (e instanceof BaseError) {
-        Object.defineProperty(e, "message", { value: msg + " " + e.message });
+      let error: unknown = e;
+      if (!(e instanceof BaseError))
+        error = (repo as any).adapter.parseError(e);
+      if (error instanceof BaseError) {
+        Object.defineProperty(e, "message", {
+          value: msg + " " + error.message,
+        });
       } else {
-        // eslint-disable-next-line no-ex-assign
-        e = new InternalError(msg + " " + (e as any).message);
+        error = new InternalError(msg + " " + (error as any).message);
       }
-      if (context.get("breakOnHandlerError")) throw e;
+      if (context.get("breakOnHandlerError")) throw error;
       context.logger.for(enforceDBDecorators).error(msg);
     }
   }
