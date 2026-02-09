@@ -4,7 +4,7 @@ import {
   ModelOperations,
   OperationKeys,
 } from "../operations/constants";
-import { BaseError, InternalError } from "./errors";
+import { InternalError } from "./errors";
 import { Model, ModelErrorDefinition } from "@decaf-ts/decorator-validation";
 import { Context } from "./Context";
 import {
@@ -91,19 +91,12 @@ export async function enforceDBDecorators<
         args as [ContextOfRepository<R>, V, keyof M, M, M]
       );
     } catch (e: unknown) {
-      const msg = `Failed to execute handler ${dec.handler.name} for ${dec.prop} on ${model.constructor.name}`;
-      let error: unknown = e;
-      if (!(e instanceof BaseError))
-        error = (repo as any).adapter.parseError(e);
-      if (error instanceof BaseError) {
-        Object.defineProperty(e, "message", {
-          value: msg + " " + error.message,
-        });
-      } else {
-        error = new InternalError(msg + " " + (error as any).message);
-      }
-      if (context.get("breakOnHandlerError")) throw error;
-      context.logger.for(enforceDBDecorators).error(msg);
+      context.logger
+        .for(enforceDBDecorators)
+        .error(
+          `Failed to execute handler ${dec.handler.name} for ${dec.prop} on ${model.constructor.name}`
+        );
+      if (context.get("breakOnHandlerError")) throw e;
     }
   }
 }
