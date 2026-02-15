@@ -29,6 +29,16 @@ declare module "@decaf-ts/decoration" {
       metadata: any
     ): void;
 
+    function pk<M extends Model<boolean>>(model: M | Constructor<M>): keyof M;
+    function pk<M extends Model<boolean>>(
+      model: M,
+      keyValue: boolean
+    ): M[keyof M];
+    function pk<M extends Model<boolean>>(
+      model: M | Constructor<M>,
+      keyValue?: boolean
+    ): keyof M | M[keyof M];
+
     /**
      * @description Reads the metadata under a key for a specific operation
      * @summary Reads the metadata under a key for a specific operation

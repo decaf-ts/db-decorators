@@ -97,7 +97,7 @@ Model.prototype.segregate = function segregate<M extends Model>(
   return result as { model: M; transient?: Record<keyof M, M[keyof M]> };
 };
 
-(Model as any).pk = function pk<M extends Model>(
+(Metadata as any).pk = function pk<M extends Model>(
   model: M | Constructor<M>,
   keyValue = false
 ) {
@@ -113,6 +113,13 @@ Model.prototype.segregate = function segregate<M extends Model>(
   if (!keyValue) return key;
   if (model instanceof Model) return model[key as keyof M];
   throw new Error("Cannot get the value of the pk from the constructor");
+}.bind(Metadata);
+
+(Model as any).pk = function pk<M extends Model>(
+  model: M | Constructor<M>,
+  keyValue = false
+) {
+  return Metadata.pk(model, keyValue);
 }.bind(Model);
 
 (Model as any).pkProps = function pkProps<M extends Model>(
@@ -159,15 +166,14 @@ Model.prototype.segregate = function segregate<M extends Model>(
   constructor?: Constructor<M>
 ): M {
   constructor = constructor || (oldModel.constructor as Constructor<M>);
-  const extract = (model: M) =>
+  const extractData = (model: M) =>
     Object.entries(model).reduce((accum: Record<string, any>, [key, val]) => {
-      if (typeof val !== "undefined") accum[key] = val;
+      if (typeof val !== "undefined" && val !== null) accum[key] = val;
       return accum;
     }, {});
 
-  return new constructor(
-    Object.assign({}, extract(oldModel), extract(newModel))
-  );
+  const data = Object.assign({}, extractData(oldModel), extractData(newModel));
+  return new constructor(data);
 }.bind(Model);
 
 (Metadata as any).saveOperation = function saveOperation<M extends Model>(
