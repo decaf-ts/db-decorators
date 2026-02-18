@@ -101,8 +101,6 @@ export function composeAttributeValue<M extends Model>(
   try {
     const composed = args
       .map((arg: string) => {
-        if (!(arg in model))
-          throw new InternalError(`Property ${arg} not found to compose from`);
         if (type === "keys") return arg;
         if (typeof (model as any)[arg] === "undefined") {
           if (filterEmpty) {
