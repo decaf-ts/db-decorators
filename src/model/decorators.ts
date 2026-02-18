@@ -92,30 +92,13 @@ export type ComposedFromMetadata = {
   filterEmpty: boolean | string[];
 };
 
-/**
- * @description Composes a property value from other properties during create or update operations
- * @summary Callback function used by composed decorators to generate a property value from other properties
- * @template M - Type extending Model
- * @template R - Type extending IRepository
- * @template V - Type extending ComposedFromMetadata
- * @template F - Type extending RepositoryFlags
- * @template C - Type extending Context
- * @param {C} context - The operation context
- * @param {V} data - Metadata for the composition
- * @param key - The property key to set the composed value on
- * @param {M} model - The model being processed
- * @return {void}
- * @function composedFromCreateUpdate
- * @memberOf module:db-decorators
- */
-export function composedFromCreateUpdate<
-  M extends Model,
-  R extends IRepository<M, any>,
-  V extends ComposedFromMetadata,
->(this: R, context: ContextOfRepository<R>, data: V, key: keyof M, model: M) {
+export function composeAttributeValue<M extends Model>(
+  model: M,
+  metadata: ComposedFromMetadata
+) {
+  const { args, type, prefix, suffix, separator, filterEmpty, hashResult } =
+    metadata;
   try {
-    const { args, type, prefix, suffix, separator, filterEmpty, hashResult } =
-      data;
     const composed = args
       .map((arg: string) => {
         if (!(arg in model))
@@ -144,11 +127,34 @@ export function composedFromCreateUpdate<
           : c;
       })
       .join(separator);
-
-    (model as any)[key] = hashResult ? Hashing.hash(str) : str;
+    return hashResult ? Hashing.hash(str) : str;
   } catch (e: any) {
     throw new InternalError(`Failed to compose value: ${e}`);
   }
+}
+
+/**
+ * @description Composes a property value from other properties during create or update operations
+ * @summary Callback function used by composed decorators to generate a property value from other properties
+ * @template M - Type extending Model
+ * @template R - Type extending IRepository
+ * @template V - Type extending ComposedFromMetadata
+ * @template F - Type extending RepositoryFlags
+ * @template C - Type extending Context
+ * @param {C} context - The operation context
+ * @param {V} data - Metadata for the composition
+ * @param key - The property key to set the composed value on
+ * @param {M} model - The model being processed
+ * @return {void}
+ * @function composedFromCreateUpdate
+ * @memberOf module:db-decorators
+ */
+export function composedFromCreateUpdate<
+  M extends Model,
+  R extends IRepository<M, any>,
+  V extends ComposedFromMetadata,
+>(this: R, context: ContextOfRepository<R>, data: V, key: keyof M, model: M) {
+  (model as any)[key] = composeAttributeValue(model, data);
 }
 
 /**
