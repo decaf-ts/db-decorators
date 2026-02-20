@@ -109,5 +109,9 @@ declare module "@decaf-ts/decorator-validation" {
       prop: keyof M,
       ctx: Context<any>
     ): boolean;
+
+    function versionProp<M extends Model<boolean>>(model: M): keyof M;
+
+    function versionOf<M extends Model<boolean>>(model: M): number;
   }
 }

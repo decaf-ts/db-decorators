@@ -7,7 +7,7 @@ import { validateCompare } from "../model/validation";
 import { Constructor, Metadata } from "@decaf-ts/decoration";
 import { DBKeys } from "../model/constants";
 import { ModelOperations } from "../operations/constants";
-import { SerializationError } from "../repository/errors";
+import { InternalError, SerializationError } from "../repository/errors";
 import { ComposedFromMetadata } from "../model/decorators";
 import { Context } from "../repository/index";
 
@@ -229,4 +229,22 @@ Model.prototype.segregate = function segregate<M extends Model>(
   if (ctx.get("allowGenerationOverride") && typeof model[prop] !== "undefined")
     return false;
   return true;
+}.bind(Model);
+
+(Model as any).versionProp = function versionProp<M extends Model>(
+  model: M
+): keyof M {
+  const meta = Metadata.get(model.constructor as any);
+  if (!meta || !meta[DBKeys.VERSION as keyof typeof meta])
+    throw new InternalError(`No version found for ${model.constructor.name}`);
+  return Object.keys(meta)[0] as keyof M;
+}.bind(Model);
+
+(Model as any).versionOf = function versionOf<M extends Model>(
+  model: M
+): number {
+  const version = model[Model.versionProp(model)];
+  if (typeof version !== "number" || version < 1)
+    throw new InternalError(`Invalid version number: ${version}`);
+  return version;
 }.bind(Model);

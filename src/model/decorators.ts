@@ -363,15 +363,17 @@ export function versionCreateUpdate(operation: CrudOperations) {
  */
 export function version() {
   const key = DBKeys.VERSION;
-  return Decoration.for(key)
-    .define(
-      generated(DBKeys.VERSION),
-      type(Number),
-      onCreate(versionCreateUpdate(OperationKeys.CREATE)),
-      onUpdate(versionCreateUpdate(OperationKeys.UPDATE)),
-      propMetadata(key, true)
-    )
-    .apply();
+  return function version(target: any, propertyKey?: any) {
+    return Decoration.for(key)
+      .define(
+        propMetadata(Metadata.key(key, propertyKey), true),
+        generated(DBKeys.VERSION),
+        type(Number),
+        onCreate(versionCreateUpdate(OperationKeys.CREATE)),
+        onUpdate(versionCreateUpdate(OperationKeys.UPDATE))
+      )
+      .apply()(target, propertyKey);
+  };
 }
 
 /**
