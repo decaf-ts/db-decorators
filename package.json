@@ -1,6 +1,6 @@
 {
   "name": "@decaf-ts/db-decorators",
-  "version": "0.8.26",
+  "version": "0.8.27",
   "description": "Agnostic database decorators and repository",
   "type": "module",
   "exports": {
