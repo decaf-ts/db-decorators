@@ -153,7 +153,7 @@ describe(`DB extended Model`, function () {
         },
       });
 
-      await expect(() => manager.create(model)).rejects.toThrowError(
+      await expect(() => manager.create(model)).rejects.toThrow(
         ValidationError
       );
     });
@@ -196,7 +196,7 @@ describe(`DB extended Model`, function () {
         "hasErrors"
       );
 
-      await expect(() => manager.update(toUpdate)).rejects.toThrowError(
+      await expect(() => manager.update(toUpdate)).rejects.toThrow(
         ValidationError
       );
 
@@ -270,7 +270,7 @@ describe(`DB extended Model`, function () {
         (toUpdate?.children as InnerTestModel[])[1] as InnerTestModel,
         "hasErrors"
       );
-      await expect(() => manager.update(toUpdate)).rejects.toThrowError(
+      await expect(() => manager.update(toUpdate)).rejects.toThrow(
         ValidationError
       );
 

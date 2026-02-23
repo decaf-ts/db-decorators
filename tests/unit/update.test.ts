@@ -68,6 +68,6 @@ describe("Update Validation", () => {
 
     await expect(() =>
       repo.update(new TestModel(toFailUpdate))
-    ).rejects.toThrowError(ValidationError);
+    ).rejects.toThrow(ValidationError);
   });
 });
