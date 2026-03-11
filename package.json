@@ -84,9 +84,5 @@
     "@decaf-ts/decorator-validation": "latest",
     "@decaf-ts/injectable-decorators": "latest",
     "@decaf-ts/logging": "latest"
-  },
-  "overrides": {
-    "minimatch": "^10.2.2",
-    "test-exclude": "7.0.1"
   }
 }

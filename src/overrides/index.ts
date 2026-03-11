@@ -6,3 +6,4 @@
 export * from "./Model";
 export * from "./overrides";
 export * from "./Metadata";
+export * from "./ModelBuilderExtensions";
