@@ -86,3 +86,43 @@ export const DBOperations: Record<string, CrudOperations[]> = {
     OperationKeys.DELETE,
   ],
 };
+
+/**
+ * @description Block target categories
+ * @summary Indicates whether the block applies to CRUD ops, prepared statements, or query keys
+ * @typedef {"crud" | "statement" | "query"} BlockOperationKind
+ * @memberOf module:db-decorators
+ */
+export type BlockOperationKind = "crud" | "statement" | "query" | "bulk";
+
+/**
+ * @description Descriptor for a single blocked operation target
+ * @summary Includes the target kind and identifier (CRUD operation, statement name, query key)
+ * @typedef BlockOperationDescriptor
+ * @property {"crud"} kind
+ * @property {CrudOperations} value
+ *
+ * @property {"statement"} kind
+ * @property {string} value
+ *
+ * @property {"query"} kind
+ * @property {string} value
+ * @memberOf module:db-decorators
+ */
+export type BlockOperationDescriptor =
+  | { kind: "crud"; value: CrudOperations }
+  | { kind: "statement"; value: string }
+  | { kind: "query"; value: string }
+  | { kind: "bulk"; value: BulkCrudOperations };
+
+/**
+ * @description Inputs accepted by @BlockOperations decorator
+ * @summary Accepts either a CRUD operation, a descriptor, or an array of both
+ * @typedef {CrudOperations | BlockOperationDescriptor | Array<CrudOperations | BlockOperationDescriptor>} BlockOperationsInput
+ * @memberOf module:db-decorators
+ */
+export type BlockOperationsInput =
+  | CrudOperations
+  | BulkCrudOperations
+  | BlockOperationDescriptor
+  | (CrudOperations | BulkCrudOperations | BlockOperationDescriptor)[];

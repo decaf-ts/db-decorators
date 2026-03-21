@@ -7,10 +7,15 @@ import {
   UpdateOperationHandler,
 } from "./types";
 import {
+  BulkCrudOperationKeys,
+  BulkCrudOperations,
   CrudOperations,
   DBOperations,
   ModelOperations,
   OperationKeys,
+  BlockOperationDescriptor,
+  BlockOperationKind,
+  BlockOperationsInput,
 } from "./constants";
 import { Operations } from "./Operations";
 import { Model } from "@decaf-ts/decorator-validation";
@@ -41,7 +46,66 @@ export type GroupSort = {
 
 const defaultPriority = 50;
 
-const DefaultGroupSort: GroupSort = { priority: defaultPriority };
+ const DefaultGroupSort: GroupSort = { priority: defaultPriority };
+
+ const crudOperationSet = new Set<CrudOperations>([
+   OperationKeys.CREATE,
+   OperationKeys.READ,
+   OperationKeys.UPDATE,
+   OperationKeys.DELETE,
+ ]);
+
+const bulkOperationSet = new Set<BulkCrudOperations>(
+  Object.values(BulkCrudOperationKeys) as BulkCrudOperations[]
+);
+
+ function resolveKindForString(value: string): BlockOperationKind {
+   if (bulkOperationSet.has(value as BulkCrudOperations)) return "bulk";
+   if (crudOperationSet.has(value as CrudOperations)) return "crud";
+   return "crud";
+ }
+
+function isBlockOperationDescriptor(
+  value: BlockOperationsInput
+): value is BlockOperationDescriptor {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    Object.prototype.hasOwnProperty.call(value, "kind") &&
+    typeof (value as any).kind === "string"
+  );
+}
+
+function normalizeBlockOperationsInput(
+  input: BlockOperationsInput | BlockOperationsInput[]
+): BlockOperationDescriptor[] {
+  const candidates = Array.isArray(input) ? input : [input];
+  const descriptors: BlockOperationDescriptor[] = [];
+
+  for (const item of candidates) {
+    if (Array.isArray(item)) {
+      descriptors.push(...normalizeBlockOperationsInput(item));
+      continue;
+    }
+
+    if (typeof item === "string") {
+      const kind = resolveKindForString(item);
+      const value =
+        kind === "bulk"
+          ? (item as BulkCrudOperations)
+          : (item as CrudOperations);
+      descriptors.push({ kind, value } as BlockOperationDescriptor);
+      continue;
+    }
+
+    if (isBlockOperationDescriptor(item)) {
+      descriptors.push(item);
+      continue;
+    }
+  }
+
+  return descriptors;
+}
 
 /**
  * @description DecoratorObject type definition
@@ -677,13 +741,25 @@ export function storeHandlerMetadata<P extends any[]>(
 
  * @category decorators
  */
-export const BlockOperations = (operations: CrudOperations[]) =>
-  storeHandlerMetadata<[CrudOperations[], CrudOperations]>(
+function matchesTarget(
+  target: BlockOperationDescriptor,
+  kind: BlockOperationKind,
+  value: string
+): boolean {
+  return target.kind === kind && target.value === value;
+}
+
+export const BlockOperations = (operations: BlockOperationsInput) => {
+  const targets = normalizeBlockOperationsInput(operations);
+  return storeHandlerMetadata<
+    [BlockOperationDescriptor[], BlockOperationKind, string]
+  >(
     OperationKeys.REFLECT + OperationKeys.BLOCK,
-    (operations: CrudOperations[], operation: CrudOperations) => {
-      return operations.includes(operation);
+    (targets: BlockOperationDescriptor[], kind: BlockOperationKind, value: string) => {
+      return targets.some((target) => matchesTarget(target, kind, value));
     }
-  )(operations);
+  )(targets);
+};
 
 /**
  * @description
@@ -709,10 +785,42 @@ export const BlockOperations = (operations: CrudOperations[]) =>
 
  * @category decorators
  */
+type LegacyBlockOperationHandler = (
+  operations: CrudOperations[],
+  operation: CrudOperations
+) => boolean;
+
+type BlockOperationIfHandler = (
+  targets: BlockOperationDescriptor[],
+  kind: BlockOperationKind,
+  value: string
+) => boolean;
+
+function invokeBlockOperationIfHandler(
+  handler: LegacyBlockOperationHandler | BlockOperationIfHandler,
+  targets: BlockOperationDescriptor[],
+  kind: BlockOperationKind,
+  value: string
+): boolean {
+  if (handler.length <= 2 && kind === "crud") {
+    const crudTargets = targets.filter(
+      (target): target is { kind: "crud"; value: CrudOperations } =>
+        target.kind === "crud"
+    );
+    const operations = crudTargets.map((target) => target.value);
+    return (handler as LegacyBlockOperationHandler)(operations, value as CrudOperations);
+  }
+
+  return (handler as BlockOperationIfHandler)(targets, kind, value);
+}
+
 export const BlockOperationIf = (
-  handler: <P extends any[]>(...params: P) => boolean
+  handler: LegacyBlockOperationHandler | BlockOperationIfHandler
 ) =>
-  storeHandlerMetadata<[CrudOperations[], CrudOperations]>(
+  storeHandlerMetadata<
+    [BlockOperationDescriptor[], BlockOperationKind, string]
+  >(
     OperationKeys.REFLECT + OperationKeys.BLOCK,
-    handler
+    (targets: BlockOperationDescriptor[], kind: BlockOperationKind, value: string) =>
+      invokeBlockOperationIfHandler(handler, targets, kind, value)
   )();
