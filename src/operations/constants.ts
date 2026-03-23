@@ -54,6 +54,10 @@ export enum BulkCrudOperationKeys {
   DELETE_ALL = "deleteAll",
 }
 
+export enum BulkOperationBlockTarget {
+  ALL = "bulkAll",
+}
+
 /**
  * @description Type for bulk CRUD operations
  * @summary Union type of the four bulk database operations for handling multiple records at once
@@ -113,7 +117,7 @@ export type BlockOperationDescriptor =
   | { kind: "crud"; value: CrudOperations }
   | { kind: "statement"; value: string }
   | { kind: "query"; value: string }
-  | { kind: "bulk"; value: BulkCrudOperations };
+  | { kind: "bulk"; value: BulkCrudOperations | BulkOperationBlockTarget };
 
 /**
  * @description Inputs accepted by @BlockOperations decorator
@@ -124,5 +128,6 @@ export type BlockOperationDescriptor =
 export type BlockOperationsInput =
   | CrudOperations
   | BulkCrudOperations
+  | BulkOperationBlockTarget
   | BlockOperationDescriptor
-  | (CrudOperations | BulkCrudOperations | BlockOperationDescriptor)[];
+  | (CrudOperations | BulkCrudOperations | BulkOperationBlockTarget | BlockOperationDescriptor)[];

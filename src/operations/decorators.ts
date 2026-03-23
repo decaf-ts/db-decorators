@@ -9,6 +9,7 @@ import {
 import {
   BulkCrudOperationKeys,
   BulkCrudOperations,
+  BulkOperationBlockTarget,
   CrudOperations,
   DBOperations,
   ModelOperations,
@@ -59,11 +60,12 @@ const bulkOperationSet = new Set<BulkCrudOperations>(
   Object.values(BulkCrudOperationKeys) as BulkCrudOperations[]
 );
 
- function resolveKindForString(value: string): BlockOperationKind {
-   if (bulkOperationSet.has(value as BulkCrudOperations)) return "bulk";
-   if (crudOperationSet.has(value as CrudOperations)) return "crud";
-   return "crud";
- }
+function resolveKindForString(value: string): BlockOperationKind {
+  if (bulkOperationSet.has(value as BulkCrudOperations)) return "bulk";
+  if (value === BulkOperationBlockTarget.ALL) return "bulk";
+  if (crudOperationSet.has(value as CrudOperations)) return "crud";
+  return "crud";
+}
 
 function isBlockOperationDescriptor(
   value: BlockOperationsInput
@@ -91,9 +93,11 @@ function normalizeBlockOperationsInput(
     if (typeof item === "string") {
       const kind = resolveKindForString(item);
       const value =
-        kind === "bulk"
-          ? (item as BulkCrudOperations)
-          : (item as CrudOperations);
+        kind === "bulk" && item === BulkOperationBlockTarget.ALL
+          ? (item as BulkOperationBlockTarget)
+          : kind === "bulk"
+            ? (item as BulkCrudOperations)
+            : (item as CrudOperations);
       descriptors.push({ kind, value } as BlockOperationDescriptor);
       continue;
     }
@@ -746,7 +750,14 @@ function matchesTarget(
   kind: BlockOperationKind,
   value: string
 ): boolean {
-  return target.kind === kind && target.value === value;
+  if (target.kind !== kind) return false;
+  if (
+    target.kind === "bulk" &&
+    target.value === BulkOperationBlockTarget.ALL
+  ) {
+    return true;
+  }
+  return target.value === value;
 }
 
 export const BlockOperations = (operations: BlockOperationsInput) => {

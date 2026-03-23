@@ -3,64 +3,82 @@ import {
   BlockOperationIf,
   BlockOperations,
 } from "../../src/operations/decorators";
-import { OperationKeys } from "../../src/operations/constants";
-import type { CrudOperations } from "../../src/operations/constants";
-import { Context } from "../../src/repository/Context";
+import {
+  BulkCrudOperationKeys,
+  OperationKeys,
+  BulkOperationBlockTarget,
+  BlockOperationDescriptor,
+} from "../../src/operations/constants";
 
-type BlockOperationMetadata<C extends Context<any> = Context<any>> = {
-  args: unknown[];
-  handler: (
-    operations: CrudOperations[],
-    operation: CrudOperations,
-    ...args: any[] | [...any[], C]
-  ) => boolean;
-};
-
-describe.skip("@BlockOperation decorator", () => {
+describe("@BlockOperations decorator", () => {
   const metadataKey = OperationKeys.REFLECT + OperationKeys.BLOCK;
 
-  it("stores the blocked CRUD operations and enforces them through the handler", () => {
+  it("normalizes targets and filters CRUD/bulk operations", () => {
     class DecoratedModel {
-      @BlockOperations([OperationKeys.CREATE, OperationKeys.DELETE])
+      @BlockOperations([OperationKeys.CREATE, BulkCrudOperationKeys.DELETE_ALL])
       status!: string;
     }
 
-    const meta = Metadata.get(DecoratedModel, metadataKey) as
-      | BlockOperationMetadata
-      | undefined;
+    const metadata = Metadata.get(DecoratedModel, metadataKey);
+    expect(metadata).toBeDefined();
+    const { handler, args } = metadata as { handler: any; args: any[] };
 
-    expect(meta).toBeDefined();
-    const metadata = meta as BlockOperationMetadata;
+    const [targets] = args as [unknown[]];
+    expect(targets).toEqual([
+      { kind: "crud", value: OperationKeys.CREATE },
+      { kind: "bulk", value: BulkCrudOperationKeys.DELETE_ALL },
+    ]);
 
-    const [blocked] = metadata.args as [CrudOperations[]];
-    expect(blocked).toEqual([OperationKeys.CREATE, OperationKeys.DELETE]);
-
-    expect(metadata.handler(blocked, OperationKeys.CREATE)).toBe(true);
-    expect(metadata.handler(blocked, OperationKeys.UPDATE)).toBe(false);
+    expect(handler(targets, "crud", OperationKeys.CREATE)).toBe(true);
+    expect(handler(targets, "crud", OperationKeys.UPDATE)).toBe(false);
+    expect(handler(targets, "bulk", BulkCrudOperationKeys.DELETE_ALL)).toBe(true);
+    expect(handler(targets, "bulk", BulkCrudOperationKeys.CREATE_ALL)).toBe(false);
   });
 
-  it("supports custom predicates through BlockOperationIf", () => {
-    const predicate = jest.fn<
-      (operations: CrudOperations[], operation: CrudOperations) => boolean
-    >((_operations, operation) => operation === OperationKeys.UPDATE);
+  it("invokes custom predicates with the new signature", () => {
+    const predicate = jest.fn((targets, kind) => kind === "statement");
 
-    class CustomGuardedModel {
+    class StatementModel {
       @BlockOperationIf(predicate)
       action!: string;
     }
 
-    const meta = Metadata.get(CustomGuardedModel, metadataKey) as
-      | BlockOperationMetadata
-      | undefined;
+    const metadata = Metadata.get(StatementModel, metadataKey) as {
+      handler: any;
+      args: any[];
+    };
 
-    expect(meta).toBeDefined();
-    const metadata = meta as BlockOperationMetadata;
-
+    expect(metadata).toBeDefined();
     expect(metadata.args).toEqual([]);
-    expect(metadata.handler).toBe(predicate);
 
-    const operations: CrudOperations[] = [OperationKeys.CREATE];
-    expect(metadata.handler(operations, OperationKeys.UPDATE)).toBe(true);
-    expect(predicate).toHaveBeenCalledWith(operations, OperationKeys.UPDATE);
+    const captured = metadata.handler([], "statement", "listBy");
+    expect(captured).toBe(true);
+    expect(predicate).toHaveBeenCalledWith([], "statement", "listBy");
+  });
+
+  it("allows blocking every bulk operation via the block-all target", () => {
+    class BulkModel {
+      @BlockOperations(BulkOperationBlockTarget.ALL)
+      status!: string;
+    }
+
+    const metadata = Metadata.get(BulkModel, metadataKey) as {
+      handler: any;
+      args: any[];
+    };
+
+    expect(metadata).toBeDefined();
+    const [targets] = metadata.args as [BlockOperationDescriptor[]];
+
+    expect(targets).toEqual([
+      { kind: "bulk", value: BulkOperationBlockTarget.ALL },
+    ]);
+
+    expect(
+      metadata.handler(targets, "bulk", BulkCrudOperationKeys.CREATE_ALL)
+    ).toBe(true);
+    expect(
+      metadata.handler(targets, "bulk", BulkCrudOperationKeys.DELETE_ALL)
+    ).toBe(true);
   });
 });
