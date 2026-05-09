@@ -91,5 +91,10 @@
   },
   "main": "./lib/cjs/index.cjs",
   "module": "./lib/esm/index.js",
-  "sideEffects": false
+  "sideEffects": [
+    "./lib/esm/overrides/index.js",
+    "./lib/esm/validation/validation.js",
+    "./lib/cjs/overrides/index.cjs",
+    "./lib/cjs/validation/validation.cjs"
+  ]
 }
