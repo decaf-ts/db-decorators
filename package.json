@@ -93,8 +93,10 @@
   "module": "./lib/esm/index.js",
   "sideEffects": [
     "./lib/esm/overrides/index.js",
+    "./lib/esm/overrides/overrides.js",
     "./lib/esm/validation/validation.js",
     "./lib/cjs/overrides/index.cjs",
+    "./lib/cjs/overrides/overrides.cjs",
     "./lib/cjs/validation/validation.cjs"
   ]
 }
