@@ -4,6 +4,7 @@
  * @summary A comprehensive library providing decorators and utilities for database operations, model definitions, validation, and repository patterns in TypeScript applications
  */
 import { Metadata } from "@decaf-ts/decoration";
+import "./validation";
 
 export * from "./identity";
 export * from "./interfaces";
