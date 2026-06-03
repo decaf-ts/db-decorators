@@ -2,6 +2,7 @@ import { Constructor } from "@decaf-ts/decoration";
 import "@decaf-ts/decorator-validation";
 import { ComposedFromMetadata } from "../model/index";
 import { Context } from "../repository/index";
+import { Serializer } from "@decaf-ts/decorator-validation";
 
 declare module "@decaf-ts/decorator-validation" {
   export interface Model {
@@ -113,5 +114,15 @@ declare module "@decaf-ts/decorator-validation" {
     function versionProp<M extends Model<boolean>>(model: M): keyof M;
 
     function versionOf<M extends Model<boolean>>(model: M): number;
+
+    function propSerializedBy<M extends Model<boolean>>(
+      model: M | Constructor<M>,
+      prop: keyof M
+    ): { serializer?: Constructor<Serializer<any>> } | undefined;
+
+    function isPropSerialized<M extends Model<boolean>>(
+      model: M | Constructor<M>,
+      prop: keyof M
+    ): boolean;
   }
 }

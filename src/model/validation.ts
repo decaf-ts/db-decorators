@@ -1,3 +1,4 @@
+import "../overrides";
 import {
   ConditionalAsync,
   Model,
@@ -12,6 +13,24 @@ import {
 } from "@decaf-ts/decorator-validation";
 import { UpdateValidator } from "../validation/validators/UpdateValidator";
 import { Constructor, Metadata } from "@decaf-ts/decoration";
+
+function normalizeSerializedValue<M extends Model>(
+  model: M,
+  prop: keyof M,
+  value: any
+) {
+  if (typeof value !== "string") return value;
+  if (!(Model as any).isPropSerialized(model, prop)) return value;
+
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) return parsed;
+  } catch {
+    // Keep original value when parsing fails or it is not an array.
+  }
+
+  return value;
+}
 
 /**
  * @description
@@ -71,7 +90,9 @@ export function validateDecorator<
   oldModel: M,
   prop: string,
   decorator: any,
-  async?: Async
+  async?: Async,
+  newPropValue?: any,
+  oldPropValue?: any
 ): ConditionalAsync<Async, string | undefined> {
   const validator: UpdateValidator = Validation.get(
     decorator.key
@@ -95,8 +116,12 @@ export function validateDecorator<
   // });
 
   const maybeError = validator.updateHasErrors(
-    (newModel as any)[prop],
-    (oldModel as any)[prop],
+    typeof newPropValue === "undefined"
+      ? (newModel as any)[prop]
+      : newPropValue,
+    typeof oldPropValue === "undefined"
+      ? (oldModel as any)[prop]
+      : oldPropValue,
     ...decoratorProps
   );
 
@@ -111,7 +136,9 @@ export function validateDecorators<
   oldModel: M,
   prop: string,
   decorators: any,
-  async?: Async
+  async?: Async,
+  newPropValue?: any,
+  oldPropValue?: any
 ): ConditionalAsync<Async, Record<string, string>> | undefined {
   const result: Record<string, string | Promise<string>> = {};
 
@@ -125,7 +152,9 @@ export function validateDecorators<
       oldModel,
       prop,
       decorator,
-      async
+      async,
+      newPropValue,
+      oldPropValue
     );
 
     /*
@@ -134,9 +163,6 @@ export function validateDecorators<
     so the '!err' check will evaluate to false (even if the promise later resolves with no errors)
     */
     if (decorator.key === ValidationKeys.LIST && (!validationErrors || async)) {
-      const newPropValue = (newModel as any)[prop];
-      const oldPropValue = (oldModel as any)[prop];
-
       const newValues =
         newPropValue instanceof Set ? [...newPropValue] : newPropValue;
       const oldValues =
@@ -246,7 +272,16 @@ export function validateCompare<M extends Model<any>>(
 
   for (const { prop, decorators } of ValidatableUpdateProps) {
     const propKey = String(prop);
-    const propValue = (newModel as any)[prop];
+    const propValue = normalizeSerializedValue(
+      newModel,
+      prop as keyof M,
+      (newModel as any)[prop]
+    );
+    const oldPropValue = normalizeSerializedValue(
+      oldModel,
+      prop as keyof M,
+      (oldModel as any)[prop]
+    );
 
     const { designTypes } = Metadata.getPropDesignTypes(
       newModel.constructor as any,
@@ -279,7 +314,15 @@ export function validateCompare<M extends Model<any>>(
 
     // TODO: Check validateDecorators method partially working. Complete check pending.
     const propErrors: Record<string, any> =
-      validateDecorators(newModel, oldModel, propKey, decorators, async) || {};
+      validateDecorators(
+        newModel,
+        oldModel,
+        propKey,
+        decorators,
+        async,
+        propValue,
+        oldPropValue
+      ) || {};
 
     // Check for nested model.
     // To prevent unnecessary processing, "propValue" must be defined

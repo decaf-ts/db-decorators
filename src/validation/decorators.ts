@@ -18,8 +18,8 @@ import {
   Decoration,
   propMetadata,
   apply,
-  metadata,
   Constructor,
+  Metadata,
 } from "@decaf-ts/decoration";
 import { ContextOfRepository } from "../repository/index";
 import { generated } from "../model/decorators";
@@ -265,10 +265,15 @@ export async function serializeAfterAll<
  *   M->>C: Return model with deserialized property
  */
 export function serialize(serializer?: Constructor<Serializer<any>>) {
-  return apply(
-    onCreateUpdate(serializeOnCreateUpdate, { serializer: serializer }),
-    after(DBOperations.ALL, serializeAfterAll, { serializer: serializer }),
-    type([String, Object]),
-    metadata(DBKeys.SERIALIZE, { serializer: serializer })
-  );
+  return function (target: object, propertyKey?: any) {
+    return apply(
+      onCreateUpdate(serializeOnCreateUpdate, { serializer: serializer }),
+      after(DBOperations.ALL, serializeAfterAll, { serializer: serializer }),
+      type([String, Object]),
+      propMetadata(Metadata.key(DBKeys.SERIALIZE, propertyKey), {
+        serializer: serializer,
+      })
+      // metadata(DBKeys.SERIALIZE, { serializer: serializer })
+    )(target, propertyKey);
+  };
 }

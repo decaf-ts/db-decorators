@@ -1,6 +1,7 @@
 import {
   Model,
   ModelConditionalAsync,
+  Serializer,
   validate,
 } from "@decaf-ts/decorator-validation";
 import { validateCompare } from "../model/validation";
@@ -247,4 +248,22 @@ Model.prototype.segregate = function segregate<M extends Model>(
   if (typeof version !== "number" || version < 1)
     throw new InternalError(`Invalid version number: ${version}`);
   return version;
+}.bind(Model);
+
+(Model as any).propSerializedBy = function propSerializedBy<
+  M extends Model<boolean>,
+>(
+  model: M | Constructor<M>,
+  prop: keyof M
+): { serializer?: Constructor<Serializer<any>> } | undefined {
+  return Metadata.get(
+    typeof model !== "function" ? (model.constructor as any) : model,
+    Metadata.key(DBKeys.SERIALIZE, prop as string)
+  );
+}.bind(Model);
+
+(Model as any).isPropSerialized = function isPropSerialized<
+  M extends Model<boolean>,
+>(model: M | Constructor<M>, prop: keyof M): boolean {
+  return !!Model.propSerializedBy(model, prop);
 }.bind(Model);
