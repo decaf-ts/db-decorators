@@ -10,7 +10,7 @@ import { DBKeys } from "../model/constants";
 import { ModelOperations } from "../operations/constants";
 import { InternalError, SerializationError } from "../repository/errors";
 import { ComposedFromMetadata } from "../model/decorators";
-import { Context } from "../repository/index";
+import { Context } from "../repository/Context";
 
 Model.prototype.isTransient = function (): boolean {
   return Metadata.isTransient(this);
