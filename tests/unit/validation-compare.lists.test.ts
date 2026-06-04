@@ -8,6 +8,7 @@ import {
   ModelErrorDefinition,
   required,
 } from "@decaf-ts/decorator-validation";
+import { serialize } from "../../src/validation/decorators";
 
 describe("Validation Lists with Update Comparison", () => {
   @model()
@@ -229,6 +230,49 @@ describe("Validation Lists with Update Comparison", () => {
           maxlength: "The maximum length is 2",
           list: "Invalid list of SyncItemModel",
         },
+        numbers: {
+          list: "Invalid list of Number",
+        },
+      })
+    );
+  });
+
+  it("should validate serialized lists during update comparison", () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require("../../src/overrides");
+
+    @model()
+    class SerializedSyncRootModel extends Model {
+      @serialize()
+      @list(Number)
+      numbers!: number[];
+
+      constructor(model?: ModelArg<SerializedSyncRootModel>) {
+        super(model);
+      }
+    }
+
+    const original = new SerializedSyncRootModel({
+      numbers: [1, 2],
+    });
+
+    const validUpdate = new SerializedSyncRootModel({
+      numbers: [1, 2, 3],
+    });
+    validUpdate.numbers = JSON.stringify(validUpdate.numbers) as any;
+
+    expect(validUpdate.hasErrors(original)).toBeUndefined();
+
+    const invalidUpdate = new SerializedSyncRootModel({
+      numbers: [1, "x" as any],
+    });
+    invalidUpdate.numbers = JSON.stringify(invalidUpdate.numbers) as any;
+
+    const errors = invalidUpdate.hasErrors(original);
+    expect(errors).toBeDefined();
+    expect(errors).toBeInstanceOf(ModelErrorDefinition);
+    expect(errors).toEqual(
+      new ModelErrorDefinition({
         numbers: {
           list: "Invalid list of Number",
         },

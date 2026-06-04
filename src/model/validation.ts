@@ -23,10 +23,12 @@ function normalizeSerializedValue<M extends Model>(
   if (!(Model as any).isPropSerialized(model, prop)) return value;
 
   try {
-    const parsed = JSON.parse(value);
-    if (Array.isArray(parsed)) return parsed;
+    const serialization = (Model as any).propSerializedBy(model, prop);
+    return serialization?.serializer
+      ? new serialization.serializer().deserialize(value)
+      : JSON.parse(value);
   } catch {
-    // Keep original value when parsing fails or it is not an array.
+    // Keep original value when parsing fails.
   }
 
   return value;
@@ -180,12 +182,17 @@ export function validateDecorators<
 
         const errs = newValues.map((childValue: any) => {
           if (Model.isModel(childValue)) {
-            // find by id so the list elements order doesn't matter
-            const id = Model.pk(childValue as any, true);
-            if (!id) return "Failed to find model id";
-            const oldListModel = oldValues.find(
-              (el: any) => id === Model.pk(el as any, true)
-            );
+            // Preserve order-independent matching when the model has a pk.
+            // For pk-less list items, fall back to validating the nested model directly.
+            let oldListModel: any = undefined;
+            try {
+              const id = Model.pk(childValue as any, true);
+              oldListModel = id
+                ? oldValues.find((el: any) => id === Model.pk(el as any, true))
+                : undefined;
+            } catch {
+              oldListModel = undefined;
+            }
             return childValue.hasErrors(oldListModel);
           }
           return allowedTypes.includes(typeof childValue)

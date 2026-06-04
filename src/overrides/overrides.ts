@@ -2,6 +2,7 @@ import {
   Model,
   ModelConditionalAsync,
   Serializer,
+  ValidationKeys,
   validate,
 } from "@decaf-ts/decorator-validation";
 import { validateCompare } from "../model/validation";
@@ -15,6 +16,43 @@ import { Context } from "../repository/Context";
 Model.prototype.isTransient = function (): boolean {
   return Metadata.isTransient(this);
 };
+
+function deserializeSerializedPropsForValidation<M extends Model>(model: M) {
+  const restored: Array<{
+    prop: keyof M;
+    value: M[keyof M];
+  }> = [];
+  const props = Metadata.properties(model.constructor as Constructor<M>) || [];
+
+  for (const prop of props) {
+    if (!(Model as any).isPropSerialized(model, prop as keyof M)) continue;
+    const decorators =
+      Metadata.validationFor(
+        model.constructor as Constructor<M>,
+        prop as keyof M
+      ) || {};
+    if (!Object.keys(decorators).includes(ValidationKeys.LIST)) continue;
+
+    const value = model[prop as keyof M];
+    if (typeof value !== "string") continue;
+
+    const serialization = (Model as any).propSerializedBy(model, prop as keyof M);
+    try {
+      restored.push({ prop: prop as keyof M, value });
+      model[prop as keyof M] = serialization?.serializer
+        ? (new serialization.serializer().deserialize(value) as M[keyof M])
+        : (JSON.parse(value) as M[keyof M]);
+    } catch {
+      // Leave the raw string in place so validation can still report a useful error.
+    }
+  }
+
+  return () => {
+    for (const { prop, value } of restored) {
+      model[prop] = value;
+    }
+  };
+}
 
 /**
  * @description Validates the model and checks for errors
@@ -37,21 +75,36 @@ Model.prototype.hasErrors = function <M extends Model<true | false>>(
   }
 
   const async = this.isAsync();
+  const restoreCurrent = deserializeSerializedPropsForValidation(this);
+  const restorePrevious = previousVersion
+    ? deserializeSerializedPropsForValidation(previousVersion)
+    : undefined;
+  const restore = () => {
+    restoreCurrent();
+    restorePrevious?.();
+  };
   const errs = validate(this, async, ...exclusions);
 
   if (async) {
     return Promise.resolve(errs).then((resolvedErrs) => {
       if (resolvedErrs || !previousVersion) {
+        restore();
         return resolvedErrs;
       }
-      return validateCompare(previousVersion, this, async, ...exclusions);
+      return Promise.resolve()
+        .then(() => validateCompare(previousVersion, this, async, ...exclusions))
+        .finally(restore);
     }) as any;
   }
 
-  if (errs || !previousVersion) return errs as any;
+  try {
+    if (errs || !previousVersion) return errs as any;
 
-  // @ts-expect-error Overriding Model prototype method with dynamic conditional return type.
-  return validateCompare(previousVersion, this, async, ...exclusions);
+    // @ts-expect-error Overriding Model prototype method with dynamic conditional return type.
+    return validateCompare(previousVersion, this, async, ...exclusions);
+  } finally {
+    restore();
+  }
 };
 
 Model.prototype.segregate = function segregate<M extends Model>(
