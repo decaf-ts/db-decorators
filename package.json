@@ -115,5 +115,9 @@
     "./lib/cjs/overrides/index.cjs",
     "./lib/cjs/overrides/overrides.cjs",
     "./lib/cjs/validation/validation.cjs"
-  ]
+  ],
+  "overrides": {
+    "test-exclude": "^7.0.2",
+    "brace-expansion": "^5.0.8"
+  }
 }
