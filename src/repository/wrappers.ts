@@ -3,6 +3,26 @@ import { InternalError } from "./errors";
 import { Model } from "@decaf-ts/decorator-validation";
 
 /**
+ * @summary Checks whether a value is awaitable (a Promise or any thenable).
+ * @description Avoids relying on `instanceof Promise`, which can fail in
+ * browser bundles where Zone.js replaces the global `Promise` with a
+ * `ZoneAwarePromise` (a native `async` function still returns an engine
+ * `Promise` that is not `instanceof` the patched global). Returns true for
+ * any thenable so the caller can await it before continuing.
+ * @param {any} value The value to test.
+ * @return {boolean} Whether the value is a thenable.
+ * @function isThenable
+ * @memberOf module:db-decorators
+ */
+export function isThenable(value: any): boolean {
+  return (
+    value !== null &&
+    (typeof value === "object" || typeof value === "function") &&
+    typeof value.then === "function"
+  );
+}
+
+/**
  * @summary Util method to change a method of an object prefixing it with another
  * @param {any} obj The Base Object
  * @param {Function} after The original method
@@ -24,11 +44,11 @@ export function prefixMethod(
   obj[name] = new Proxy(obj[name], {
     apply: async (target, thisArg, argArray) => {
       let results = prefix.call(thisArg, ...argArray);
-      if (results instanceof Promise) results = await results;
+      if (isThenable(results)) results = await results;
 
       results = target.call(thisArg, ...results);
 
-      if (results instanceof Promise) results = await results;
+      if (isThenable(results)) results = await results;
 
       return results;
     },
@@ -56,11 +76,11 @@ export function suffixMethod(
   obj[name] = new Proxy(obj[name], {
     apply: async (target, thisArg, argArray) => {
       let results = target.call(thisArg, ...argArray);
-      if (results instanceof Promise) results = await results;
+      if (isThenable(results)) results = await results;
 
       results = suffix.call(thisArg, ...results);
 
-      if (results instanceof Promise) results = await results;
+      if (isThenable(results)) results = await results;
 
       return results;
     },
@@ -91,15 +111,15 @@ export function wrapMethodWithContext(
   obj[name] = new Proxy(obj[name], {
     apply: async (target, thisArg, argArray) => {
       let transformedArgs = before.call(thisArg, ...argArray);
-      if (transformedArgs instanceof Promise)
+      if (isThenable(transformedArgs))
         transformedArgs = await transformedArgs;
       const context = transformedArgs[transformedArgs.length - 1] as any;
       if (!(context instanceof Context))
         throw new InternalError("Missing a context");
       let results = target.call(thisArg, ...transformedArgs);
-      if (results instanceof Promise) results = await results;
+      if (isThenable(results)) results = await results;
       results = after.call(thisArg, results, context);
-      if (results instanceof Promise) results = await results;
+      if (isThenable(results)) results = await results;
       return results;
     },
   });
@@ -116,7 +136,7 @@ export function wrapMethodWithContextForUpdate(
   obj[name] = new Proxy(obj[name], {
     apply: async (target, thisArg, argArray) => {
       let transformedArgs = before.call(thisArg, ...argArray);
-      if (transformedArgs instanceof Promise)
+      if (isThenable(transformedArgs))
         transformedArgs = await transformedArgs;
       const oldModel = transformedArgs.pop();
       const context = transformedArgs[transformedArgs.length - 1] as any;
@@ -132,9 +152,9 @@ export function wrapMethodWithContextForUpdate(
       }
 
       let results = target.call(thisArg, ...transformedArgs);
-      if (results instanceof Promise) results = await results;
+      if (isThenable(results)) results = await results;
       results = after.call(thisArg, results, oldModel, context);
-      if (results instanceof Promise) results = await results;
+      if (isThenable(results)) results = await results;
       return results;
     },
   });
