@@ -1,3 +1,4 @@
+import { it } from "@decaf-ts/for-testing";
 import { prop } from "@decaf-ts/decoration";
 import {
   email,

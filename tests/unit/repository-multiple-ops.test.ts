@@ -1,3 +1,4 @@
+import { it } from "@decaf-ts/for-testing";
 import { Injectables } from "@decaf-ts/injectable-decorators";
 import { IRepository, after, onCreate, DBOperations, id } from "../../src";
 

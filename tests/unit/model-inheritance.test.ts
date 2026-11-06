@@ -1,3 +1,4 @@
+import { it } from "@decaf-ts/for-testing";
 import type { ModelArg } from "@decaf-ts/decorator-validation";
 import { Model, model, required } from "@decaf-ts/decorator-validation";
 import { timestamp } from "../../src/validation/decorators";

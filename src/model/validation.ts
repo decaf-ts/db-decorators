@@ -184,15 +184,16 @@ export function validateDecorators<
           if (Model.isModel(childValue)) {
             // Preserve order-independent matching when the model has a pk.
             // For pk-less list items, fall back to validating the nested model directly.
-            let oldListModel: any = undefined;
-            try {
-              const id = Model.pk(childValue as any, true);
-              oldListModel = id
-                ? oldValues.find((el: any) => id === Model.pk(el as any, true))
-                : undefined;
-            } catch {
-              oldListModel = undefined;
-            }
+            const oldListModel = (() => {
+              try {
+                const id = Model.pk(childValue as any, true);
+                return id
+                  ? oldValues.find((el: any) => id === Model.pk(el as any, true))
+                  : undefined;
+              } catch {
+                return undefined;
+              }
+            })();
             return childValue.hasErrors(oldListModel);
           }
           return allowedTypes.includes(typeof childValue)

@@ -1,3 +1,4 @@
+import { it } from "@decaf-ts/for-testing";
 import { TestRamRepository } from "./testRepositories";
 import { TestModel } from "./TestModel";
 import { IRepository } from "../../src/interfaces/IRepository";

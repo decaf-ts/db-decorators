@@ -1,3 +1,4 @@
+import { it } from "@decaf-ts/for-testing";
 import "../../src/overrides";
 import { Metadata } from "@decaf-ts/decoration";
 import { Model, ModelBuilder } from "@decaf-ts/decorator-validation";

@@ -1,3 +1,4 @@
+import { it } from "@decaf-ts/for-testing";
 import { InheritanceTestModel, TestModel, UserModel } from "./TestModel";
 import { Injectables } from "@decaf-ts/injectable-decorators";
 import { IRepository } from "../../src";
