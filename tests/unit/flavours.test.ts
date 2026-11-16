@@ -17,6 +17,8 @@ import {
 import { RamRepository } from "./RamRepository";
 import { Decoration, uses } from "@decaf-ts/decoration";
 
+const OVERRIDDEN_TS = 0;
+
 describe("Operation flavours", () => {
   async function otherHandler<
     M extends Model,
@@ -29,7 +31,9 @@ describe("Operation flavours", () => {
     key: keyof M,
     model: M
   ): Promise<void> {
-    (model as any)[key] = "overridden";
+    // A value of the property's type (validation type-checks every property),
+    // distinct from what the default `@timestamp` handler would set.
+    (model as any)[key] = new Date(OVERRIDDEN_TS);
   }
 
   Decoration.flavouredAs("other")
@@ -108,6 +112,6 @@ describe("Operation flavours", () => {
     );
 
     expect(created).toBeDefined();
-    expect(created.createdAt).toEqual("overridden");
+    expect(new Date(created.createdAt).getTime()).toEqual(OVERRIDDEN_TS);
   });
 });

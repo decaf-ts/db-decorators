@@ -35,7 +35,7 @@ The db-decorators library provides a comprehensive set of TypeScript decorators 
 
 Documentation available [here](https://decaf-ts.github.io/db-decorators/)
 
-Minimal size: 9 KB kb gzipped
+Minimal size: 9.1 KB kb gzipped
 
 
 

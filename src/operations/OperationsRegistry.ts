@@ -144,7 +144,9 @@ export class OperationsRegistry {
   private resolveFlavour(target?: Constructor): string {
     if (!target) return Decoration.defaultFlavour;
     try {
-      return Metadata.flavourOf(target);
+      // Property decorators run before the class decorator assigns a
+      // flavour: handlers registered then belong to the default flavour.
+      return Metadata.flavourOf(target) || Decoration.defaultFlavour;
     } catch {
       return Decoration.defaultFlavour;
     }
@@ -159,15 +161,50 @@ export class OperationsRegistry {
     const byOperation = this.cache[name]?.[propKey]?.[operation];
     if (!byOperation) return undefined;
     const flavour = this.resolveFlavour(owner);
+    // A model re-flavoured with `uses(...)` keeps the handlers registered
+    // under the default flavour by decorators that flavour does not override
+    // (e.g. `@uuid()` on a `@pk()` overridden by an adapter): the flavour's
+    // own handlers are added to them, replacing same-named ones — never
+    // used instead of them.
+    // A default-flavour handler the flavour did replace (a different
+    // handler, or none) is no longer in the model's operation metadata —
+    // which decoration reverts on re-flavouring — and is left out.
+    const own = flavour !== Decoration.defaultFlavour ? byOperation[flavour] : undefined;
+    let base = byOperation[Decoration.defaultFlavour];
+    if (own && base) {
+      const declared = this.declaredHandlers(owner, name, propKey, operation);
+      base = Object.fromEntries(
+        Object.entries(base).filter(([handlerName]) =>
+          declared ? declared.has(handlerName) : true
+        )
+      );
+    }
     const bucket =
-      byOperation[flavour] ||
-      byOperation[Decoration.defaultFlavour] ||
-      this.firstBucket(byOperation);
+      base || own ? { ...(base ?? {}), ...(own ?? {}) } : this.firstBucket(byOperation);
     if (!bucket) return undefined;
     const handlers = Object.values(bucket);
     return handlers.length
       ? (handlers as OperationHandler<M, R, V>[])
       : undefined;
+  }
+
+  /** Handler names the owner's operation metadata declares for a property. */
+  private declaredHandlers(
+    owner: Constructor | undefined,
+    name: string,
+    propKey: string,
+    operation: string
+  ): Set<string> | undefined {
+    if (!owner) return undefined;
+    try {
+      const data = (Metadata as any).readOperation(owner, propKey, operation) as
+        | { handlers?: Record<string, Record<string, Record<string, unknown>>> }
+        | undefined;
+      const handlers = data?.handlers?.[name]?.[propKey];
+      return handlers ? new Set(Object.keys(handlers)) : new Set();
+    } catch {
+      return undefined;
+    }
   }
 
   private firstBucket(
